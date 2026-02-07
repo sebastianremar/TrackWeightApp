@@ -19,7 +19,8 @@ jobs:
           key: ${{ secrets.EC2_SSH_KEY }}
           script: |
             cd /home/ec2-user/SaraPesoApp
-            git pull origin main
+            git fetch origin main
+            git reset --hard origin/main
             cd back
-            npm ci --production
+            npm ci --omit=dev
             pm2 restart sara-peso || pm2 start server.js --name sara-peso
