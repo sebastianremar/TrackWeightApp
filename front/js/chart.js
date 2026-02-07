@@ -153,3 +153,149 @@ function renderChart(entries) {
         svg.selectAll('.chart-dot').attr('r', 6);
     }
 }
+
+// Comparison chart — two lines overlaid
+function renderCompareChart(myEntries, friendEntries, friendName) {
+    // Remove any existing overlay
+    var existing = document.querySelector('.compare-overlay');
+    if (existing) existing.remove();
+
+    var overlay = document.createElement('div');
+    overlay.className = 'modal-overlay compare-overlay';
+
+    var card = document.createElement('div');
+    card.className = 'modal';
+    card.style.maxWidth = '600px';
+
+    var header = document.createElement('div');
+    header.style.display = 'flex';
+    header.style.justifyContent = 'space-between';
+    header.style.alignItems = 'center';
+    header.style.marginBottom = '16px';
+
+    var title = document.createElement('h3');
+    title.textContent = 'Weight Comparison';
+
+    var closeBtn = document.createElement('button');
+    closeBtn.className = 'confirm-btn confirm-cancel';
+    closeBtn.textContent = 'Close';
+    closeBtn.style.flex = '0';
+    closeBtn.style.padding = '8px 16px';
+    closeBtn.addEventListener('click', function() {
+        overlay.remove();
+        var tt = document.querySelector('.chart-tooltip');
+        if (tt) tt.remove();
+    });
+
+    header.appendChild(title);
+    header.appendChild(closeBtn);
+    card.appendChild(header);
+
+    var chartDiv = document.createElement('div');
+    chartDiv.id = 'compare-chart';
+    chartDiv.style.width = '100%';
+    chartDiv.style.minHeight = '300px';
+    card.appendChild(chartDiv);
+
+    // Legend
+    var legend = document.createElement('div');
+    legend.className = 'chart-legend';
+
+    var myLegend = document.createElement('div');
+    myLegend.className = 'legend-item';
+    var myColor = document.createElement('div');
+    myColor.className = 'legend-color';
+    myColor.style.backgroundColor = '#667eea';
+    var myLabel = document.createElement('span');
+    myLabel.textContent = 'You';
+    myLegend.appendChild(myColor);
+    myLegend.appendChild(myLabel);
+
+    var friendLegend = document.createElement('div');
+    friendLegend.className = 'legend-item';
+    var friendColor = document.createElement('div');
+    friendColor.className = 'legend-color';
+    friendColor.style.backgroundColor = '#e74c3c';
+    var friendLabel = document.createElement('span');
+    friendLabel.textContent = friendName;
+    friendLegend.appendChild(friendColor);
+    friendLegend.appendChild(friendLabel);
+
+    legend.appendChild(myLegend);
+    legend.appendChild(friendLegend);
+    card.appendChild(legend);
+
+    overlay.appendChild(card);
+    document.body.appendChild(overlay);
+
+    // Now render with D3
+    var parseDate = d3.timeParse('%Y-%m-%d');
+    var myData = myEntries.map(function(d) { return { date: parseDate(d.date), weight: d.weight }; });
+    var friendData = friendEntries.map(function(d) { return { date: parseDate(d.date), weight: d.weight }; });
+    var allData = myData.concat(friendData);
+
+    if (allData.length === 0) return;
+
+    var margin = { top: 20, right: 30, bottom: 40, left: 50 };
+    var containerEl = document.getElementById('compare-chart');
+    var width = containerEl.clientWidth - margin.left - margin.right;
+    var height = 280 - margin.top - margin.bottom;
+    if (width < 100) width = 300;
+
+    var svg = d3.select('#compare-chart')
+        .append('svg')
+        .attr('viewBox', '0 0 ' + (width + margin.left + margin.right) + ' ' + (height + margin.top + margin.bottom))
+        .append('g')
+        .attr('transform', 'translate(' + margin.left + ',' + margin.top + ')');
+
+    var x = d3.scaleTime()
+        .domain(d3.extent(allData, function(d) { return d.date; }))
+        .range([0, width]);
+
+    var yExtent = d3.extent(allData, function(d) { return d.weight; });
+    var yPadding = Math.max((yExtent[1] - yExtent[0]) * 0.15, 1);
+    var y = d3.scaleLinear()
+        .domain([yExtent[0] - yPadding, yExtent[1] + yPadding])
+        .range([height, 0]);
+
+    // Grid
+    svg.append('g')
+        .attr('class', 'grid')
+        .call(d3.axisLeft(y).ticks(5).tickSize(-width).tickFormat(''));
+
+    // Axes
+    svg.append('g')
+        .attr('class', 'axis')
+        .attr('transform', 'translate(0,' + height + ')')
+        .call(d3.axisBottom(x).ticks(6).tickFormat(d3.timeFormat('%b %d')));
+
+    svg.append('g')
+        .attr('class', 'axis')
+        .call(d3.axisLeft(y).ticks(5).tickFormat(function(d) { return d + ' kg'; }));
+
+    var line = d3.line()
+        .x(function(d) { return x(d.date); })
+        .y(function(d) { return y(d.weight); })
+        .curve(d3.curveMonotoneX);
+
+    // My line
+    if (myData.length > 0) {
+        svg.append('path')
+            .datum(myData)
+            .attr('fill', 'none')
+            .attr('stroke', '#667eea')
+            .attr('stroke-width', 2.5)
+            .attr('d', line);
+    }
+
+    // Friend line
+    if (friendData.length > 0) {
+        svg.append('path')
+            .datum(friendData)
+            .attr('fill', 'none')
+            .attr('stroke', '#e74c3c')
+            .attr('stroke-width', 2.5)
+            .attr('stroke-dasharray', '6,3')
+            .attr('d', line);
+    }
+}
