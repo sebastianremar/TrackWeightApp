@@ -19,17 +19,24 @@ window.showAuth = function() {
     document.getElementById('signup-form').reset();
     var errors = document.querySelectorAll('.auth-error');
     errors.forEach(function(el) { el.style.display = 'none'; });
+
+    Navigation.reset();
 };
 
 window.showDashboard = function(name) {
     document.getElementById('auth-view').style.display = 'none';
     document.getElementById('dashboard-view').style.display = 'block';
     document.getElementById('user-name').textContent = name || 'User';
+
+    Navigation.init();
+    Navigation.loaded.weight = true;
     loadDashboardData();
 };
 
 // On page load — check for existing session
 (function init() {
+    Toast.init();
+
     var token = localStorage.getItem('token');
     var userName = localStorage.getItem('userName');
 
