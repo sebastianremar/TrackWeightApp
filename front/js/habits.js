@@ -1,6 +1,8 @@
 var Habits = {
     habits: [],
     todayEntries: {},
+    calendarEntries: {},
+    selectedDate: null,
     currentSubView: 'today',
     calendarMonth: new Date(),
 
@@ -193,6 +195,7 @@ var Habits = {
         // Grid
         var grid = document.createElement('div');
         grid.className = 'calendar-grid';
+        grid.id = 'calendar-grid';
 
         // Day labels
         ['Su','Mo','Tu','We','Th','Fr','Sa'].forEach(function(d) {
@@ -212,12 +215,12 @@ var Habits = {
         var fromStr = year + '-' + String(month + 1).padStart(2, '0') + '-01';
         var toStr = year + '-' + String(month + 1).padStart(2, '0') + '-' + String(daysInMonth).padStart(2, '0');
 
-        var entriesByDate = {};
+        this.calendarEntries = {};
         try {
             var allEntries = await API.getAllHabitEntries(fromStr, toStr);
             (allEntries.entries || []).forEach(function(e) {
-                if (!entriesByDate[e.date]) entriesByDate[e.date] = [];
-                entriesByDate[e.date].push(e.habitId);
+                if (!Habits.calendarEntries[e.date]) Habits.calendarEntries[e.date] = [];
+                Habits.calendarEntries[e.date].push(e.habitId);
             });
         } catch (err) {
             // Continue without entries
@@ -241,40 +244,174 @@ var Habits = {
             var dateStr = year + '-' + String(month + 1).padStart(2, '0') + '-' + String(d).padStart(2, '0');
             var dayEl = document.createElement('div');
             dayEl.className = 'calendar-day';
+            dayEl.dataset.date = dateStr;
             if (dateStr === today) dayEl.classList.add('today');
+
+            // Mark future days
+            if (dateStr > today) {
+                dayEl.classList.add('future');
+            } else {
+                // Clickable: non-future days
+                (function(ds) {
+                    dayEl.addEventListener('click', function() {
+                        // Remove previous selection
+                        var prev = grid.querySelector('.calendar-day.selected');
+                        if (prev) prev.classList.remove('selected');
+                        this.classList.add('selected');
+                        Habits.showDayDetail(ds);
+                    });
+                })(dateStr);
+            }
 
             var dayNum = document.createElement('span');
             dayNum.textContent = d;
             dayEl.appendChild(dayNum);
 
             // Dots for completed habits
-            var dayEntries = entriesByDate[dateStr];
-            if (dayEntries && dayEntries.length > 0) {
-                var dots = document.createElement('div');
-                dots.className = 'calendar-dots';
-                // Show up to 4 dots
-                var unique = [];
-                var seen = {};
-                dayEntries.forEach(function(hid) {
-                    if (!seen[hid]) {
-                        seen[hid] = true;
-                        unique.push(hid);
-                    }
-                });
-                unique.slice(0, 4).forEach(function(hid) {
-                    var dot = document.createElement('div');
-                    dot.className = 'calendar-dot';
-                    dot.style.backgroundColor = habitColors[hid] || '#667eea';
-                    dots.appendChild(dot);
-                });
-                dayEl.appendChild(dots);
-            }
+            this.renderDayDots(dayEl, dateStr, habitColors);
 
             grid.appendChild(dayEl);
         }
 
         card.appendChild(grid);
+
+        // Day detail panel placeholder
+        var detailPanel = document.createElement('div');
+        detailPanel.id = 'calendar-day-detail';
+        card.appendChild(detailPanel);
+
         content.appendChild(card);
+
+        // Auto-open today if it's in the current month
+        var todayMonth = new Date().getMonth();
+        var todayYear = new Date().getFullYear();
+        if (year === todayYear && month === todayMonth) {
+            var todayCell = grid.querySelector('.calendar-day[data-date="' + today + '"]');
+            if (todayCell) {
+                todayCell.classList.add('selected');
+                this.showDayDetail(today);
+            }
+        }
+    },
+
+    renderDayDots: function(dayEl, dateStr, habitColors) {
+        // Remove existing dots
+        var existingDots = dayEl.querySelector('.calendar-dots');
+        if (existingDots) existingDots.remove();
+
+        var dayEntries = this.calendarEntries[dateStr];
+        if (dayEntries && dayEntries.length > 0) {
+            var dots = document.createElement('div');
+            dots.className = 'calendar-dots';
+            var unique = [];
+            var seen = {};
+            dayEntries.forEach(function(hid) {
+                if (!seen[hid]) {
+                    seen[hid] = true;
+                    unique.push(hid);
+                }
+            });
+            unique.slice(0, 4).forEach(function(hid) {
+                var dot = document.createElement('div');
+                dot.className = 'calendar-dot';
+                dot.style.backgroundColor = habitColors[hid] || '#667eea';
+                dots.appendChild(dot);
+            });
+            dayEl.appendChild(dots);
+        }
+    },
+
+    showDayDetail: function(dateStr) {
+        this.selectedDate = dateStr;
+        var panel = document.getElementById('calendar-day-detail');
+        if (!panel) return;
+        panel.innerHTML = '';
+
+        // Format date header
+        var parts = dateStr.split('-');
+        var dateObj = new Date(parseInt(parts[0]), parseInt(parts[1]) - 1, parseInt(parts[2]));
+        var days = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+        var months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+        var header = document.createElement('h3');
+        header.className = 'day-detail-header';
+        header.textContent = days[dateObj.getDay()] + ', ' + months[dateObj.getMonth()] + ' ' + dateObj.getDate();
+        panel.appendChild(header);
+
+        if (this.habits.length === 0) {
+            var empty = document.createElement('p');
+            empty.className = 'empty-state';
+            empty.textContent = 'No habits yet.';
+            panel.appendChild(empty);
+            return;
+        }
+
+        var dayEntries = this.calendarEntries[dateStr] || [];
+        var entrySet = {};
+        dayEntries.forEach(function(hid) { entrySet[hid] = true; });
+
+        // Build habit color lookup for dot updates
+        var habitColors = {};
+        this.habits.forEach(function(h) {
+            habitColors[h.habitId] = h.color;
+        });
+
+        this.habits.forEach(function(habit) {
+            var item = document.createElement('div');
+            item.className = 'habit-item';
+
+            var checkbox = document.createElement('div');
+            checkbox.className = 'habit-checkbox';
+            checkbox.style.color = habit.color;
+            if (entrySet[habit.habitId]) {
+                checkbox.classList.add('checked');
+            }
+            checkbox.addEventListener('click', function() {
+                Habits.toggleCalendarHabit(habit, checkbox, dateStr, habitColors);
+            });
+
+            var info = document.createElement('div');
+            info.className = 'habit-info';
+
+            var nameEl = document.createElement('div');
+            nameEl.className = 'habit-name';
+            nameEl.textContent = habit.name;
+
+            info.appendChild(nameEl);
+            item.appendChild(checkbox);
+            item.appendChild(info);
+            panel.appendChild(item);
+        });
+    },
+
+    toggleCalendarHabit: async function(habit, checkbox, dateStr, habitColors) {
+        var isChecked = checkbox.classList.contains('checked');
+        try {
+            if (isChecked) {
+                await API.deleteHabitEntry(habit.habitId, dateStr);
+                checkbox.classList.remove('checked');
+                // Remove from calendarEntries
+                var entries = this.calendarEntries[dateStr] || [];
+                var idx = entries.indexOf(habit.habitId);
+                if (idx !== -1) entries.splice(idx, 1);
+                if (entries.length === 0) delete this.calendarEntries[dateStr];
+            } else {
+                await API.logHabitEntry(habit.habitId, dateStr);
+                checkbox.classList.add('checked');
+                // Add to calendarEntries
+                if (!this.calendarEntries[dateStr]) this.calendarEntries[dateStr] = [];
+                this.calendarEntries[dateStr].push(habit.habitId);
+            }
+            // Update dots on the day cell inline
+            var grid = document.getElementById('calendar-grid');
+            if (grid) {
+                var dayCell = grid.querySelector('.calendar-day[data-date="' + dateStr + '"]');
+                if (dayCell) {
+                    this.renderDayDots(dayCell, dateStr, habitColors);
+                }
+            }
+        } catch (err) {
+            Toast.error(err.message);
+        }
     },
 
     renderStats: async function() {
