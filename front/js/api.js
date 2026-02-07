@@ -80,26 +80,26 @@ const API = {
     },
 
     updateHabit(id, data) {
-        return this.request('/habits/' + id, {
+        return this.request('/habits/' + encodeURIComponent(id), {
             method: 'PATCH',
             body: JSON.stringify(data)
         });
     },
 
     archiveHabit(id) {
-        return this.request('/habits/' + id, { method: 'DELETE' });
+        return this.request('/habits/' + encodeURIComponent(id), { method: 'DELETE' });
     },
 
     // Habit entries
     logHabitEntry(habitId, date) {
-        return this.request('/habits/' + habitId + '/entries', {
+        return this.request('/habits/' + encodeURIComponent(habitId) + '/entries', {
             method: 'POST',
             body: JSON.stringify({ date })
         });
     },
 
     deleteHabitEntry(habitId, date) {
-        return this.request('/habits/' + habitId + '/entries/' + date, { method: 'DELETE' });
+        return this.request('/habits/' + encodeURIComponent(habitId) + '/entries/' + date, { method: 'DELETE' });
     },
 
     getHabitEntries(habitId, from, to) {
@@ -107,7 +107,7 @@ const API = {
         if (from) params.set('from', from);
         if (to) params.set('to', to);
         const qs = params.toString();
-        return this.request('/habits/' + habitId + '/entries' + (qs ? '?' + qs : ''));
+        return this.request('/habits/' + encodeURIComponent(habitId) + '/entries' + (qs ? '?' + qs : ''));
     },
 
     getAllHabitEntries(from, to) {
@@ -122,7 +122,7 @@ const API = {
         const params = new URLSearchParams();
         if (weeks) params.set('weeks', weeks);
         const qs = params.toString();
-        return this.request('/habits/' + habitId + '/stats' + (qs ? '?' + qs : ''));
+        return this.request('/habits/' + encodeURIComponent(habitId) + '/stats' + (qs ? '?' + qs : ''));
     },
 
     // Friends
