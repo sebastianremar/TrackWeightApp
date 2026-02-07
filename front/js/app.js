@@ -31,11 +31,25 @@ window.showDashboard = function(name) {
     Navigation.init();
     Navigation.loaded.weight = true;
     loadDashboardData();
+
+    // Sync dark mode from server
+    API.getProfile().then(function(profile) {
+        var serverDark = profile.darkMode || false;
+        document.body.classList.toggle('dark', serverDark);
+        localStorage.setItem('darkMode', serverDark ? 'true' : 'false');
+    }).catch(function() {
+        // Ignore — localStorage value already applied
+    });
 };
 
 // On page load — check for existing session
 (function init() {
     Toast.init();
+
+    // Apply dark mode from localStorage immediately (no flash)
+    if (localStorage.getItem('darkMode') === 'true') {
+        document.body.classList.add('dark');
+    }
 
     var token = localStorage.getItem('token');
     var userName = localStorage.getItem('userName');

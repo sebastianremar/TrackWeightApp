@@ -52,6 +52,7 @@ router.post('/signup', async (req, res) => {
         name: name.trim(),
         password: hashedPassword,
         shareWeight: false,
+        darkMode: false,
         createdAt: new Date().toISOString()
     };
 
@@ -133,6 +134,7 @@ router.get('/me', authenticate, async (req, res) => {
             name: user.name,
             email: user.email,
             shareWeight: user.shareWeight || false,
+            darkMode: user.darkMode || false,
             createdAt: user.createdAt
         });
     } catch (err) {
@@ -143,7 +145,7 @@ router.get('/me', authenticate, async (req, res) => {
 
 // PATCH /api/me — update profile
 router.patch('/me', authenticate, async (req, res) => {
-    const { name, shareWeight } = req.body;
+    const { name, shareWeight, darkMode } = req.body;
     const updates = [];
     const names = {};
     const values = {};
@@ -165,6 +167,14 @@ router.patch('/me', authenticate, async (req, res) => {
         values[':sw'] = shareWeight;
     }
 
+    if (darkMode !== undefined) {
+        if (typeof darkMode !== 'boolean') {
+            return res.status(400).json({ error: 'darkMode must be a boolean' });
+        }
+        updates.push('darkMode = :dm');
+        values[':dm'] = darkMode;
+    }
+
     if (updates.length === 0) {
         return res.status(400).json({ error: 'No valid fields to update' });
     }
@@ -183,7 +193,8 @@ router.patch('/me', authenticate, async (req, res) => {
         res.json({
             name: user.name,
             email: user.email,
-            shareWeight: user.shareWeight || false
+            shareWeight: user.shareWeight || false,
+            darkMode: user.darkMode || false
         });
     } catch (err) {
         console.error('DynamoDB UpdateItem error:', err);

@@ -64,6 +64,41 @@ var Settings = {
         profileCard.appendChild(group);
         container.appendChild(profileCard);
 
+        // Appearance card
+        var appearanceCard = document.createElement('section');
+        appearanceCard.className = 'card';
+
+        var appearanceTitle = document.createElement('h2');
+        appearanceTitle.textContent = 'Appearance';
+        appearanceCard.appendChild(appearanceTitle);
+
+        var appearanceGroup = document.createElement('div');
+        appearanceGroup.className = 'settings-group';
+
+        var darkRow = document.createElement('div');
+        darkRow.className = 'settings-row';
+        var darkLabel = document.createElement('span');
+        darkLabel.className = 'settings-label';
+        darkLabel.textContent = 'Dark Mode';
+        var darkToggle = document.createElement('label');
+        darkToggle.className = 'toggle';
+        var darkCheckbox = document.createElement('input');
+        darkCheckbox.type = 'checkbox';
+        darkCheckbox.checked = this.profile.darkMode || false;
+        darkCheckbox.addEventListener('change', function() {
+            Settings.updateDarkMode(darkCheckbox.checked);
+        });
+        var darkSlider = document.createElement('div');
+        darkSlider.className = 'toggle-slider';
+        darkToggle.appendChild(darkCheckbox);
+        darkToggle.appendChild(darkSlider);
+        darkRow.appendChild(darkLabel);
+        darkRow.appendChild(darkToggle);
+        appearanceGroup.appendChild(darkRow);
+
+        appearanceCard.appendChild(appearanceGroup);
+        container.appendChild(appearanceCard);
+
         // Privacy card
         var privacyCard = document.createElement('section');
         privacyCard.className = 'card';
@@ -203,8 +238,25 @@ var Settings = {
             Toast.success(value ? 'Weight sharing enabled' : 'Weight sharing disabled');
         } catch (err) {
             Toast.error(err.message);
-            // Revert toggle
             this.render();
+        }
+    },
+
+    updateDarkMode: async function(value) {
+        // Apply immediately
+        document.body.classList.toggle('dark', value);
+        localStorage.setItem('darkMode', value ? 'true' : 'false');
+        this.profile.darkMode = value;
+
+        try {
+            await API.updateProfile({ darkMode: value });
+            Toast.success(value ? 'Dark mode enabled' : 'Dark mode disabled');
+        } catch (err) {
+            Toast.error(err.message);
+            // Revert
+            document.body.classList.toggle('dark', !value);
+            localStorage.setItem('darkMode', !value ? 'true' : 'false');
+            this.profile.darkMode = !value;
         }
     }
 };

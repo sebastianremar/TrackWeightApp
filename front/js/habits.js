@@ -3,8 +3,10 @@ var Habits = {
     todayEntries: {},
     calendarEntries: {},
     selectedDate: null,
-    currentSubView: 'today',
+    currentSubView: 'day',
     calendarMonth: new Date(),
+    selectedDayDate: new Date().toISOString().split('T')[0],
+    weekOffset: 0,
 
     COLORS: ['#667eea', '#e74c3c', '#27ae60', '#f39c12', '#9b59b6', '#1abc9c', '#e67e22', '#3498db'],
 
@@ -15,7 +17,7 @@ var Habits = {
         // Sub-navigation
         var nav = document.createElement('div');
         nav.className = 'habits-sub-nav';
-        ['Today', 'Calendar', 'Stats'].forEach(function(label) {
+        ['Day', 'Week', 'Month', 'Stats'].forEach(function(label) {
             var btn = document.createElement('button');
             btn.textContent = label;
             btn.dataset.view = label.toLowerCase();
@@ -48,22 +50,62 @@ var Habits = {
 
     renderSubView: function() {
         switch (this.currentSubView) {
-            case 'today': this.renderToday(); break;
-            case 'calendar': this.renderCalendar(); break;
+            case 'day': this.renderDay(); break;
+            case 'week': this.renderWeek(); break;
+            case 'month': this.renderMonth(); break;
             case 'stats': this.renderStats(); break;
         }
     },
 
-    renderToday: async function() {
+    // ========== DAY VIEW ==========
+    renderDay: async function() {
         var content = document.getElementById('habits-content');
         content.innerHTML = '';
 
         var card = document.createElement('section');
         card.className = 'card';
 
-        var title = document.createElement('h2');
-        title.textContent = 'Today\'s Habits';
-        card.appendChild(title);
+        // Date navigation header
+        var today = new Date().toISOString().split('T')[0];
+        var header = document.createElement('div');
+        header.className = 'calendar-header';
+
+        var prevBtn = document.createElement('button');
+        prevBtn.className = 'calendar-nav-btn';
+        prevBtn.textContent = '\u2190';
+        prevBtn.addEventListener('click', function() {
+            var d = Habits._parseDate(Habits.selectedDayDate);
+            d.setDate(d.getDate() - 1);
+            Habits.selectedDayDate = Habits._formatDate(d);
+            Habits.renderDay();
+        });
+
+        var dateLabel = document.createElement('h3');
+        var selDate = this._parseDate(this.selectedDayDate);
+        var days = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+        var months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+        dateLabel.textContent = days[selDate.getDay()] + ', ' + months[selDate.getMonth()] + ' ' + selDate.getDate();
+
+        var nextBtn = document.createElement('button');
+        nextBtn.className = 'calendar-nav-btn';
+        nextBtn.textContent = '\u2192';
+        if (this.selectedDayDate >= today) {
+            nextBtn.disabled = true;
+            nextBtn.style.opacity = '0.3';
+            nextBtn.style.cursor = 'default';
+        } else {
+            nextBtn.addEventListener('click', function() {
+                var d = Habits._parseDate(Habits.selectedDayDate);
+                d.setDate(d.getDate() + 1);
+                Habits.selectedDayDate = Habits._formatDate(d);
+                Habits.renderDay();
+            });
+        }
+
+        header.appendChild(prevBtn);
+        header.appendChild(dateLabel);
+        header.appendChild(nextBtn);
+        card.appendChild(header);
 
         if (this.habits.length === 0) {
             var empty = document.createElement('p');
@@ -71,19 +113,18 @@ var Habits = {
             empty.textContent = 'No habits yet. Create one to get started!';
             card.appendChild(empty);
         } else {
-            // Load today's entries for all habits
-            var today = new Date().toISOString().split('T')[0];
-            var weekStart = new Date();
+            // Load entries for selected day + surrounding week for progress
+            var weekStart = new Date(selDate);
             weekStart.setDate(weekStart.getDate() - weekStart.getDay());
-            var weekStartStr = weekStart.toISOString().split('T')[0];
+            var weekStartStr = this._formatDate(weekStart);
 
             try {
-                var allEntries = await API.getAllHabitEntries(weekStartStr, today);
+                var allEntries = await API.getAllHabitEntries(weekStartStr, this.selectedDayDate);
                 this.todayEntries = {};
                 var weekEntries = {};
 
                 (allEntries.entries || []).forEach(function(e) {
-                    if (e.date === today) {
+                    if (e.date === Habits.selectedDayDate) {
                         Habits.todayEntries[e.habitId] = true;
                     }
                     if (!weekEntries[e.habitId]) weekEntries[e.habitId] = 0;
@@ -101,7 +142,7 @@ var Habits = {
                         checkbox.classList.add('checked');
                     }
                     checkbox.addEventListener('click', function() {
-                        Habits.toggleHabit(habit, checkbox, today);
+                        Habits.toggleDayHabit(habit, checkbox, Habits.selectedDayDate);
                     });
 
                     var info = document.createElement('div');
@@ -139,7 +180,7 @@ var Habits = {
         content.appendChild(card);
     },
 
-    toggleHabit: async function(habit, checkbox, date) {
+    toggleDayHabit: async function(habit, checkbox, date) {
         var isChecked = checkbox.classList.contains('checked');
         try {
             if (isChecked) {
@@ -156,7 +197,157 @@ var Habits = {
         }
     },
 
-    renderCalendar: async function() {
+    // ========== WEEK VIEW ==========
+    renderWeek: async function() {
+        var content = document.getElementById('habits-content');
+        content.innerHTML = '';
+
+        var card = document.createElement('section');
+        card.className = 'card';
+
+        var today = new Date();
+        var todayStr = this._formatDate(today);
+
+        // Week start = Monday of the offset week
+        var weekStart = new Date(today);
+        weekStart.setDate(weekStart.getDate() - ((weekStart.getDay() + 6) % 7) + (this.weekOffset * 7));
+        var weekEnd = new Date(weekStart);
+        weekEnd.setDate(weekEnd.getDate() + 6);
+
+        // Navigation header
+        var header = document.createElement('div');
+        header.className = 'calendar-header';
+
+        var prevBtn = document.createElement('button');
+        prevBtn.className = 'calendar-nav-btn';
+        prevBtn.textContent = '\u2190';
+        prevBtn.addEventListener('click', function() {
+            Habits.weekOffset--;
+            Habits.renderWeek();
+        });
+
+        var weekLabel = document.createElement('h3');
+        var months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+        weekLabel.textContent = months[weekStart.getMonth()] + ' ' + weekStart.getDate() + ' \u2013 ' + months[weekEnd.getMonth()] + ' ' + weekEnd.getDate();
+
+        var nextBtn = document.createElement('button');
+        nextBtn.className = 'calendar-nav-btn';
+        nextBtn.textContent = '\u2192';
+        if (this.weekOffset >= 0) {
+            nextBtn.disabled = true;
+            nextBtn.style.opacity = '0.3';
+            nextBtn.style.cursor = 'default';
+        } else {
+            nextBtn.addEventListener('click', function() {
+                Habits.weekOffset++;
+                Habits.renderWeek();
+            });
+        }
+
+        header.appendChild(prevBtn);
+        header.appendChild(weekLabel);
+        header.appendChild(nextBtn);
+        card.appendChild(header);
+
+        // Fetch entries for the week
+        var fromStr = this._formatDate(weekStart);
+        var toStr = this._formatDate(weekEnd) > todayStr ? todayStr : this._formatDate(weekEnd);
+
+        this.calendarEntries = {};
+        try {
+            var allEntries = await API.getAllHabitEntries(fromStr, toStr);
+            (allEntries.entries || []).forEach(function(e) {
+                if (!Habits.calendarEntries[e.date]) Habits.calendarEntries[e.date] = [];
+                Habits.calendarEntries[e.date].push(e.habitId);
+            });
+        } catch (err) {
+            // Continue without entries
+        }
+
+        var habitColors = {};
+        this.habits.forEach(function(h) { habitColors[h.habitId] = h.color; });
+
+        // Week strip
+        var strip = document.createElement('div');
+        strip.className = 'week-strip';
+        strip.id = 'week-strip';
+
+        var dayNames = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
+
+        // Default selected day in the week
+        if (!this.selectedDate || this.selectedDate < fromStr || this.selectedDate > this._formatDate(weekEnd)) {
+            this.selectedDate = todayStr >= fromStr && todayStr <= this._formatDate(weekEnd) ? todayStr : fromStr;
+        }
+
+        for (var i = 0; i < 7; i++) {
+            var dayDate = new Date(weekStart);
+            dayDate.setDate(dayDate.getDate() + i);
+            var dateStr = this._formatDate(dayDate);
+
+            var dayEl = document.createElement('div');
+            dayEl.className = 'week-day';
+            dayEl.dataset.date = dateStr;
+
+            if (dateStr === todayStr) dayEl.classList.add('today');
+            if (dateStr > todayStr) dayEl.classList.add('future');
+            if (dateStr === this.selectedDate) dayEl.classList.add('selected');
+
+            var nameSpan = document.createElement('div');
+            nameSpan.className = 'week-day-name';
+            nameSpan.textContent = dayNames[i];
+
+            var numSpan = document.createElement('div');
+            numSpan.className = 'week-day-num';
+            numSpan.textContent = dayDate.getDate();
+
+            // Dots
+            var dotsDiv = document.createElement('div');
+            dotsDiv.className = 'week-day-dots';
+            var dayEntries = this.calendarEntries[dateStr] || [];
+            var seen = {};
+            dayEntries.forEach(function(hid) {
+                if (!seen[hid]) {
+                    seen[hid] = true;
+                    var dot = document.createElement('div');
+                    dot.className = 'calendar-dot';
+                    dot.style.backgroundColor = habitColors[hid] || '#667eea';
+                    dotsDiv.appendChild(dot);
+                }
+            });
+
+            dayEl.appendChild(nameSpan);
+            dayEl.appendChild(numSpan);
+            dayEl.appendChild(dotsDiv);
+
+            if (dateStr <= todayStr) {
+                (function(ds) {
+                    dayEl.addEventListener('click', function() {
+                        strip.querySelectorAll('.week-day').forEach(function(d) { d.classList.remove('selected'); });
+                        dayEl.classList.add('selected');
+                        Habits.selectedDate = ds;
+                        Habits.showDayDetail(ds, 'week-day-detail', 'week-strip');
+                    });
+                })(dateStr);
+            }
+
+            strip.appendChild(dayEl);
+        }
+
+        card.appendChild(strip);
+
+        // Day detail panel
+        var detailPanel = document.createElement('div');
+        detailPanel.id = 'week-day-detail';
+        card.appendChild(detailPanel);
+
+        content.appendChild(card);
+
+        // Auto-open selected day
+        this.showDayDetail(this.selectedDate, 'week-day-detail', 'week-strip');
+    },
+
+    // ========== MONTH VIEW ==========
+    renderMonth: async function() {
         var content = document.getElementById('habits-content');
         content.innerHTML = '';
 
@@ -172,19 +363,19 @@ var Habits = {
         prevBtn.textContent = '\u2190';
         prevBtn.addEventListener('click', function() {
             Habits.calendarMonth.setMonth(Habits.calendarMonth.getMonth() - 1);
-            Habits.renderCalendar();
+            Habits.renderMonth();
         });
 
         var monthLabel = document.createElement('h3');
-        var months = ['January','February','March','April','May','June','July','August','September','October','November','December'];
-        monthLabel.textContent = months[this.calendarMonth.getMonth()] + ' ' + this.calendarMonth.getFullYear();
+        var monthNames = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+        monthLabel.textContent = monthNames[this.calendarMonth.getMonth()] + ' ' + this.calendarMonth.getFullYear();
 
         var nextBtn = document.createElement('button');
         nextBtn.className = 'calendar-nav-btn';
         nextBtn.textContent = '\u2192';
         nextBtn.addEventListener('click', function() {
             Habits.calendarMonth.setMonth(Habits.calendarMonth.getMonth() + 1);
-            Habits.renderCalendar();
+            Habits.renderMonth();
         });
 
         header.appendChild(prevBtn);
@@ -247,18 +438,15 @@ var Habits = {
             dayEl.dataset.date = dateStr;
             if (dateStr === today) dayEl.classList.add('today');
 
-            // Mark future days
             if (dateStr > today) {
                 dayEl.classList.add('future');
             } else {
-                // Clickable: non-future days
                 (function(ds) {
                     dayEl.addEventListener('click', function() {
-                        // Remove previous selection
                         var prev = grid.querySelector('.calendar-day.selected');
                         if (prev) prev.classList.remove('selected');
                         this.classList.add('selected');
-                        Habits.showDayDetail(ds);
+                        Habits.showDayDetail(ds, 'calendar-day-detail', 'calendar-grid');
                     });
                 })(dateStr);
             }
@@ -267,7 +455,6 @@ var Habits = {
             dayNum.textContent = d;
             dayEl.appendChild(dayNum);
 
-            // Dots for completed habits
             this.renderDayDots(dayEl, dateStr, habitColors);
 
             grid.appendChild(dayEl);
@@ -275,27 +462,26 @@ var Habits = {
 
         card.appendChild(grid);
 
-        // Day detail panel placeholder
+        // Day detail panel
         var detailPanel = document.createElement('div');
         detailPanel.id = 'calendar-day-detail';
         card.appendChild(detailPanel);
 
         content.appendChild(card);
 
-        // Auto-open today if it's in the current month
+        // Auto-open today if in current month
         var todayMonth = new Date().getMonth();
         var todayYear = new Date().getFullYear();
         if (year === todayYear && month === todayMonth) {
             var todayCell = grid.querySelector('.calendar-day[data-date="' + today + '"]');
             if (todayCell) {
                 todayCell.classList.add('selected');
-                this.showDayDetail(today);
+                this.showDayDetail(today, 'calendar-day-detail', 'calendar-grid');
             }
         }
     },
 
     renderDayDots: function(dayEl, dateStr, habitColors) {
-        // Remove existing dots
         var existingDots = dayEl.querySelector('.calendar-dots');
         if (existingDots) existingDots.remove();
 
@@ -321,20 +507,20 @@ var Habits = {
         }
     },
 
-    showDayDetail: function(dateStr) {
+    // Shared day detail panel — used by Week and Month views
+    showDayDetail: function(dateStr, panelId, gridId) {
         this.selectedDate = dateStr;
-        var panel = document.getElementById('calendar-day-detail');
+        var panel = document.getElementById(panelId || 'calendar-day-detail');
         if (!panel) return;
         panel.innerHTML = '';
 
-        // Format date header
         var parts = dateStr.split('-');
         var dateObj = new Date(parseInt(parts[0]), parseInt(parts[1]) - 1, parseInt(parts[2]));
-        var days = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
-        var months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+        var dayNames = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+        var monthNames = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
         var header = document.createElement('h3');
         header.className = 'day-detail-header';
-        header.textContent = days[dateObj.getDay()] + ', ' + months[dateObj.getMonth()] + ' ' + dateObj.getDate();
+        header.textContent = dayNames[dateObj.getDay()] + ', ' + monthNames[dateObj.getMonth()] + ' ' + dateObj.getDate();
         panel.appendChild(header);
 
         if (this.habits.length === 0) {
@@ -349,11 +535,11 @@ var Habits = {
         var entrySet = {};
         dayEntries.forEach(function(hid) { entrySet[hid] = true; });
 
-        // Build habit color lookup for dot updates
         var habitColors = {};
-        this.habits.forEach(function(h) {
-            habitColors[h.habitId] = h.color;
-        });
+        this.habits.forEach(function(h) { habitColors[h.habitId] = h.color; });
+
+        var actualGridId = gridId || 'calendar-grid';
+        var actualPanelId = panelId || 'calendar-day-detail';
 
         this.habits.forEach(function(habit) {
             var item = document.createElement('div');
@@ -366,7 +552,7 @@ var Habits = {
                 checkbox.classList.add('checked');
             }
             checkbox.addEventListener('click', function() {
-                Habits.toggleCalendarHabit(habit, checkbox, dateStr, habitColors);
+                Habits.toggleCalendarHabit(habit, checkbox, dateStr, habitColors, actualGridId, actualPanelId);
             });
 
             var info = document.createElement('div');
@@ -383,13 +569,12 @@ var Habits = {
         });
     },
 
-    toggleCalendarHabit: async function(habit, checkbox, dateStr, habitColors) {
+    toggleCalendarHabit: async function(habit, checkbox, dateStr, habitColors, gridId, panelId) {
         var isChecked = checkbox.classList.contains('checked');
         try {
             if (isChecked) {
                 await API.deleteHabitEntry(habit.habitId, dateStr);
                 checkbox.classList.remove('checked');
-                // Remove from calendarEntries
                 var entries = this.calendarEntries[dateStr] || [];
                 var idx = entries.indexOf(habit.habitId);
                 if (idx !== -1) entries.splice(idx, 1);
@@ -397,23 +582,50 @@ var Habits = {
             } else {
                 await API.logHabitEntry(habit.habitId, dateStr);
                 checkbox.classList.add('checked');
-                // Add to calendarEntries
                 if (!this.calendarEntries[dateStr]) this.calendarEntries[dateStr] = [];
                 this.calendarEntries[dateStr].push(habit.habitId);
             }
-            // Update dots on the day cell inline
-            var grid = document.getElementById('calendar-grid');
-            if (grid) {
-                var dayCell = grid.querySelector('.calendar-day[data-date="' + dateStr + '"]');
-                if (dayCell) {
-                    this.renderDayDots(dayCell, dateStr, habitColors);
-                }
-            }
+            // Update dots on the day cell
+            this._updateDots(dateStr, habitColors, gridId);
         } catch (err) {
             Toast.error(err.message);
         }
     },
 
+    _updateDots: function(dateStr, habitColors, gridId) {
+        var grid = document.getElementById(gridId);
+        if (!grid) return;
+
+        if (gridId === 'week-strip') {
+            // Week view: update week-day-dots
+            var dayCell = grid.querySelector('.week-day[data-date="' + dateStr + '"]');
+            if (dayCell) {
+                var dotsDiv = dayCell.querySelector('.week-day-dots');
+                if (dotsDiv) {
+                    dotsDiv.innerHTML = '';
+                    var dayEntries = this.calendarEntries[dateStr] || [];
+                    var seen = {};
+                    dayEntries.forEach(function(hid) {
+                        if (!seen[hid]) {
+                            seen[hid] = true;
+                            var dot = document.createElement('div');
+                            dot.className = 'calendar-dot';
+                            dot.style.backgroundColor = habitColors[hid] || '#667eea';
+                            dotsDiv.appendChild(dot);
+                        }
+                    });
+                }
+            }
+        } else {
+            // Month view: use renderDayDots
+            var dayCell = grid.querySelector('.calendar-day[data-date="' + dateStr + '"]');
+            if (dayCell) {
+                this.renderDayDots(dayCell, dateStr, habitColors);
+            }
+        }
+    },
+
+    // ========== CREATIVE STATS ==========
     renderStats: async function() {
         var content = document.getElementById('habits-content');
         content.innerHTML = '';
@@ -422,7 +634,7 @@ var Habits = {
         card.className = 'card';
 
         var title = document.createElement('h2');
-        title.textContent = 'Habit Stats (Last 4 Weeks)';
+        title.textContent = 'Habit Stats';
         card.appendChild(title);
 
         if (this.habits.length === 0) {
@@ -434,58 +646,300 @@ var Habits = {
             return;
         }
 
-        for (var i = 0; i < this.habits.length; i++) {
-            var habit = this.habits[i];
+        // Period toggle
+        var periodToggle = document.createElement('div');
+        periodToggle.className = 'stats-period-toggle';
+
+        var currentPeriod = 'week';
+
+        var weekBtn = document.createElement('button');
+        weekBtn.textContent = 'This Week';
+        weekBtn.classList.add('active');
+        weekBtn.addEventListener('click', function() {
+            currentPeriod = 'week';
+            weekBtn.classList.add('active');
+            monthBtn.classList.remove('active');
+            loadStats('week');
+        });
+
+        var monthBtn = document.createElement('button');
+        monthBtn.textContent = 'This Month';
+        monthBtn.addEventListener('click', function() {
+            currentPeriod = 'month';
+            monthBtn.classList.add('active');
+            weekBtn.classList.remove('active');
+            loadStats('month');
+        });
+
+        periodToggle.appendChild(weekBtn);
+        periodToggle.appendChild(monthBtn);
+        card.appendChild(periodToggle);
+
+        // Donut container
+        var donutContainer = document.createElement('div');
+        donutContainer.id = 'stats-donut-container';
+        card.appendChild(donutContainer);
+
+        // Legend container
+        var legendContainer = document.createElement('div');
+        legendContainer.className = 'donut-legend';
+        legendContainer.id = 'stats-donut-legend';
+        card.appendChild(legendContainer);
+
+        // Streaks section
+        var streaksTitle = document.createElement('h2');
+        streaksTitle.textContent = 'Streaks';
+        streaksTitle.style.marginTop = '8px';
+        card.appendChild(streaksTitle);
+
+        var streaksContainer = document.createElement('div');
+        streaksContainer.id = 'stats-streaks';
+        card.appendChild(streaksContainer);
+
+        content.appendChild(card);
+
+        var habits = this.habits;
+
+        async function loadStats(period) {
+            var today = new Date();
+            var todayStr = Habits._formatDate(today);
+            var from, to, numDays;
+
+            if (period === 'week') {
+                var weekStart = new Date(today);
+                weekStart.setDate(weekStart.getDate() - ((weekStart.getDay() + 6) % 7));
+                from = Habits._formatDate(weekStart);
+                to = todayStr;
+                numDays = Math.floor((today - weekStart) / 86400000) + 1;
+            } else {
+                var monthStart = new Date(today.getFullYear(), today.getMonth(), 1);
+                from = Habits._formatDate(monthStart);
+                to = todayStr;
+                numDays = Math.floor((today - monthStart) / 86400000) + 1;
+            }
+
             try {
-                var statsResult = await API.getHabitStats(habit.habitId, 4);
-                var totalCompletions = 0;
-                var totalTarget = habit.targetFrequency * 4;
-                (statsResult.stats || []).forEach(function(w) {
-                    totalCompletions += w.completions;
+                var allEntries = await API.getAllHabitEntries(from, to);
+                var entriesByHabit = {};
+                habits.forEach(function(h) { entriesByHabit[h.habitId] = []; });
+
+                (allEntries.entries || []).forEach(function(e) {
+                    if (entriesByHabit[e.habitId]) {
+                        entriesByHabit[e.habitId].push(e.date);
+                    }
                 });
 
-                var pct = totalTarget > 0 ? Math.round((totalCompletions / totalTarget) * 100) : 0;
-                if (pct > 100) pct = 100;
-
-                var bar = document.createElement('div');
-                bar.className = 'habit-stat-bar';
-
-                var label = document.createElement('div');
-                label.className = 'habit-stat-label';
-                label.textContent = habit.name;
-
-                var track = document.createElement('div');
-                track.className = 'habit-stat-track';
-
-                var fill = document.createElement('div');
-                fill.className = 'habit-stat-fill';
-                fill.style.backgroundColor = habit.color;
-                fill.style.width = '0%';
-                track.appendChild(fill);
-
-                var pctEl = document.createElement('div');
-                pctEl.className = 'habit-stat-pct';
-                pctEl.textContent = pct + '%';
-
-                bar.appendChild(label);
-                bar.appendChild(track);
-                bar.appendChild(pctEl);
-                card.appendChild(bar);
-
-                // Animate fill
-                (function(fillEl, pctVal) {
-                    requestAnimationFrame(function() {
-                        fillEl.style.width = pctVal + '%';
-                    });
-                })(fill, pct);
+                Habits.renderDonutChart(habits, entriesByHabit);
+                Habits.renderStreaks(habits, entriesByHabit, from, to, numDays);
             } catch (err) {
-                // Skip this habit on error
+                Toast.error(err.message);
             }
         }
 
-        content.appendChild(card);
+        loadStats('week');
     },
 
+    renderDonutChart: function(habits, entriesByHabit) {
+        var container = document.getElementById('stats-donut-container');
+        var legend = document.getElementById('stats-donut-legend');
+        container.innerHTML = '';
+        legend.innerHTML = '';
+
+        var data = habits.map(function(h) {
+            var dates = {};
+            (entriesByHabit[h.habitId] || []).forEach(function(d) { dates[d] = true; });
+            return { name: h.name, color: h.color, value: Object.keys(dates).length };
+        }).filter(function(d) { return d.value > 0; });
+
+        if (data.length === 0) {
+            container.innerHTML = '<p class="empty-state">No completions in this period.</p>';
+            return;
+        }
+
+        var width = 220;
+        var height = 220;
+        var radius = Math.min(width, height) / 2;
+        var innerRadius = radius * 0.55;
+
+        var svg = d3.select(container)
+            .append('svg')
+            .attr('width', width)
+            .attr('height', height)
+            .append('g')
+            .attr('transform', 'translate(' + width / 2 + ',' + height / 2 + ')');
+
+        var pie = d3.pie()
+            .value(function(d) { return d.value; })
+            .sort(null)
+            .padAngle(0.03);
+
+        var arc = d3.arc()
+            .innerRadius(innerRadius)
+            .outerRadius(radius);
+
+        var arcHover = d3.arc()
+            .innerRadius(innerRadius)
+            .outerRadius(radius + 8);
+
+        var total = d3.sum(data, function(d) { return d.value; });
+
+        // Center total
+        svg.append('text')
+            .attr('text-anchor', 'middle')
+            .attr('dy', '-0.2em')
+            .style('font-size', '28px')
+            .style('font-weight', '700')
+            .style('fill', 'var(--text-primary)')
+            .text(total);
+
+        svg.append('text')
+            .attr('text-anchor', 'middle')
+            .attr('dy', '1.2em')
+            .style('font-size', '12px')
+            .style('fill', 'var(--text-muted)')
+            .text('completions');
+
+        var arcs = svg.selectAll('.arc')
+            .data(pie(data))
+            .enter()
+            .append('g')
+            .attr('class', 'arc');
+
+        arcs.append('path')
+            .attr('d', function(d) {
+                // Start from zero for animation
+                var startArc = d3.arc().innerRadius(innerRadius).outerRadius(innerRadius);
+                return startArc(d);
+            })
+            .attr('fill', function(d) { return d.data.color; })
+            .style('cursor', 'pointer')
+            .transition()
+            .duration(800)
+            .attrTween('d', function(d) {
+                var interpolate = d3.interpolate(
+                    { startAngle: d.startAngle, endAngle: d.startAngle },
+                    d
+                );
+                return function(t) {
+                    return arc(interpolate(t));
+                };
+            });
+
+        // Add hover after transition
+        setTimeout(function() {
+            arcs.selectAll('path')
+                .on('mouseenter', function(event, d) {
+                    d3.select(this).transition().duration(200).attr('d', arcHover(d));
+                })
+                .on('mouseleave', function(event, d) {
+                    d3.select(this).transition().duration(200).attr('d', arc(d));
+                });
+        }, 850);
+
+        // Legend
+        data.forEach(function(d) {
+            var item = document.createElement('div');
+            item.className = 'donut-legend-item';
+
+            var color = document.createElement('div');
+            color.className = 'donut-legend-color';
+            color.style.backgroundColor = d.color;
+
+            var label = document.createElement('span');
+            label.textContent = d.name + ' (' + d.value + ')';
+
+            item.appendChild(color);
+            item.appendChild(label);
+            legend.appendChild(item);
+        });
+    },
+
+    renderStreaks: function(habits, entriesByHabit, from, to, numDays) {
+        var container = document.getElementById('stats-streaks');
+        container.innerHTML = '';
+
+        habits.forEach(function(habit) {
+            var row = document.createElement('div');
+            row.className = 'streak-row';
+
+            var headerDiv = document.createElement('div');
+            headerDiv.className = 'streak-header';
+
+            var nameSpan = document.createElement('span');
+            nameSpan.className = 'streak-habit-name';
+            nameSpan.textContent = habit.name;
+
+            // Calculate streak
+            var dateSet = {};
+            (entriesByHabit[habit.habitId] || []).forEach(function(d) { dateSet[d] = true; });
+
+            var currentStreak = 0;
+            var bestStreak = 0;
+            var tempStreak = 0;
+
+            // Walk from 'from' to 'to'
+            var d = Habits._parseDate(from);
+            var endDate = Habits._parseDate(to);
+
+            while (d <= endDate) {
+                var ds = Habits._formatDate(d);
+                if (dateSet[ds]) {
+                    tempStreak++;
+                    if (tempStreak > bestStreak) bestStreak = tempStreak;
+                } else {
+                    tempStreak = 0;
+                }
+                d.setDate(d.getDate() + 1);
+            }
+
+            // Current streak: count backwards from 'to'
+            var cDate = Habits._parseDate(to);
+            var fromDate = Habits._parseDate(from);
+            currentStreak = 0;
+            while (cDate >= fromDate) {
+                var cs = Habits._formatDate(cDate);
+                if (dateSet[cs]) {
+                    currentStreak++;
+                    cDate.setDate(cDate.getDate() - 1);
+                } else {
+                    break;
+                }
+            }
+
+            var infoSpan = document.createElement('span');
+            infoSpan.className = 'streak-info';
+            infoSpan.textContent = currentStreak + ' day streak (best: ' + bestStreak + ')';
+
+            headerDiv.appendChild(nameSpan);
+            headerDiv.appendChild(infoSpan);
+            row.appendChild(headerDiv);
+
+            // Heatmap cells
+            var cellsDiv = document.createElement('div');
+            cellsDiv.className = 'streak-cells';
+
+            var cellDate = Habits._parseDate(from);
+            for (var i = 0; i < numDays; i++) {
+                var cell = document.createElement('div');
+                cell.className = 'streak-cell';
+                var cellStr = Habits._formatDate(cellDate);
+                if (dateSet[cellStr]) {
+                    cell.classList.add('filled');
+                    cell.style.backgroundColor = habit.color;
+                } else {
+                    cell.classList.add('empty');
+                }
+                cell.title = cellStr;
+                cellsDiv.appendChild(cell);
+                cellDate.setDate(cellDate.getDate() + 1);
+            }
+
+            row.appendChild(cellsDiv);
+            container.appendChild(row);
+        });
+    },
+
+    // ========== HABIT MODAL ==========
     showHabitModal: function(editHabit) {
         var overlay = document.createElement('div');
         overlay.className = 'modal-overlay';
@@ -606,5 +1060,15 @@ var Habits = {
         document.body.appendChild(overlay);
 
         nameInput.focus();
+    },
+
+    // ========== HELPERS ==========
+    _parseDate: function(str) {
+        var parts = str.split('-');
+        return new Date(parseInt(parts[0]), parseInt(parts[1]) - 1, parseInt(parts[2]));
+    },
+
+    _formatDate: function(d) {
+        return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
     }
 };
