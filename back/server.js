@@ -5,7 +5,11 @@ const path = require('path');
 
 const authRoutes = require('./routes/auth');
 const weightRoutes = require('./routes/weight');
+const habitRoutes = require('./routes/habits');
+const habitEntryRoutes = require('./routes/habitEntries');
+const friendRoutes = require('./routes/friends');
 const authenticate = require('./middleware/auth');
+const rateLimit = require('./middleware/rateLimit');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -21,9 +25,16 @@ app.use((req, res, next) => {
     next();
 });
 
+// Rate limiters for auth endpoints
+app.post('/api/signin', rateLimit({ maxHits: 10, windowMs: 15 * 60 * 1000 }));
+app.post('/api/signup', rateLimit({ maxHits: 5, windowMs: 60 * 60 * 1000 }));
+
 // Routes
 app.use('/api', authRoutes);
 app.use('/api/weight', authenticate, weightRoutes);
+app.use('/api/habits', authenticate, habitEntryRoutes);
+app.use('/api/habits', authenticate, habitRoutes);
+app.use('/api/friends', authenticate, friendRoutes);
 
 // SPA fallback — serve index.html for non-API routes
 app.get('/*path', (req, res) => {
