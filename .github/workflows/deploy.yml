@@ -42,13 +42,17 @@ jobs:
           key: ${{ secrets.EC2_SSH_KEY }}
           script: |
             cd /home/ec2-user/SaraPesoApp
+            PREV_SHA=$(git rev-parse HEAD)
+            echo "$PREV_SHA" > /tmp/deploy-prev-sha
             git fetch origin main
             git reset --hard origin/main
             cd back
             npm ci --omit=dev
-            pm2 restart sara-peso || pm2 start server.js --name sara-peso
+            mkdir -p logs
+            pm2 restart ecosystem.config.js --env production || pm2 start ecosystem.config.js --env production
 
       - name: Health check
+        id: healthcheck
         run: |
           sleep 5
           for i in 1 2 3 4 5; do
@@ -62,3 +66,24 @@ jobs:
           done
           echo "Health check failed after 5 attempts"
           exit 1
+
+      - name: Rollback on failure
+        if: failure() && steps.healthcheck.outcome == 'failure'
+        uses: appleboy/ssh-action@v1
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ec2-user
+          key: ${{ secrets.EC2_SSH_KEY }}
+          script: |
+            cd /home/ec2-user/SaraPesoApp
+            PREV_SHA=$(cat /tmp/deploy-prev-sha 2>/dev/null)
+            if [ -z "$PREV_SHA" ]; then
+              echo "No previous SHA found, cannot rollback"
+              exit 1
+            fi
+            echo "Rolling back to $PREV_SHA"
+            git reset --hard "$PREV_SHA"
+            cd back
+            npm ci --omit=dev
+            pm2 restart ecosystem.config.js --env production
+            echo "Rollback complete"
