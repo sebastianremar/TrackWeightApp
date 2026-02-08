@@ -5,6 +5,7 @@ var Friends = {
     load: async function() {
         var container = document.getElementById('screen-friends');
         container.innerHTML = '';
+        var spinner = Spinner.show(container);
 
         try {
             var [friendsResult, requestsResult] = await Promise.all([
@@ -14,10 +15,12 @@ var Friends = {
             this.friends = friendsResult.friends || [];
             this.requests = requestsResult.requests || [];
         } catch (err) {
+            Spinner.hide(spinner);
             Toast.error(err.message);
             return;
         }
 
+        Spinner.hide(spinner);
         this.render();
     },
 

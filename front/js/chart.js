@@ -17,8 +17,18 @@ function renderChart(entries) {
 
     if (width < 100) width = 300;
 
+    // Accessible data summary
+    var summary = document.createElement('div');
+    summary.className = 'sr-only';
+    var latest = entries[entries.length - 1];
+    var first = entries[0];
+    summary.textContent = 'Weight chart showing ' + entries.length + ' entries from ' + first.date + ' to ' + latest.date + '. Latest: ' + latest.weight + ' kg.';
+    container.appendChild(summary);
+
     var svg = d3.select('#chart-container')
         .append('svg')
+        .attr('role', 'img')
+        .attr('aria-label', 'Weight trend chart with ' + entries.length + ' data points')
         .attr('viewBox', '0 0 ' + (width + margin.left + margin.right) + ' ' + (height + margin.top + margin.bottom))
         .append('g')
         .attr('transform', 'translate(' + margin.left + ',' + margin.top + ')');
@@ -244,6 +254,8 @@ function renderCompareChart(myEntries, friendEntries, friendName) {
 
     var svg = d3.select('#compare-chart')
         .append('svg')
+        .attr('role', 'img')
+        .attr('aria-label', 'Weight comparison chart between you and ' + friendName)
         .attr('viewBox', '0 0 ' + (width + margin.left + margin.right) + ' ' + (height + margin.top + margin.bottom))
         .append('g')
         .attr('transform', 'translate(' + margin.left + ',' + margin.top + ')');

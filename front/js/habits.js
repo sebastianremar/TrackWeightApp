@@ -37,14 +37,17 @@ var Habits = {
         content.id = 'habits-content';
         container.appendChild(content);
 
+        var spinner = Spinner.show(content);
         try {
             var result = await API.getHabits();
             this.habits = result.habits || [];
         } catch (err) {
+            Spinner.hide(spinner);
             Toast.error(err.message);
             return;
         }
 
+        Spinner.hide(spinner);
         this.renderSubView();
     },
 

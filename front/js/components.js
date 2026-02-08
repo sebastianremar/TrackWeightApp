@@ -7,6 +7,8 @@ var Toast = {
         if (!this.container) {
             this.container = document.createElement('div');
             this.container.id = 'toast-container';
+            this.container.setAttribute('aria-live', 'polite');
+            this.container.setAttribute('aria-atomic', 'true');
             document.body.appendChild(this.container);
         }
     },
@@ -16,6 +18,7 @@ var Toast = {
         type = type || 'info';
         var toast = document.createElement('div');
         toast.className = 'toast toast-' + type;
+        toast.setAttribute('role', 'status');
         toast.textContent = message;
         this.container.appendChild(toast);
 
@@ -42,7 +45,8 @@ var Spinner = {
     show: function(container) {
         var el = document.createElement('div');
         el.className = 'spinner-overlay';
-        el.innerHTML = '<div class="spinner"></div>';
+        el.setAttribute('role', 'status');
+        el.innerHTML = '<div class="spinner"></div><span class="sr-only">Loading...</span>';
         container.style.position = 'relative';
         container.appendChild(el);
         return el;
@@ -61,8 +65,12 @@ var Confirm = {
 
         var dialog = document.createElement('div');
         dialog.className = 'confirm-dialog';
+        dialog.setAttribute('role', 'alertdialog');
+        dialog.setAttribute('aria-modal', 'true');
+        dialog.setAttribute('aria-labelledby', 'confirm-msg');
 
         var msg = document.createElement('p');
+        msg.id = 'confirm-msg';
         msg.textContent = message;
         dialog.appendChild(msg);
 
@@ -89,5 +97,8 @@ var Confirm = {
         dialog.appendChild(actions);
         overlay.appendChild(dialog);
         document.body.appendChild(overlay);
+
+        // Focus the confirm button for keyboard users
+        okBtn.focus();
     }
 };

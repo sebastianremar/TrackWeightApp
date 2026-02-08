@@ -1,8 +1,12 @@
 var Navigation = {
     currentScreen: 'weight',
     loaded: { weight: false, habits: false, friends: false, settings: false },
+    _initialized: false,
 
     init: function() {
+        if (this._initialized) return;
+        this._initialized = true;
+
         var self = this;
         document.querySelectorAll('.nav-tab').forEach(function(tab) {
             tab.addEventListener('click', function() {
@@ -24,7 +28,9 @@ var Navigation = {
 
         // Update tabs
         document.querySelectorAll('.nav-tab').forEach(function(tab) {
-            tab.classList.toggle('active', tab.dataset.screen === screen);
+            var isActive = tab.dataset.screen === screen;
+            tab.classList.toggle('active', isActive);
+            tab.setAttribute('aria-current', isActive ? 'true' : 'false');
         });
 
         // Update screens
