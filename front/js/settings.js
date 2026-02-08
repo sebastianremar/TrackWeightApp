@@ -11,7 +11,7 @@ var Settings = {
             this.profile = result;
         } catch (err) {
             Spinner.hide(spinner);
-            Toast.error(err.message);
+            if (!err._toasted) Toast.error(err.message || 'Failed to load settings');
             return;
         }
 
@@ -223,7 +223,7 @@ var Settings = {
                 overlay.remove();
                 Settings.render();
             } catch (err) {
-                Toast.error(err.message);
+                if (!err._toasted) Toast.error(err.message || 'Failed to update name');
             }
         });
 
@@ -242,7 +242,7 @@ var Settings = {
             this.profile.shareWeight = value;
             Toast.success(value ? 'Weight sharing enabled' : 'Weight sharing disabled');
         } catch (err) {
-            Toast.error(err.message);
+            if (!err._toasted) Toast.error(err.message || 'Failed to update setting');
             this.render();
         }
     },
@@ -257,7 +257,7 @@ var Settings = {
             await API.updateProfile({ darkMode: value });
             Toast.success(value ? 'Dark mode enabled' : 'Dark mode disabled');
         } catch (err) {
-            Toast.error(err.message);
+            if (!err._toasted) Toast.error(err.message || 'Failed to update setting');
             // Revert
             document.body.classList.toggle('dark', !value);
             localStorage.setItem('darkMode', !value ? 'true' : 'false');

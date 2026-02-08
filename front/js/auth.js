@@ -33,8 +33,10 @@ signinForm.addEventListener('submit', async function (e) {
         localStorage.setItem('userName', data.user.name);
         window.showDashboard(data.user.name);
     } catch (err) {
-        errorEl.textContent = err.message || 'Could not connect to server';
-        errorEl.style.display = 'block';
+        if (!err._toasted) {
+            errorEl.textContent = err.message || 'Could not connect to server';
+            errorEl.style.display = 'block';
+        }
     }
 });
 
@@ -59,7 +61,9 @@ signupForm.addEventListener('submit', async function (e) {
         localStorage.setItem('userName', data.user.name);
         window.showDashboard(data.user.name);
     } catch (err) {
-        errorEl.textContent = err.message || 'Could not connect to server';
-        errorEl.style.display = 'block';
+        if (!err._toasted) {
+            errorEl.textContent = err.message || 'Could not connect to server';
+            errorEl.style.display = 'block';
+        }
     }
 });

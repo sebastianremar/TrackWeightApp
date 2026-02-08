@@ -16,7 +16,7 @@ var Friends = {
             this.requests = requestsResult.requests || [];
         } catch (err) {
             Spinner.hide(spinner);
-            Toast.error(err.message);
+            if (!err._toasted) Toast.error(err.message || 'Failed to load friends');
             return;
         }
 
@@ -170,7 +170,7 @@ var Friends = {
             Toast.success(accept ? 'Request accepted' : 'Request rejected');
             this.load();
         } catch (err) {
-            Toast.error(err.message);
+            if (!err._toasted) Toast.error(err.message || 'Failed to respond to request');
         }
     },
 
@@ -180,7 +180,7 @@ var Friends = {
             Toast.success('Friend removed');
             this.load();
         } catch (err) {
-            Toast.error(err.message);
+            if (!err._toasted) Toast.error(err.message || 'Failed to remove friend');
         }
     },
 
@@ -229,7 +229,7 @@ var Friends = {
                 overlay.remove();
                 Friends.load();
             } catch (err) {
-                Toast.error(err.message);
+                if (!err._toasted) Toast.error(err.message || 'Failed to send request');
             }
         });
 
@@ -264,7 +264,7 @@ var Friends = {
 
             renderCompareChart(myEntries, friendEntries, friend.name);
         } catch (err) {
-            Toast.error(err.message);
+            if (!err._toasted) Toast.error(err.message || 'Failed to load comparison data');
         }
     }
 };

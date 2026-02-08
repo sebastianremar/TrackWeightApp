@@ -26,7 +26,7 @@ async function loadDashboardData() {
         renderEntriesTable(allEntries);
     } catch (err) {
         Spinner.hide(spinner);
-        if (err.message !== 'Session expired') {
+        if (!err._toasted) {
             Toast.error('Failed to load weight data');
         }
     }
@@ -165,7 +165,7 @@ async function deleteEntry(date) {
         Toast.success('Entry deleted');
         loadDashboardData();
     } catch (err) {
-        Toast.error(err.message);
+        if (!err._toasted) Toast.error(err.message || 'Failed to delete entry');
     }
 }
 
@@ -192,7 +192,7 @@ document.getElementById('weight-form').addEventListener('submit', async function
         Toast.success('Weight logged successfully!');
         loadDashboardData();
     } catch (err) {
-        Toast.error(err.message);
+        if (!err._toasted) Toast.error(err.message || 'Failed to log weight');
     } finally {
         if (submitBtn) {
             submitBtn.disabled = false;

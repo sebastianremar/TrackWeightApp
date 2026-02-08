@@ -43,7 +43,7 @@ var Habits = {
             this.habits = result.habits || [];
         } catch (err) {
             Spinner.hide(spinner);
-            Toast.error(err.message);
+            if (!err._toasted) Toast.error(err.message || 'Failed to load habits');
             return;
         }
 
@@ -168,7 +168,7 @@ var Habits = {
                     card.appendChild(item);
                 });
             } catch (err) {
-                Toast.error(err.message);
+                if (!err._toasted) Toast.error(err.message || 'Failed to load habit entries');
             }
         }
 
@@ -196,7 +196,7 @@ var Habits = {
                 this.todayEntries[habit.habitId] = true;
             }
         } catch (err) {
-            Toast.error(err.message);
+            if (!err._toasted) Toast.error(err.message || 'Failed to update habit');
         }
     },
 
@@ -264,7 +264,7 @@ var Habits = {
                 Habits.calendarEntries[e.date].push(e.habitId);
             });
         } catch (err) {
-            // Continue without entries
+            if (!err._toasted) Toast.error('Failed to load week data');
         }
 
         var habitColors = {};
@@ -417,7 +417,7 @@ var Habits = {
                 Habits.calendarEntries[e.date].push(e.habitId);
             });
         } catch (err) {
-            // Continue without entries
+            if (!err._toasted) Toast.error('Failed to load month data');
         }
 
         // Build habit color lookup
@@ -591,7 +591,7 @@ var Habits = {
             // Update dots on the day cell
             this._updateDots(dateStr, habitColors, gridId);
         } catch (err) {
-            Toast.error(err.message);
+            if (!err._toasted) Toast.error(err.message || 'Failed to update habit');
         }
     },
 
@@ -735,7 +735,7 @@ var Habits = {
                 Habits.renderDonutChart(habits, entriesByHabit);
                 Habits.renderStreaks(habits, entriesByHabit, from, to, numDays);
             } catch (err) {
-                Toast.error(err.message);
+                if (!err._toasted) Toast.error(err.message || 'Failed to load stats');
             }
         }
 
@@ -1051,7 +1051,7 @@ var Habits = {
                 overlay.remove();
                 Habits.load();
             } catch (err) {
-                Toast.error(err.message);
+                if (!err._toasted) Toast.error(err.message || 'Failed to save habit');
             }
         });
 

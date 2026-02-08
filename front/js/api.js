@@ -17,25 +17,33 @@ var API = {
 
             clearTimeout(timeoutId);
 
+            var data = await res.json();
+
             if (res.status === 401) {
-                window.showAuth();
-                throw new Error('Session expired');
+                var isAuthEndpoint = endpoint === '/signin' || endpoint === '/signup';
+                if (!isAuthEndpoint) {
+                    window.showAuth();
+                }
+                throw new Error(data.error || 'Invalid credentials');
             }
 
-            var data = await res.json();
             if (!res.ok) throw new Error(data.error || 'Request failed');
             return data;
         } catch (err) {
             clearTimeout(timeoutId);
 
             if (err.name === 'AbortError') {
-                Toast.error('Request timed out. Please try again.');
-                throw new Error('Request timed out');
+                var timeoutErr = new Error('Request timed out. Please try again.');
+                timeoutErr._toasted = true;
+                Toast.error(timeoutErr.message);
+                throw timeoutErr;
             }
 
             if (err instanceof TypeError && err.message === 'Failed to fetch') {
-                Toast.error('You appear to be offline. Check your connection.');
-                throw new Error('Network error');
+                var offlineErr = new Error('You appear to be offline. Check your connection.');
+                offlineErr._toasted = true;
+                Toast.error(offlineErr.message);
+                throw offlineErr;
             }
 
             throw err;
