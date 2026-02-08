@@ -1,10 +1,12 @@
 const express = require('express');
 const { PutCommand, DeleteCommand, QueryCommand } = require('@aws-sdk/lib-dynamodb');
 const { docClient } = require('../lib/db');
+const logger = require('../lib/logger');
 
 const router = express.Router();
 
 const DATE_REGEX = /^\d{4}-\d{2}-\d{2}$/;
+const DEFAULT_LIMIT = 200;
 
 function isValidDate(dateStr) {
     if (!DATE_REGEX.test(dateStr)) return false;
@@ -15,7 +17,8 @@ function isValidDate(dateStr) {
 // GET /api/habits/entries/all — MUST come before /:id routes
 router.get('/entries/all', async (req, res) => {
     const email = req.user.email;
-    const { from, to } = req.query;
+    const { from, to, cursor } = req.query;
+    const limit = Math.min(parseInt(req.query.limit) || DEFAULT_LIMIT, 500);
 
     const params = {
         TableName: process.env.HABIT_ENTRIES_TABLE,
@@ -23,6 +26,7 @@ router.get('/entries/all', async (req, res) => {
         KeyConditionExpression: 'email = :email',
         ExpressionAttributeValues: { ':email': email },
         ScanIndexForward: true,
+        Limit: limit,
     };
 
     if (from && to) {
@@ -36,6 +40,14 @@ router.get('/entries/all', async (req, res) => {
         params.ExpressionAttributeValues[':from'] = from;
     }
 
+    if (cursor) {
+        try {
+            params.ExclusiveStartKey = JSON.parse(Buffer.from(cursor, 'base64url').toString());
+        } catch {
+            return res.status(400).json({ error: 'Invalid cursor' });
+        }
+    }
+
     try {
         const result = await docClient.send(new QueryCommand(params));
         const entries = (result.Items || []).map((item) => ({
@@ -43,9 +55,17 @@ router.get('/entries/all', async (req, res) => {
             date: item.date,
             completed: item.completed,
         }));
-        res.json({ entries });
+
+        const response = { entries };
+        if (result.LastEvaluatedKey) {
+            response.nextCursor = Buffer.from(JSON.stringify(result.LastEvaluatedKey)).toString(
+                'base64url',
+            );
+        }
+
+        res.json(response);
     } catch (err) {
-        console.error('DynamoDB Query error:', err);
+        logger.error({ err }, 'DynamoDB Query error');
         return res.status(500).json({ error: 'Internal server error' });
     }
 });
@@ -86,7 +106,7 @@ router.post('/:id/entries', async (req, res) => {
         );
         res.status(201).json({ entry: { date, completed: true, note: item.note } });
     } catch (err) {
-        console.error('DynamoDB PutItem error:', err);
+        logger.error({ err }, 'DynamoDB PutItem error');
         return res.status(500).json({ error: 'Internal server error' });
     }
 });
@@ -116,16 +136,17 @@ router.delete('/:id/entries/:date', async (req, res) => {
         }
         res.json({ message: 'Entry deleted' });
     } catch (err) {
-        console.error('DynamoDB DeleteItem error:', err);
+        logger.error({ err }, 'DynamoDB DeleteItem error');
         return res.status(500).json({ error: 'Internal server error' });
     }
 });
 
-// GET /api/habits/:id/entries — get entries for a habit (?from=&to=)
+// GET /api/habits/:id/entries — get entries for a habit (?from=&to=&limit=&cursor=)
 router.get('/:id/entries', async (req, res) => {
     const email = req.user.email;
     const habitId = req.params.id;
-    const { from, to } = req.query;
+    const { from, to, cursor } = req.query;
+    const limit = Math.min(parseInt(req.query.limit) || DEFAULT_LIMIT, 500);
     const emailHabitId = email + '#' + habitId;
 
     const params = {
@@ -133,6 +154,7 @@ router.get('/:id/entries', async (req, res) => {
         KeyConditionExpression: 'emailHabitId = :pk',
         ExpressionAttributeValues: { ':pk': emailHabitId },
         ScanIndexForward: true,
+        Limit: limit,
     };
 
     if (from && to) {
@@ -146,6 +168,14 @@ router.get('/:id/entries', async (req, res) => {
         params.ExpressionAttributeValues[':from'] = from;
     }
 
+    if (cursor) {
+        try {
+            params.ExclusiveStartKey = JSON.parse(Buffer.from(cursor, 'base64url').toString());
+        } catch {
+            return res.status(400).json({ error: 'Invalid cursor' });
+        }
+    }
+
     try {
         const result = await docClient.send(new QueryCommand(params));
         const entries = (result.Items || []).map((item) => ({
@@ -153,9 +183,17 @@ router.get('/:id/entries', async (req, res) => {
             completed: item.completed,
             note: item.note || '',
         }));
-        res.json({ entries });
+
+        const response = { entries };
+        if (result.LastEvaluatedKey) {
+            response.nextCursor = Buffer.from(JSON.stringify(result.LastEvaluatedKey)).toString(
+                'base64url',
+            );
+        }
+
+        res.json(response);
     } catch (err) {
-        console.error('DynamoDB Query error:', err);
+        logger.error({ err }, 'DynamoDB Query error');
         return res.status(500).json({ error: 'Internal server error' });
     }
 });
@@ -209,7 +247,7 @@ router.get('/:id/stats', async (req, res) => {
 
         res.json({ stats: weeklyStats });
     } catch (err) {
-        console.error('DynamoDB Query error:', err);
+        logger.error({ err }, 'DynamoDB Query error');
         return res.status(500).json({ error: 'Internal server error' });
     }
 });

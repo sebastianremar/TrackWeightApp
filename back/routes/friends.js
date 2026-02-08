@@ -1,6 +1,7 @@
 const express = require('express');
 const { PutCommand, QueryCommand, DeleteCommand, GetCommand } = require('@aws-sdk/lib-dynamodb');
 const { docClient } = require('../lib/db');
+const logger = require('../lib/logger');
 
 const router = express.Router();
 
@@ -31,7 +32,7 @@ router.post('/request', async (req, res) => {
             return res.status(404).json({ error: 'User not found' });
         }
     } catch (err) {
-        console.error('DynamoDB GetItem error:', err);
+        logger.error({ err }, 'DynamoDB GetItem error');
         return res.status(500).json({ error: 'Internal server error' });
     }
 
@@ -51,7 +52,7 @@ router.post('/request', async (req, res) => {
             return res.status(400).json({ error: 'Request already pending' });
         }
     } catch (err) {
-        console.error('DynamoDB GetItem error:', err);
+        logger.error({ err }, 'DynamoDB GetItem error');
         return res.status(500).json({ error: 'Internal server error' });
     }
 
@@ -87,7 +88,7 @@ router.post('/request', async (req, res) => {
         );
         res.status(201).json({ message: 'Friend request sent' });
     } catch (err) {
-        console.error('DynamoDB PutItem error:', err);
+        logger.error({ err }, 'DynamoDB PutItem error');
         return res.status(500).json({ error: 'Internal server error' });
     }
 });
@@ -119,7 +120,7 @@ router.post('/respond', async (req, res) => {
             return res.status(404).json({ error: 'No pending request from this user' });
         }
     } catch (err) {
-        console.error('DynamoDB GetItem error:', err);
+        logger.error({ err }, 'DynamoDB GetItem error');
         return res.status(500).json({ error: 'Internal server error' });
     }
 
@@ -156,7 +157,7 @@ router.post('/respond', async (req, res) => {
             );
             res.json({ message: 'Friend request accepted' });
         } catch (err) {
-            console.error('DynamoDB PutItem error:', err);
+            logger.error({ err }, 'DynamoDB PutItem error');
             return res.status(500).json({ error: 'Internal server error' });
         }
     } else {
@@ -176,7 +177,7 @@ router.post('/respond', async (req, res) => {
             );
             res.json({ message: 'Friend request rejected' });
         } catch (err) {
-            console.error('DynamoDB DeleteItem error:', err);
+            logger.error({ err }, 'DynamoDB DeleteItem error');
             return res.status(500).json({ error: 'Internal server error' });
         }
     }
@@ -197,33 +198,34 @@ router.get('/', async (req, res) => {
             }),
         );
 
-        // Look up friend names
-        const friends = [];
-        for (const item of result.Items || []) {
-            try {
-                const userResult = await docClient.send(
-                    new GetCommand({
-                        TableName: process.env.USERS_TABLE,
-                        Key: { email: item.friendEmail },
-                    }),
-                );
-                friends.push({
-                    email: item.friendEmail,
-                    name: userResult.Item ? userResult.Item.name : item.friendEmail,
-                    shareWeight: userResult.Item ? userResult.Item.shareWeight || false : false,
-                });
-            } catch {
-                friends.push({
-                    email: item.friendEmail,
-                    name: item.friendEmail,
-                    shareWeight: false,
-                });
-            }
-        }
+        // Look up friend names in parallel
+        const friends = await Promise.all(
+            (result.Items || []).map(async (item) => {
+                try {
+                    const userResult = await docClient.send(
+                        new GetCommand({
+                            TableName: process.env.USERS_TABLE,
+                            Key: { email: item.friendEmail },
+                        }),
+                    );
+                    return {
+                        email: item.friendEmail,
+                        name: userResult.Item ? userResult.Item.name : item.friendEmail,
+                        shareWeight: userResult.Item ? userResult.Item.shareWeight || false : false,
+                    };
+                } catch {
+                    return {
+                        email: item.friendEmail,
+                        name: item.friendEmail,
+                        shareWeight: false,
+                    };
+                }
+            }),
+        );
 
         res.json({ friends });
     } catch (err) {
-        console.error('DynamoDB Query error:', err);
+        logger.error({ err }, 'DynamoDB Query error');
         return res.status(500).json({ error: 'Internal server error' });
     }
 });
@@ -247,32 +249,34 @@ router.get('/requests', async (req, res) => {
             }),
         );
 
-        const requests = [];
-        for (const item of result.Items || []) {
-            try {
-                const userResult = await docClient.send(
-                    new GetCommand({
-                        TableName: process.env.USERS_TABLE,
-                        Key: { email: item.friendEmail },
-                    }),
-                );
-                requests.push({
-                    email: item.friendEmail,
-                    name: userResult.Item ? userResult.Item.name : item.friendEmail,
-                    createdAt: item.createdAt,
-                });
-            } catch {
-                requests.push({
-                    email: item.friendEmail,
-                    name: item.friendEmail,
-                    createdAt: item.createdAt,
-                });
-            }
-        }
+        // Look up friend names in parallel
+        const requests = await Promise.all(
+            (result.Items || []).map(async (item) => {
+                try {
+                    const userResult = await docClient.send(
+                        new GetCommand({
+                            TableName: process.env.USERS_TABLE,
+                            Key: { email: item.friendEmail },
+                        }),
+                    );
+                    return {
+                        email: item.friendEmail,
+                        name: userResult.Item ? userResult.Item.name : item.friendEmail,
+                        createdAt: item.createdAt,
+                    };
+                } catch {
+                    return {
+                        email: item.friendEmail,
+                        name: item.friendEmail,
+                        createdAt: item.createdAt,
+                    };
+                }
+            }),
+        );
 
         res.json({ requests });
     } catch (err) {
-        console.error('DynamoDB Query error:', err);
+        logger.error({ err }, 'DynamoDB Query error');
         return res.status(500).json({ error: 'Internal server error' });
     }
 });
@@ -297,7 +301,7 @@ router.delete('/:email', async (req, res) => {
         );
         res.json({ message: 'Friend removed' });
     } catch (err) {
-        console.error('DynamoDB DeleteItem error:', err);
+        logger.error({ err }, 'DynamoDB DeleteItem error');
         return res.status(500).json({ error: 'Internal server error' });
     }
 });
@@ -319,7 +323,7 @@ router.get('/:email/weight', async (req, res) => {
             return res.status(403).json({ error: 'Not friends with this user' });
         }
     } catch (err) {
-        console.error('DynamoDB GetItem error:', err);
+        logger.error({ err }, 'DynamoDB GetItem error');
         return res.status(500).json({ error: 'Internal server error' });
     }
 
@@ -335,7 +339,7 @@ router.get('/:email/weight', async (req, res) => {
             return res.status(403).json({ error: 'This friend does not share their weight data' });
         }
     } catch (err) {
-        console.error('DynamoDB GetItem error:', err);
+        logger.error({ err }, 'DynamoDB GetItem error');
         return res.status(500).json({ error: 'Internal server error' });
     }
 
@@ -362,7 +366,7 @@ router.get('/:email/weight', async (req, res) => {
 
         res.json({ entries });
     } catch (err) {
-        console.error('DynamoDB Query error:', err);
+        logger.error({ err }, 'DynamoDB Query error');
         return res.status(500).json({ error: 'Internal server error' });
     }
 });

@@ -3,9 +3,18 @@ const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const { GetCommand, PutCommand, UpdateCommand } = require('@aws-sdk/lib-dynamodb');
 const { docClient } = require('../lib/db');
+const logger = require('../lib/logger');
 const authenticate = require('../middleware/auth');
 
 const router = express.Router();
+
+const COOKIE_OPTIONS = {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === 'production',
+    sameSite: 'strict',
+    maxAge: 24 * 60 * 60 * 1000, // 24h
+    path: '/',
+};
 
 function isStrongPassword(password) {
     return /[a-z]/.test(password) && /[A-Z]/.test(password) && /\d/.test(password);
@@ -70,15 +79,15 @@ router.post('/signup', async (req, res) => {
         if (err.name === 'ConditionalCheckFailedException') {
             return res.status(409).json({ error: 'A user with this email already exists' });
         }
-        console.error('DynamoDB PutItem error:', err);
+        logger.error({ err }, 'DynamoDB PutItem error');
         return res.status(500).json({ error: 'Internal server error' });
     }
 
     const token = jwt.sign({ email: user.email }, process.env.JWT_SECRET, { expiresIn: '24h' });
+    res.cookie('token', token, COOKIE_OPTIONS);
 
     res.status(201).json({
         message: 'Account created successfully',
-        token,
         user: { name: user.name, email: user.email },
     });
 });
@@ -100,7 +109,7 @@ router.post('/signin', async (req, res) => {
             }),
         );
     } catch (err) {
-        console.error('DynamoDB GetItem error:', err);
+        logger.error({ err }, 'DynamoDB GetItem error');
         return res.status(500).json({ error: 'Internal server error' });
     }
 
@@ -115,12 +124,18 @@ router.post('/signin', async (req, res) => {
     }
 
     const token = jwt.sign({ email: user.email }, process.env.JWT_SECRET, { expiresIn: '24h' });
+    res.cookie('token', token, COOKIE_OPTIONS);
 
     res.json({
         message: 'Signed in successfully',
-        token,
         user: { name: user.name, email: user.email },
     });
+});
+
+// POST /api/signout
+router.post('/signout', (req, res) => {
+    res.clearCookie('token', { path: '/' });
+    res.json({ message: 'Signed out' });
 });
 
 // GET /api/me — get current user profile
@@ -146,7 +161,7 @@ router.get('/me', authenticate, async (req, res) => {
             createdAt: user.createdAt,
         });
     } catch (err) {
-        console.error('DynamoDB GetItem error:', err);
+        logger.error({ err }, 'DynamoDB GetItem error');
         return res.status(500).json({ error: 'Internal server error' });
     }
 });
@@ -207,9 +222,81 @@ router.patch('/me', authenticate, async (req, res) => {
             darkMode: user.darkMode || false,
         });
     } catch (err) {
-        console.error('DynamoDB UpdateItem error:', err);
+        logger.error({ err }, 'DynamoDB UpdateItem error');
         return res.status(500).json({ error: 'Internal server error' });
     }
+});
+
+// PATCH /api/me/password — change password
+router.patch('/me/password', authenticate, async (req, res) => {
+    const { currentPassword, newPassword } = req.body;
+
+    if (!currentPassword || !newPassword) {
+        return res.status(400).json({ error: 'Current password and new password are required' });
+    }
+
+    if (typeof newPassword !== 'string' || newPassword.length < 8) {
+        return res.status(400).json({ error: 'New password must be at least 8 characters' });
+    }
+
+    if (Buffer.byteLength(newPassword, 'utf8') > 72) {
+        return res.status(400).json({ error: 'New password is too long' });
+    }
+
+    if (!isStrongPassword(newPassword)) {
+        return res
+            .status(400)
+            .json({ error: 'New password must contain uppercase, lowercase, and a digit' });
+    }
+
+    // Fetch current user
+    let user;
+    try {
+        const result = await docClient.send(
+            new GetCommand({
+                TableName: process.env.USERS_TABLE,
+                Key: { email: req.user.email },
+            }),
+        );
+        user = result.Item;
+        if (!user) {
+            return res.status(404).json({ error: 'User not found' });
+        }
+    } catch (err) {
+        logger.error({ err }, 'DynamoDB GetItem error');
+        return res.status(500).json({ error: 'Internal server error' });
+    }
+
+    // Verify current password
+    const valid = await bcrypt.compare(currentPassword, user.password);
+    if (!valid) {
+        return res.status(401).json({ error: 'Current password is incorrect' });
+    }
+
+    // Hash and save new password
+    const hashedPassword = await bcrypt.hash(newPassword, 10);
+    try {
+        await docClient.send(
+            new UpdateCommand({
+                TableName: process.env.USERS_TABLE,
+                Key: { email: req.user.email },
+                UpdateExpression: 'SET #p = :password',
+                ExpressionAttributeNames: { '#p': 'password' },
+                ExpressionAttributeValues: { ':password': hashedPassword },
+            }),
+        );
+    } catch (err) {
+        logger.error({ err }, 'DynamoDB UpdateItem error');
+        return res.status(500).json({ error: 'Internal server error' });
+    }
+
+    // Issue fresh token
+    const token = jwt.sign({ email: req.user.email }, process.env.JWT_SECRET, {
+        expiresIn: '24h',
+    });
+    res.cookie('token', token, COOKIE_OPTIONS);
+
+    res.json({ message: 'Password updated successfully' });
 });
 
 module.exports = router;

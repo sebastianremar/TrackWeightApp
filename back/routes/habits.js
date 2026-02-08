@@ -1,6 +1,7 @@
 const express = require('express');
 const { PutCommand, QueryCommand, UpdateCommand, GetCommand } = require('@aws-sdk/lib-dynamodb');
 const { docClient } = require('../lib/db');
+const logger = require('../lib/logger');
 
 const router = express.Router();
 
@@ -39,7 +40,7 @@ router.post('/', async (req, res) => {
             return res.status(400).json({ error: 'Maximum 20 active habits allowed' });
         }
     } catch (err) {
-        console.error('DynamoDB Query error:', err);
+        logger.error({ err }, 'DynamoDB Query error');
         return res.status(500).json({ error: 'Internal server error' });
     }
 
@@ -63,7 +64,7 @@ router.post('/', async (req, res) => {
         );
         res.status(201).json({ habit: item });
     } catch (err) {
-        console.error('DynamoDB PutItem error:', err);
+        logger.error({ err }, 'DynamoDB PutItem error');
         return res.status(500).json({ error: 'Internal server error' });
     }
 });
@@ -88,7 +89,7 @@ router.get('/', async (req, res) => {
         const result = await docClient.send(new QueryCommand(params));
         res.json({ habits: result.Items || [] });
     } catch (err) {
-        console.error('DynamoDB Query error:', err);
+        logger.error({ err }, 'DynamoDB Query error');
         return res.status(500).json({ error: 'Internal server error' });
     }
 });
@@ -110,7 +111,7 @@ router.get('/:id', async (req, res) => {
         }
         res.json({ habit: result.Item });
     } catch (err) {
-        console.error('DynamoDB GetItem error:', err);
+        logger.error({ err }, 'DynamoDB GetItem error');
         return res.status(500).json({ error: 'Internal server error' });
     }
 });
@@ -169,7 +170,7 @@ router.patch('/:id', async (req, res) => {
         if (err.name === 'ConditionalCheckFailedException') {
             return res.status(404).json({ error: 'Habit not found' });
         }
-        console.error('DynamoDB UpdateItem error:', err);
+        logger.error({ err }, 'DynamoDB UpdateItem error');
         return res.status(500).json({ error: 'Internal server error' });
     }
 });
@@ -194,7 +195,7 @@ router.delete('/:id', async (req, res) => {
         if (err.name === 'ConditionalCheckFailedException') {
             return res.status(404).json({ error: 'Habit not found' });
         }
-        console.error('DynamoDB UpdateItem error:', err);
+        logger.error({ err }, 'DynamoDB UpdateItem error');
         return res.status(500).json({ error: 'Internal server error' });
     }
 });

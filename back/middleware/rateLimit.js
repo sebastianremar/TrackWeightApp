@@ -36,4 +36,5 @@ function rateLimit({ maxHits, windowMs }) {
     };
 }
 
+rateLimit._buckets = buckets;
 module.exports = rateLimit;
