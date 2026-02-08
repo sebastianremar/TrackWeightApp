@@ -42,7 +42,9 @@ router.post('/signup', async (req, res) => {
     }
 
     if (!isStrongPassword(password)) {
-        return res.status(400).json({ error: 'Password must contain uppercase, lowercase, and a digit' });
+        return res
+            .status(400)
+            .json({ error: 'Password must contain uppercase, lowercase, and a digit' });
     }
 
     const hashedPassword = await bcrypt.hash(password, 10);
@@ -53,15 +55,17 @@ router.post('/signup', async (req, res) => {
         password: hashedPassword,
         shareWeight: false,
         darkMode: false,
-        createdAt: new Date().toISOString()
+        createdAt: new Date().toISOString(),
     };
 
     try {
-        await docClient.send(new PutCommand({
-            TableName: process.env.USERS_TABLE,
-            Item: user,
-            ConditionExpression: 'attribute_not_exists(email)'
-        }));
+        await docClient.send(
+            new PutCommand({
+                TableName: process.env.USERS_TABLE,
+                Item: user,
+                ConditionExpression: 'attribute_not_exists(email)',
+            }),
+        );
     } catch (err) {
         if (err.name === 'ConditionalCheckFailedException') {
             return res.status(409).json({ error: 'A user with this email already exists' });
@@ -75,7 +79,7 @@ router.post('/signup', async (req, res) => {
     res.status(201).json({
         message: 'Account created successfully',
         token,
-        user: { name: user.name, email: user.email }
+        user: { name: user.name, email: user.email },
     });
 });
 
@@ -89,10 +93,12 @@ router.post('/signin', async (req, res) => {
 
     let result;
     try {
-        result = await docClient.send(new GetCommand({
-            TableName: process.env.USERS_TABLE,
-            Key: { email: email.trim().toLowerCase() }
-        }));
+        result = await docClient.send(
+            new GetCommand({
+                TableName: process.env.USERS_TABLE,
+                Key: { email: email.trim().toLowerCase() },
+            }),
+        );
     } catch (err) {
         console.error('DynamoDB GetItem error:', err);
         return res.status(500).json({ error: 'Internal server error' });
@@ -113,17 +119,19 @@ router.post('/signin', async (req, res) => {
     res.json({
         message: 'Signed in successfully',
         token,
-        user: { name: user.name, email: user.email }
+        user: { name: user.name, email: user.email },
     });
 });
 
 // GET /api/me — get current user profile
 router.get('/me', authenticate, async (req, res) => {
     try {
-        const result = await docClient.send(new GetCommand({
-            TableName: process.env.USERS_TABLE,
-            Key: { email: req.user.email }
-        }));
+        const result = await docClient.send(
+            new GetCommand({
+                TableName: process.env.USERS_TABLE,
+                Key: { email: req.user.email },
+            }),
+        );
 
         if (!result.Item) {
             return res.status(404).json({ error: 'User not found' });
@@ -135,7 +143,7 @@ router.get('/me', authenticate, async (req, res) => {
             email: user.email,
             shareWeight: user.shareWeight || false,
             darkMode: user.darkMode || false,
-            createdAt: user.createdAt
+            createdAt: user.createdAt,
         });
     } catch (err) {
         console.error('DynamoDB GetItem error:', err);
@@ -180,21 +188,23 @@ router.patch('/me', authenticate, async (req, res) => {
     }
 
     try {
-        const result = await docClient.send(new UpdateCommand({
-            TableName: process.env.USERS_TABLE,
-            Key: { email: req.user.email },
-            UpdateExpression: 'SET ' + updates.join(', '),
-            ExpressionAttributeNames: Object.keys(names).length > 0 ? names : undefined,
-            ExpressionAttributeValues: values,
-            ReturnValues: 'ALL_NEW'
-        }));
+        const result = await docClient.send(
+            new UpdateCommand({
+                TableName: process.env.USERS_TABLE,
+                Key: { email: req.user.email },
+                UpdateExpression: 'SET ' + updates.join(', '),
+                ExpressionAttributeNames: Object.keys(names).length > 0 ? names : undefined,
+                ExpressionAttributeValues: values,
+                ReturnValues: 'ALL_NEW',
+            }),
+        );
 
         const user = result.Attributes;
         res.json({
             name: user.name,
             email: user.email,
             shareWeight: user.shareWeight || false,
-            darkMode: user.darkMode || false
+            darkMode: user.darkMode || false,
         });
     } catch (err) {
         console.error('DynamoDB UpdateItem error:', err);

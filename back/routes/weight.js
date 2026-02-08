@@ -38,14 +38,16 @@ router.post('/', async (req, res) => {
         email,
         date,
         weight: Math.round(weight * 10) / 10,
-        createdAt: new Date().toISOString()
+        createdAt: new Date().toISOString(),
     };
 
     try {
-        await docClient.send(new PutCommand({
-            TableName: process.env.WEIGHT_TABLE,
-            Item: entry
-        }));
+        await docClient.send(
+            new PutCommand({
+                TableName: process.env.WEIGHT_TABLE,
+                Item: entry,
+            }),
+        );
     } catch (err) {
         console.error('DynamoDB PutItem error:', err);
         return res.status(500).json({ error: 'Internal server error' });
@@ -53,7 +55,7 @@ router.post('/', async (req, res) => {
 
     res.status(201).json({
         message: 'Weight recorded',
-        entry: { date: entry.date, weight: entry.weight, createdAt: entry.createdAt }
+        entry: { date: entry.date, weight: entry.weight, createdAt: entry.createdAt },
     });
 });
 
@@ -66,7 +68,7 @@ router.get('/', async (req, res) => {
         TableName: process.env.WEIGHT_TABLE,
         KeyConditionExpression: 'email = :email',
         ExpressionAttributeValues: { ':email': email },
-        ScanIndexForward: true
+        ScanIndexForward: true,
     };
 
     if (from && to) {
@@ -86,9 +88,9 @@ router.get('/', async (req, res) => {
 
     try {
         const result = await docClient.send(new QueryCommand(params));
-        const entries = (result.Items || []).map(item => ({
+        const entries = (result.Items || []).map((item) => ({
             date: item.date,
-            weight: item.weight
+            weight: item.weight,
         }));
         res.json({ entries });
     } catch (err) {
@@ -102,13 +104,15 @@ router.get('/latest', async (req, res) => {
     const email = req.user.email;
 
     try {
-        const result = await docClient.send(new QueryCommand({
-            TableName: process.env.WEIGHT_TABLE,
-            KeyConditionExpression: 'email = :email',
-            ExpressionAttributeValues: { ':email': email },
-            ScanIndexForward: false,
-            Limit: 1
-        }));
+        const result = await docClient.send(
+            new QueryCommand({
+                TableName: process.env.WEIGHT_TABLE,
+                KeyConditionExpression: 'email = :email',
+                ExpressionAttributeValues: { ':email': email },
+                ScanIndexForward: false,
+                Limit: 1,
+            }),
+        );
 
         if (!result.Items || result.Items.length === 0) {
             return res.status(404).json({ error: 'No entries yet' });
@@ -132,11 +136,13 @@ router.delete('/:date', async (req, res) => {
     }
 
     try {
-        const result = await docClient.send(new DeleteCommand({
-            TableName: process.env.WEIGHT_TABLE,
-            Key: { email, date },
-            ReturnValues: 'ALL_OLD'
-        }));
+        const result = await docClient.send(
+            new DeleteCommand({
+                TableName: process.env.WEIGHT_TABLE,
+                Key: { email, date },
+                ReturnValues: 'ALL_OLD',
+            }),
+        );
 
         if (!result.Attributes) {
             return res.status(404).json({ error: 'No entry found for this date' });

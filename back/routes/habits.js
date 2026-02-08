@@ -27,12 +27,14 @@ router.post('/', async (req, res) => {
 
     // Check max 20 active habits
     try {
-        const existing = await docClient.send(new QueryCommand({
-            TableName: process.env.HABITS_TABLE,
-            KeyConditionExpression: 'email = :email',
-            FilterExpression: 'archived <> :true',
-            ExpressionAttributeValues: { ':email': email, ':true': true }
-        }));
+        const existing = await docClient.send(
+            new QueryCommand({
+                TableName: process.env.HABITS_TABLE,
+                KeyConditionExpression: 'email = :email',
+                FilterExpression: 'archived <> :true',
+                ExpressionAttributeValues: { ':email': email, ':true': true },
+            }),
+        );
         if (existing.Items && existing.Items.length >= 20) {
             return res.status(400).json({ error: 'Maximum 20 active habits allowed' });
         }
@@ -49,14 +51,16 @@ router.post('/', async (req, res) => {
         targetFrequency: freq,
         color: color || '#667eea',
         archived: false,
-        createdAt: new Date().toISOString()
+        createdAt: new Date().toISOString(),
     };
 
     try {
-        await docClient.send(new PutCommand({
-            TableName: process.env.HABITS_TABLE,
-            Item: item
-        }));
+        await docClient.send(
+            new PutCommand({
+                TableName: process.env.HABITS_TABLE,
+                Item: item,
+            }),
+        );
         res.status(201).json({ habit: item });
     } catch (err) {
         console.error('DynamoDB PutItem error:', err);
@@ -72,7 +76,7 @@ router.get('/', async (req, res) => {
     const params = {
         TableName: process.env.HABITS_TABLE,
         KeyConditionExpression: 'email = :email',
-        ExpressionAttributeValues: { ':email': email }
+        ExpressionAttributeValues: { ':email': email },
     };
 
     if (!includeArchived) {
@@ -95,10 +99,12 @@ router.get('/:id', async (req, res) => {
     const habitId = req.params.id;
 
     try {
-        const result = await docClient.send(new GetCommand({
-            TableName: process.env.HABITS_TABLE,
-            Key: { email, habitId }
-        }));
+        const result = await docClient.send(
+            new GetCommand({
+                TableName: process.env.HABITS_TABLE,
+                Key: { email, habitId },
+            }),
+        );
         if (!result.Item) {
             return res.status(404).json({ error: 'Habit not found' });
         }
@@ -147,15 +153,17 @@ router.patch('/:id', async (req, res) => {
     }
 
     try {
-        const result = await docClient.send(new UpdateCommand({
-            TableName: process.env.HABITS_TABLE,
-            Key: { email, habitId },
-            UpdateExpression: 'SET ' + updates.join(', '),
-            ExpressionAttributeNames: Object.keys(names).length > 0 ? names : undefined,
-            ExpressionAttributeValues: values,
-            ConditionExpression: 'attribute_exists(email)',
-            ReturnValues: 'ALL_NEW'
-        }));
+        const result = await docClient.send(
+            new UpdateCommand({
+                TableName: process.env.HABITS_TABLE,
+                Key: { email, habitId },
+                UpdateExpression: 'SET ' + updates.join(', '),
+                ExpressionAttributeNames: Object.keys(names).length > 0 ? names : undefined,
+                ExpressionAttributeValues: values,
+                ConditionExpression: 'attribute_exists(email)',
+                ReturnValues: 'ALL_NEW',
+            }),
+        );
         res.json({ habit: result.Attributes });
     } catch (err) {
         if (err.name === 'ConditionalCheckFailedException') {
@@ -172,13 +180,15 @@ router.delete('/:id', async (req, res) => {
     const habitId = req.params.id;
 
     try {
-        await docClient.send(new UpdateCommand({
-            TableName: process.env.HABITS_TABLE,
-            Key: { email, habitId },
-            UpdateExpression: 'SET archived = :true',
-            ExpressionAttributeValues: { ':true': true },
-            ConditionExpression: 'attribute_exists(email)'
-        }));
+        await docClient.send(
+            new UpdateCommand({
+                TableName: process.env.HABITS_TABLE,
+                Key: { email, habitId },
+                UpdateExpression: 'SET archived = :true',
+                ExpressionAttributeValues: { ':true': true },
+                ConditionExpression: 'attribute_exists(email)',
+            }),
+        );
         res.json({ message: 'Habit archived' });
     } catch (err) {
         if (err.name === 'ConditionalCheckFailedException') {

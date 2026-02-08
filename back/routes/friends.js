@@ -21,10 +21,12 @@ router.post('/request', async (req, res) => {
 
     // Check recipient exists
     try {
-        const userResult = await docClient.send(new GetCommand({
-            TableName: process.env.USERS_TABLE,
-            Key: { email: recipient }
-        }));
+        const userResult = await docClient.send(
+            new GetCommand({
+                TableName: process.env.USERS_TABLE,
+                Key: { email: recipient },
+            }),
+        );
         if (!userResult.Item) {
             return res.status(404).json({ error: 'User not found' });
         }
@@ -35,10 +37,12 @@ router.post('/request', async (req, res) => {
 
     // Check if already friends or pending
     try {
-        const existing = await docClient.send(new GetCommand({
-            TableName: process.env.FRIENDSHIPS_TABLE,
-            Key: { email: senderEmail, friendEmail: recipient }
-        }));
+        const existing = await docClient.send(
+            new GetCommand({
+                TableName: process.env.FRIENDSHIPS_TABLE,
+                Key: { email: senderEmail, friendEmail: recipient },
+            }),
+        );
         if (existing.Item) {
             var status = existing.Item.status;
             if (status === 'accepted') {
@@ -55,28 +59,32 @@ router.post('/request', async (req, res) => {
 
     // Write two rows: sender row + recipient row
     try {
-        await docClient.send(new PutCommand({
-            TableName: process.env.FRIENDSHIPS_TABLE,
-            Item: {
-                email: senderEmail,
-                friendEmail: recipient,
-                status: 'pending',
-                direction: 'sent',
-                createdAt: now,
-                updatedAt: now
-            }
-        }));
-        await docClient.send(new PutCommand({
-            TableName: process.env.FRIENDSHIPS_TABLE,
-            Item: {
-                email: recipient,
-                friendEmail: senderEmail,
-                status: 'pending',
-                direction: 'received',
-                createdAt: now,
-                updatedAt: now
-            }
-        }));
+        await docClient.send(
+            new PutCommand({
+                TableName: process.env.FRIENDSHIPS_TABLE,
+                Item: {
+                    email: senderEmail,
+                    friendEmail: recipient,
+                    status: 'pending',
+                    direction: 'sent',
+                    createdAt: now,
+                    updatedAt: now,
+                },
+            }),
+        );
+        await docClient.send(
+            new PutCommand({
+                TableName: process.env.FRIENDSHIPS_TABLE,
+                Item: {
+                    email: recipient,
+                    friendEmail: senderEmail,
+                    status: 'pending',
+                    direction: 'received',
+                    createdAt: now,
+                    updatedAt: now,
+                },
+            }),
+        );
         res.status(201).json({ message: 'Friend request sent' });
     } catch (err) {
         console.error('DynamoDB PutItem error:', err);
@@ -97,11 +105,17 @@ router.post('/respond', async (req, res) => {
 
     // Check that there's a pending received request
     try {
-        const existing = await docClient.send(new GetCommand({
-            TableName: process.env.FRIENDSHIPS_TABLE,
-            Key: { email: userEmail, friendEmail: sender }
-        }));
-        if (!existing.Item || existing.Item.status !== 'pending' || existing.Item.direction !== 'received') {
+        const existing = await docClient.send(
+            new GetCommand({
+                TableName: process.env.FRIENDSHIPS_TABLE,
+                Key: { email: userEmail, friendEmail: sender },
+            }),
+        );
+        if (
+            !existing.Item ||
+            existing.Item.status !== 'pending' ||
+            existing.Item.direction !== 'received'
+        ) {
             return res.status(404).json({ error: 'No pending request from this user' });
         }
     } catch (err) {
@@ -114,28 +128,32 @@ router.post('/respond', async (req, res) => {
     if (accept) {
         // Update both rows to accepted
         try {
-            await docClient.send(new PutCommand({
-                TableName: process.env.FRIENDSHIPS_TABLE,
-                Item: {
-                    email: userEmail,
-                    friendEmail: sender,
-                    status: 'accepted',
-                    direction: 'received',
-                    createdAt: now,
-                    updatedAt: now
-                }
-            }));
-            await docClient.send(new PutCommand({
-                TableName: process.env.FRIENDSHIPS_TABLE,
-                Item: {
-                    email: sender,
-                    friendEmail: userEmail,
-                    status: 'accepted',
-                    direction: 'sent',
-                    createdAt: now,
-                    updatedAt: now
-                }
-            }));
+            await docClient.send(
+                new PutCommand({
+                    TableName: process.env.FRIENDSHIPS_TABLE,
+                    Item: {
+                        email: userEmail,
+                        friendEmail: sender,
+                        status: 'accepted',
+                        direction: 'received',
+                        createdAt: now,
+                        updatedAt: now,
+                    },
+                }),
+            );
+            await docClient.send(
+                new PutCommand({
+                    TableName: process.env.FRIENDSHIPS_TABLE,
+                    Item: {
+                        email: sender,
+                        friendEmail: userEmail,
+                        status: 'accepted',
+                        direction: 'sent',
+                        createdAt: now,
+                        updatedAt: now,
+                    },
+                }),
+            );
             res.json({ message: 'Friend request accepted' });
         } catch (err) {
             console.error('DynamoDB PutItem error:', err);
@@ -144,14 +162,18 @@ router.post('/respond', async (req, res) => {
     } else {
         // Delete both rows
         try {
-            await docClient.send(new DeleteCommand({
-                TableName: process.env.FRIENDSHIPS_TABLE,
-                Key: { email: userEmail, friendEmail: sender }
-            }));
-            await docClient.send(new DeleteCommand({
-                TableName: process.env.FRIENDSHIPS_TABLE,
-                Key: { email: sender, friendEmail: userEmail }
-            }));
+            await docClient.send(
+                new DeleteCommand({
+                    TableName: process.env.FRIENDSHIPS_TABLE,
+                    Key: { email: userEmail, friendEmail: sender },
+                }),
+            );
+            await docClient.send(
+                new DeleteCommand({
+                    TableName: process.env.FRIENDSHIPS_TABLE,
+                    Key: { email: sender, friendEmail: userEmail },
+                }),
+            );
             res.json({ message: 'Friend request rejected' });
         } catch (err) {
             console.error('DynamoDB DeleteItem error:', err);
@@ -165,29 +187,37 @@ router.get('/', async (req, res) => {
     const email = req.user.email;
 
     try {
-        const result = await docClient.send(new QueryCommand({
-            TableName: process.env.FRIENDSHIPS_TABLE,
-            KeyConditionExpression: 'email = :email',
-            FilterExpression: '#s = :accepted',
-            ExpressionAttributeNames: { '#s': 'status' },
-            ExpressionAttributeValues: { ':email': email, ':accepted': 'accepted' }
-        }));
+        const result = await docClient.send(
+            new QueryCommand({
+                TableName: process.env.FRIENDSHIPS_TABLE,
+                KeyConditionExpression: 'email = :email',
+                FilterExpression: '#s = :accepted',
+                ExpressionAttributeNames: { '#s': 'status' },
+                ExpressionAttributeValues: { ':email': email, ':accepted': 'accepted' },
+            }),
+        );
 
         // Look up friend names
         const friends = [];
-        for (const item of (result.Items || [])) {
+        for (const item of result.Items || []) {
             try {
-                const userResult = await docClient.send(new GetCommand({
-                    TableName: process.env.USERS_TABLE,
-                    Key: { email: item.friendEmail }
-                }));
+                const userResult = await docClient.send(
+                    new GetCommand({
+                        TableName: process.env.USERS_TABLE,
+                        Key: { email: item.friendEmail },
+                    }),
+                );
                 friends.push({
                     email: item.friendEmail,
                     name: userResult.Item ? userResult.Item.name : item.friendEmail,
-                    shareWeight: userResult.Item ? (userResult.Item.shareWeight || false) : false
+                    shareWeight: userResult.Item ? userResult.Item.shareWeight || false : false,
                 });
-            } catch (e) {
-                friends.push({ email: item.friendEmail, name: item.friendEmail, shareWeight: false });
+            } catch {
+                friends.push({
+                    email: item.friendEmail,
+                    name: item.friendEmail,
+                    shareWeight: false,
+                });
             }
         }
 
@@ -203,32 +233,40 @@ router.get('/requests', async (req, res) => {
     const email = req.user.email;
 
     try {
-        const result = await docClient.send(new QueryCommand({
-            TableName: process.env.FRIENDSHIPS_TABLE,
-            KeyConditionExpression: 'email = :email',
-            FilterExpression: '#s = :pending AND direction = :received',
-            ExpressionAttributeNames: { '#s': 'status' },
-            ExpressionAttributeValues: {
-                ':email': email,
-                ':pending': 'pending',
-                ':received': 'received'
-            }
-        }));
+        const result = await docClient.send(
+            new QueryCommand({
+                TableName: process.env.FRIENDSHIPS_TABLE,
+                KeyConditionExpression: 'email = :email',
+                FilterExpression: '#s = :pending AND direction = :received',
+                ExpressionAttributeNames: { '#s': 'status' },
+                ExpressionAttributeValues: {
+                    ':email': email,
+                    ':pending': 'pending',
+                    ':received': 'received',
+                },
+            }),
+        );
 
         const requests = [];
-        for (const item of (result.Items || [])) {
+        for (const item of result.Items || []) {
             try {
-                const userResult = await docClient.send(new GetCommand({
-                    TableName: process.env.USERS_TABLE,
-                    Key: { email: item.friendEmail }
-                }));
+                const userResult = await docClient.send(
+                    new GetCommand({
+                        TableName: process.env.USERS_TABLE,
+                        Key: { email: item.friendEmail },
+                    }),
+                );
                 requests.push({
                     email: item.friendEmail,
                     name: userResult.Item ? userResult.Item.name : item.friendEmail,
-                    createdAt: item.createdAt
+                    createdAt: item.createdAt,
                 });
-            } catch (e) {
-                requests.push({ email: item.friendEmail, name: item.friendEmail, createdAt: item.createdAt });
+            } catch {
+                requests.push({
+                    email: item.friendEmail,
+                    name: item.friendEmail,
+                    createdAt: item.createdAt,
+                });
             }
         }
 
@@ -245,14 +283,18 @@ router.delete('/:email', async (req, res) => {
     const friendEmail = decodeURIComponent(req.params.email).trim().toLowerCase();
 
     try {
-        await docClient.send(new DeleteCommand({
-            TableName: process.env.FRIENDSHIPS_TABLE,
-            Key: { email: userEmail, friendEmail }
-        }));
-        await docClient.send(new DeleteCommand({
-            TableName: process.env.FRIENDSHIPS_TABLE,
-            Key: { email: friendEmail, friendEmail: userEmail }
-        }));
+        await docClient.send(
+            new DeleteCommand({
+                TableName: process.env.FRIENDSHIPS_TABLE,
+                Key: { email: userEmail, friendEmail },
+            }),
+        );
+        await docClient.send(
+            new DeleteCommand({
+                TableName: process.env.FRIENDSHIPS_TABLE,
+                Key: { email: friendEmail, friendEmail: userEmail },
+            }),
+        );
         res.json({ message: 'Friend removed' });
     } catch (err) {
         console.error('DynamoDB DeleteItem error:', err);
@@ -267,10 +309,12 @@ router.get('/:email/weight', async (req, res) => {
 
     // Verify accepted friendship
     try {
-        const friendship = await docClient.send(new GetCommand({
-            TableName: process.env.FRIENDSHIPS_TABLE,
-            Key: { email: userEmail, friendEmail }
-        }));
+        const friendship = await docClient.send(
+            new GetCommand({
+                TableName: process.env.FRIENDSHIPS_TABLE,
+                Key: { email: userEmail, friendEmail },
+            }),
+        );
         if (!friendship.Item || friendship.Item.status !== 'accepted') {
             return res.status(403).json({ error: 'Not friends with this user' });
         }
@@ -281,10 +325,12 @@ router.get('/:email/weight', async (req, res) => {
 
     // Check friend's privacy setting
     try {
-        const friendUser = await docClient.send(new GetCommand({
-            TableName: process.env.USERS_TABLE,
-            Key: { email: friendEmail }
-        }));
+        const friendUser = await docClient.send(
+            new GetCommand({
+                TableName: process.env.USERS_TABLE,
+                Key: { email: friendEmail },
+            }),
+        );
         if (!friendUser.Item || !friendUser.Item.shareWeight) {
             return res.status(403).json({ error: 'This friend does not share their weight data' });
         }
@@ -299,17 +345,19 @@ router.get('/:email/weight', async (req, res) => {
     const fromStr = from.toISOString().split('T')[0];
 
     try {
-        const result = await docClient.send(new QueryCommand({
-            TableName: process.env.WEIGHT_TABLE,
-            KeyConditionExpression: 'email = :email AND #d >= :from',
-            ExpressionAttributeNames: { '#d': 'date' },
-            ExpressionAttributeValues: { ':email': friendEmail, ':from': fromStr },
-            ScanIndexForward: true
-        }));
+        const result = await docClient.send(
+            new QueryCommand({
+                TableName: process.env.WEIGHT_TABLE,
+                KeyConditionExpression: 'email = :email AND #d >= :from',
+                ExpressionAttributeNames: { '#d': 'date' },
+                ExpressionAttributeValues: { ':email': friendEmail, ':from': fromStr },
+                ScanIndexForward: true,
+            }),
+        );
 
-        const entries = (result.Items || []).map(item => ({
+        const entries = (result.Items || []).map((item) => ({
             date: item.date,
-            weight: item.weight
+            weight: item.weight,
         }));
 
         res.json({ entries });

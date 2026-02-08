@@ -22,7 +22,7 @@ router.get('/entries/all', async (req, res) => {
         IndexName: 'HabitEntriesByUser',
         KeyConditionExpression: 'email = :email',
         ExpressionAttributeValues: { ':email': email },
-        ScanIndexForward: true
+        ScanIndexForward: true,
     };
 
     if (from && to) {
@@ -38,10 +38,10 @@ router.get('/entries/all', async (req, res) => {
 
     try {
         const result = await docClient.send(new QueryCommand(params));
-        const entries = (result.Items || []).map(item => ({
+        const entries = (result.Items || []).map((item) => ({
             habitId: item.habitId,
             date: item.date,
-            completed: item.completed
+            completed: item.completed,
         }));
         res.json({ entries });
     } catch (err) {
@@ -74,14 +74,16 @@ router.post('/:id/entries', async (req, res) => {
         habitId,
         completed: true,
         note: typeof note === 'string' ? note.trim() : '',
-        createdAt: new Date().toISOString()
+        createdAt: new Date().toISOString(),
     };
 
     try {
-        await docClient.send(new PutCommand({
-            TableName: process.env.HABIT_ENTRIES_TABLE,
-            Item: item
-        }));
+        await docClient.send(
+            new PutCommand({
+                TableName: process.env.HABIT_ENTRIES_TABLE,
+                Item: item,
+            }),
+        );
         res.status(201).json({ entry: { date, completed: true, note: item.note } });
     } catch (err) {
         console.error('DynamoDB PutItem error:', err);
@@ -102,11 +104,13 @@ router.delete('/:id/entries/:date', async (req, res) => {
     const emailHabitId = email + '#' + habitId;
 
     try {
-        const result = await docClient.send(new DeleteCommand({
-            TableName: process.env.HABIT_ENTRIES_TABLE,
-            Key: { emailHabitId, date },
-            ReturnValues: 'ALL_OLD'
-        }));
+        const result = await docClient.send(
+            new DeleteCommand({
+                TableName: process.env.HABIT_ENTRIES_TABLE,
+                Key: { emailHabitId, date },
+                ReturnValues: 'ALL_OLD',
+            }),
+        );
         if (!result.Attributes) {
             return res.status(404).json({ error: 'Entry not found' });
         }
@@ -128,7 +132,7 @@ router.get('/:id/entries', async (req, res) => {
         TableName: process.env.HABIT_ENTRIES_TABLE,
         KeyConditionExpression: 'emailHabitId = :pk',
         ExpressionAttributeValues: { ':pk': emailHabitId },
-        ScanIndexForward: true
+        ScanIndexForward: true,
     };
 
     if (from && to) {
@@ -144,10 +148,10 @@ router.get('/:id/entries', async (req, res) => {
 
     try {
         const result = await docClient.send(new QueryCommand(params));
-        const entries = (result.Items || []).map(item => ({
+        const entries = (result.Items || []).map((item) => ({
             date: item.date,
             completed: item.completed,
-            note: item.note || ''
+            note: item.note || '',
         }));
         res.json({ entries });
     } catch (err) {
@@ -166,38 +170,40 @@ router.get('/:id/stats', async (req, res) => {
     // Calculate date range
     const now = new Date();
     const from = new Date(now);
-    from.setDate(from.getDate() - (weeks * 7));
+    from.setDate(from.getDate() - weeks * 7);
     const fromStr = from.toISOString().split('T')[0];
 
     try {
-        const result = await docClient.send(new QueryCommand({
-            TableName: process.env.HABIT_ENTRIES_TABLE,
-            KeyConditionExpression: 'emailHabitId = :pk AND #d >= :from',
-            ExpressionAttributeNames: { '#d': 'date' },
-            ExpressionAttributeValues: {
-                ':pk': emailHabitId,
-                ':from': fromStr
-            }
-        }));
+        const result = await docClient.send(
+            new QueryCommand({
+                TableName: process.env.HABIT_ENTRIES_TABLE,
+                KeyConditionExpression: 'emailHabitId = :pk AND #d >= :from',
+                ExpressionAttributeNames: { '#d': 'date' },
+                ExpressionAttributeValues: {
+                    ':pk': emailHabitId,
+                    ':from': fromStr,
+                },
+            }),
+        );
 
         // Group entries by week
         const weeklyStats = [];
         for (var w = 0; w < weeks; w++) {
             var weekStart = new Date(now);
-            weekStart.setDate(weekStart.getDate() - ((weeks - w) * 7));
+            weekStart.setDate(weekStart.getDate() - (weeks - w) * 7);
             var weekEnd = new Date(weekStart);
             weekEnd.setDate(weekEnd.getDate() + 7);
 
             var startStr = weekStart.toISOString().split('T')[0];
             var endStr = weekEnd.toISOString().split('T')[0];
 
-            var count = (result.Items || []).filter(function(item) {
+            var count = (result.Items || []).filter(function (item) {
                 return item.date >= startStr && item.date < endStr;
             }).length;
 
             weeklyStats.push({
                 weekStart: startStr,
-                completions: count
+                completions: count,
             });
         }
 
