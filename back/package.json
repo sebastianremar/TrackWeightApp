@@ -9,7 +9,10 @@
         "lint": "eslint .",
         "lint:fix": "eslint . --fix",
         "format": "prettier --write .",
-        "format:check": "prettier --check ."
+        "format:check": "prettier --check .",
+        "test": "jest --forceExit",
+        "test:watch": "jest --watch --forceExit",
+        "test:coverage": "jest --coverage --forceExit"
     },
     "engines": {
         "node": ">=20.0.0"
@@ -22,16 +25,21 @@
         "@aws-sdk/client-dynamodb": "^3.750.0",
         "@aws-sdk/lib-dynamodb": "^3.750.0",
         "bcrypt": "^6.0.0",
+        "cookie-parser": "^1.4.7",
         "cors": "^2.8.6",
         "dotenv": "^16.4.7",
         "express": "^5.2.1",
         "helmet": "^8.1.0",
-        "jsonwebtoken": "^9.0.3"
+        "jsonwebtoken": "^9.0.3",
+        "pino": "^10.3.0"
     },
     "devDependencies": {
         "@eslint/js": "^10.0.1",
+        "aws-sdk-client-mock": "^4.1.0",
         "eslint": "^10.0.0",
         "eslint-config-prettier": "^10.1.8",
-        "prettier": "^3.8.1"
+        "jest": "^29.7.0",
+        "prettier": "^3.8.1",
+        "supertest": "^7.1.0"
     }
 }
