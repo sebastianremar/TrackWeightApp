@@ -6,6 +6,9 @@ function getTodayStr() {
 }
 
 async function loadDashboardData() {
+    var chartContainer = document.getElementById('chart-container');
+    var spinner = chartContainer ? Spinner.show(chartContainer) : null;
+
     try {
         var from = null;
         if (currentRange !== 'all') {
@@ -16,13 +19,15 @@ async function loadDashboardData() {
 
         var result = await API.getWeightHistory(from);
         allEntries = result.entries || [];
+        Spinner.hide(spinner);
         renderChart(allEntries);
         updateStats(allEntries);
         updateLastEntry(allEntries);
         renderEntriesTable(allEntries);
     } catch (err) {
+        Spinner.hide(spinner);
         if (err.message !== 'Session expired') {
-            console.error('Failed to load data:', err);
+            Toast.error('Failed to load weight data');
         }
     }
 }
@@ -174,6 +179,12 @@ document.getElementById('weight-form').addEventListener('submit', async function
 
     if (!date) date = getTodayStr();
 
+    var submitBtn = e.target.querySelector('button[type="submit"]');
+    if (submitBtn) {
+        submitBtn.disabled = true;
+        submitBtn.textContent = 'Saving...';
+    }
+
     try {
         await API.logWeight(weight, date);
         input.value = '';
@@ -182,6 +193,11 @@ document.getElementById('weight-form').addEventListener('submit', async function
         loadDashboardData();
     } catch (err) {
         Toast.error(err.message);
+    } finally {
+        if (submitBtn) {
+            submitBtn.disabled = false;
+            submitBtn.textContent = 'Log Weight';
+        }
     }
 });
 
@@ -198,6 +214,8 @@ document.querySelectorAll('.chart-controls button').forEach(function(btn) {
 });
 
 // Logout
-document.getElementById('logout-btn').addEventListener('click', function() {
-    window.showAuth();
+document.getElementById('logout-btn').addEventListener('click', function () {
+    API.signout().catch(function () {}).finally(function () {
+        window.showAuth();
+    });
 });

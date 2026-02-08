@@ -1,34 +1,64 @@
-const API = {
+var API = {
+    _timeout: 15000,
+
     async request(endpoint, options = {}) {
-        const token = localStorage.getItem('token');
-        const headers = { 'Content-Type': 'application/json', ...options.headers };
-        if (token) headers['Authorization'] = 'Bearer ' + token;
+        var controller = new AbortController();
+        var timeoutId = setTimeout(function() { controller.abort(); }, API._timeout);
 
-        const res = await fetch('/api' + endpoint, { ...options, headers });
+        var headers = { 'Content-Type': 'application/json', ...options.headers };
 
-        if (res.status === 401 && token) {
-            window.showAuth();
-            throw new Error('Session expired');
+        try {
+            var res = await fetch('/api' + endpoint, {
+                ...options,
+                headers,
+                credentials: 'same-origin',
+                signal: controller.signal,
+            });
+
+            clearTimeout(timeoutId);
+
+            if (res.status === 401) {
+                window.showAuth();
+                throw new Error('Session expired');
+            }
+
+            var data = await res.json();
+            if (!res.ok) throw new Error(data.error || 'Request failed');
+            return data;
+        } catch (err) {
+            clearTimeout(timeoutId);
+
+            if (err.name === 'AbortError') {
+                Toast.error('Request timed out. Please try again.');
+                throw new Error('Request timed out');
+            }
+
+            if (err instanceof TypeError && err.message === 'Failed to fetch') {
+                Toast.error('You appear to be offline. Check your connection.');
+                throw new Error('Network error');
+            }
+
+            throw err;
         }
-
-        const data = await res.json();
-        if (!res.ok) throw new Error(data.error || 'Request failed');
-        return data;
     },
 
     // Auth
     signin(email, password) {
         return this.request('/signin', {
             method: 'POST',
-            body: JSON.stringify({ email, password })
+            body: JSON.stringify({ email, password }),
         });
     },
 
     signup(name, email, password) {
         return this.request('/signup', {
             method: 'POST',
-            body: JSON.stringify({ name, email, password })
+            body: JSON.stringify({ name, email, password }),
         });
+    },
+
+    signout() {
+        return this.request('/signout', { method: 'POST' });
     },
 
     // Profile
@@ -39,7 +69,14 @@ const API = {
     updateProfile(data) {
         return this.request('/me', {
             method: 'PATCH',
-            body: JSON.stringify(data)
+            body: JSON.stringify(data),
+        });
+    },
+
+    changePassword(currentPassword, newPassword) {
+        return this.request('/me/password', {
+            method: 'PATCH',
+            body: JSON.stringify({ currentPassword, newPassword }),
         });
     },
 
@@ -47,15 +84,15 @@ const API = {
     logWeight(weight, date) {
         return this.request('/weight', {
             method: 'POST',
-            body: JSON.stringify({ weight, date })
+            body: JSON.stringify({ weight, date }),
         });
     },
 
     getWeightHistory(from, to) {
-        const params = new URLSearchParams();
+        var params = new URLSearchParams();
         if (from) params.set('from', from);
         if (to) params.set('to', to);
-        const qs = params.toString();
+        var qs = params.toString();
         return this.request('/weight' + (qs ? '?' + qs : ''));
     },
 
@@ -71,7 +108,7 @@ const API = {
     createHabit(data) {
         return this.request('/habits', {
             method: 'POST',
-            body: JSON.stringify(data)
+            body: JSON.stringify(data),
         });
     },
 
@@ -82,7 +119,7 @@ const API = {
     updateHabit(id, data) {
         return this.request('/habits/' + encodeURIComponent(id), {
             method: 'PATCH',
-            body: JSON.stringify(data)
+            body: JSON.stringify(data),
         });
     },
 
@@ -94,49 +131,56 @@ const API = {
     logHabitEntry(habitId, date) {
         return this.request('/habits/' + encodeURIComponent(habitId) + '/entries', {
             method: 'POST',
-            body: JSON.stringify({ date })
+            body: JSON.stringify({ date }),
         });
     },
 
     deleteHabitEntry(habitId, date) {
-        return this.request('/habits/' + encodeURIComponent(habitId) + '/entries/' + date, { method: 'DELETE' });
+        return this.request(
+            '/habits/' + encodeURIComponent(habitId) + '/entries/' + date,
+            { method: 'DELETE' },
+        );
     },
 
     getHabitEntries(habitId, from, to) {
-        const params = new URLSearchParams();
+        var params = new URLSearchParams();
         if (from) params.set('from', from);
         if (to) params.set('to', to);
-        const qs = params.toString();
-        return this.request('/habits/' + encodeURIComponent(habitId) + '/entries' + (qs ? '?' + qs : ''));
+        var qs = params.toString();
+        return this.request(
+            '/habits/' + encodeURIComponent(habitId) + '/entries' + (qs ? '?' + qs : ''),
+        );
     },
 
     getAllHabitEntries(from, to) {
-        const params = new URLSearchParams();
+        var params = new URLSearchParams();
         if (from) params.set('from', from);
         if (to) params.set('to', to);
-        const qs = params.toString();
+        var qs = params.toString();
         return this.request('/habits/entries/all' + (qs ? '?' + qs : ''));
     },
 
     getHabitStats(habitId, weeks) {
-        const params = new URLSearchParams();
+        var params = new URLSearchParams();
         if (weeks) params.set('weeks', weeks);
-        const qs = params.toString();
-        return this.request('/habits/' + encodeURIComponent(habitId) + '/stats' + (qs ? '?' + qs : ''));
+        var qs = params.toString();
+        return this.request(
+            '/habits/' + encodeURIComponent(habitId) + '/stats' + (qs ? '?' + qs : ''),
+        );
     },
 
     // Friends
     sendFriendRequest(email) {
         return this.request('/friends/request', {
             method: 'POST',
-            body: JSON.stringify({ email })
+            body: JSON.stringify({ email }),
         });
     },
 
     respondToRequest(email, accept) {
         return this.request('/friends/respond', {
             method: 'POST',
-            body: JSON.stringify({ email, accept })
+            body: JSON.stringify({ email, accept }),
         });
     },
 
@@ -154,5 +198,5 @@ const API = {
 
     getFriendWeight(email) {
         return this.request('/friends/' + encodeURIComponent(email) + '/weight');
-    }
+    },
 };

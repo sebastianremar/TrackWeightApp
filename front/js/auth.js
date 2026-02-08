@@ -3,9 +3,11 @@ const tabs = document.querySelectorAll('.tab');
 const signinForm = document.getElementById('signin-form');
 const signupForm = document.getElementById('signup-form');
 
-tabs.forEach(function(tab) {
-    tab.addEventListener('click', function() {
-        tabs.forEach(function(t) { t.classList.remove('active'); });
+tabs.forEach(function (tab) {
+    tab.addEventListener('click', function () {
+        tabs.forEach(function (t) {
+            t.classList.remove('active');
+        });
         tab.classList.add('active');
 
         if (tab.dataset.tab === 'signin') {
@@ -19,7 +21,7 @@ tabs.forEach(function(tab) {
 });
 
 // Sign In
-signinForm.addEventListener('submit', async function(e) {
+signinForm.addEventListener('submit', async function (e) {
     e.preventDefault();
     const email = document.getElementById('signin-email').value;
     const password = document.getElementById('signin-password').value;
@@ -28,7 +30,6 @@ signinForm.addEventListener('submit', async function(e) {
 
     try {
         const data = await API.signin(email, password);
-        localStorage.setItem('token', data.token);
         localStorage.setItem('userName', data.user.name);
         window.showDashboard(data.user.name);
     } catch (err) {
@@ -38,7 +39,7 @@ signinForm.addEventListener('submit', async function(e) {
 });
 
 // Sign Up
-signupForm.addEventListener('submit', async function(e) {
+signupForm.addEventListener('submit', async function (e) {
     e.preventDefault();
     const name = document.getElementById('signup-name').value;
     const email = document.getElementById('signup-email').value;
@@ -55,7 +56,6 @@ signupForm.addEventListener('submit', async function(e) {
 
     try {
         const data = await API.signup(name, email, password);
-        localStorage.setItem('token', data.token);
         localStorage.setItem('userName', data.user.name);
         window.showDashboard(data.user.name);
     } catch (err) {

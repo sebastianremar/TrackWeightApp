@@ -4,15 +4,18 @@ var Settings = {
     load: async function() {
         var container = document.getElementById('screen-settings');
         container.innerHTML = '';
+        var spinner = Spinner.show(container);
 
         try {
             var result = await API.getProfile();
             this.profile = result;
         } catch (err) {
+            Spinner.hide(spinner);
             Toast.error(err.message);
             return;
         }
 
+        Spinner.hide(spinner);
         this.render();
     },
 
@@ -160,8 +163,10 @@ var Settings = {
         logoutBtn.className = 'friend-btn friend-btn-danger';
         logoutBtn.textContent = 'Sign Out';
         logoutBtn.style.marginLeft = 'auto';
-        logoutBtn.addEventListener('click', function() {
-            window.showAuth();
+        logoutBtn.addEventListener('click', function () {
+            API.signout().catch(function () {}).finally(function () {
+                window.showAuth();
+            });
         });
         logoutRow.appendChild(logoutBtn);
         accountCard.appendChild(logoutRow);
