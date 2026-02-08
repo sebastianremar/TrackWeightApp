@@ -45,10 +45,16 @@ JWT_SECRET=$(node -e "console.log(require('crypto').randomBytes(64).toString('he
 if [ ! -f "$APP_DIR/back/.env" ]; then
     cat > "$APP_DIR/back/.env" << EOF
 PORT=3000
+NODE_ENV=production
 JWT_SECRET=$JWT_SECRET
 AWS_REGION=us-east-1
+CORS_ORIGIN=
+LOG_LEVEL=info
 USERS_TABLE=Pesos
 WEIGHT_TABLE=WeightEntries
+FRIENDSHIPS_TABLE=Friendships
+HABITS_TABLE=Habits
+HABIT_ENTRIES_TABLE=HabitEntries
 EOF
     echo ".env created with generated JWT_SECRET"
 else
@@ -59,23 +65,7 @@ echo ""
 echo "=== 6/6 Setting up nginx ==="
 sudo yum install -y nginx
 
-sudo tee /etc/nginx/conf.d/sarapeso.conf > /dev/null << 'EOF'
-server {
-    listen 80;
-    server_name _;
-
-    location / {
-        proxy_pass http://127.0.0.1:3000;
-        proxy_http_version 1.1;
-        proxy_set_header Upgrade $http_upgrade;
-        proxy_set_header Connection 'upgrade';
-        proxy_set_header Host $host;
-        proxy_set_header X-Real-IP $remote_addr;
-        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-        proxy_cache_bypass $http_upgrade;
-    }
-}
-EOF
+sudo cp "$APP_DIR/nginx/sara-peso.conf" /etc/nginx/conf.d/sarapeso.conf
 
 # Remove default server block if it conflicts on port 80
 sudo sed -i '/listen\s*80/,/}/{ /server_name/d }' /etc/nginx/nginx.conf 2>/dev/null || true
@@ -86,7 +76,8 @@ sudo systemctl restart nginx
 echo ""
 echo "=== Starting app with PM2 ==="
 cd "$APP_DIR/back"
-pm2 start server.js --name sara-peso
+mkdir -p logs
+pm2 start ecosystem.config.js --env production
 pm2 save
 sudo env PATH=$PATH:/usr/bin pm2 startup systemd -u ec2-user --hp /home/ec2-user
 
