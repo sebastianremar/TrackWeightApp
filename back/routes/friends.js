@@ -1,5 +1,5 @@
 const express = require('express');
-const { PutCommand, QueryCommand, DeleteCommand, GetCommand } = require('@aws-sdk/lib-dynamodb');
+const { QueryCommand, GetCommand, TransactWriteCommand } = require('@aws-sdk/lib-dynamodb');
 const { docClient } = require('../lib/db');
 const logger = require('../lib/logger');
 
@@ -58,37 +58,43 @@ router.post('/request', async (req, res) => {
 
     const now = new Date().toISOString();
 
-    // Write two rows: sender row + recipient row
+    // Write two rows atomically: sender row + recipient row
     try {
         await docClient.send(
-            new PutCommand({
-                TableName: process.env.FRIENDSHIPS_TABLE,
-                Item: {
-                    email: senderEmail,
-                    friendEmail: recipient,
-                    status: 'pending',
-                    direction: 'sent',
-                    createdAt: now,
-                    updatedAt: now,
-                },
-            }),
-        );
-        await docClient.send(
-            new PutCommand({
-                TableName: process.env.FRIENDSHIPS_TABLE,
-                Item: {
-                    email: recipient,
-                    friendEmail: senderEmail,
-                    status: 'pending',
-                    direction: 'received',
-                    createdAt: now,
-                    updatedAt: now,
-                },
+            new TransactWriteCommand({
+                TransactItems: [
+                    {
+                        Put: {
+                            TableName: process.env.FRIENDSHIPS_TABLE,
+                            Item: {
+                                email: senderEmail,
+                                friendEmail: recipient,
+                                status: 'pending',
+                                direction: 'sent',
+                                createdAt: now,
+                                updatedAt: now,
+                            },
+                        },
+                    },
+                    {
+                        Put: {
+                            TableName: process.env.FRIENDSHIPS_TABLE,
+                            Item: {
+                                email: recipient,
+                                friendEmail: senderEmail,
+                                status: 'pending',
+                                direction: 'received',
+                                createdAt: now,
+                                updatedAt: now,
+                            },
+                        },
+                    },
+                ],
             }),
         );
         res.status(201).json({ message: 'Friend request sent' });
     } catch (err) {
-        logger.error({ err }, 'DynamoDB PutItem error');
+        logger.error({ err }, 'DynamoDB TransactWrite error');
         return res.status(500).json({ error: 'Internal server error' });
     }
 });
@@ -127,57 +133,69 @@ router.post('/respond', async (req, res) => {
     const now = new Date().toISOString();
 
     if (accept) {
-        // Update both rows to accepted
+        // Update both rows to accepted atomically
         try {
             await docClient.send(
-                new PutCommand({
-                    TableName: process.env.FRIENDSHIPS_TABLE,
-                    Item: {
-                        email: userEmail,
-                        friendEmail: sender,
-                        status: 'accepted',
-                        direction: 'received',
-                        createdAt: now,
-                        updatedAt: now,
-                    },
-                }),
-            );
-            await docClient.send(
-                new PutCommand({
-                    TableName: process.env.FRIENDSHIPS_TABLE,
-                    Item: {
-                        email: sender,
-                        friendEmail: userEmail,
-                        status: 'accepted',
-                        direction: 'sent',
-                        createdAt: now,
-                        updatedAt: now,
-                    },
+                new TransactWriteCommand({
+                    TransactItems: [
+                        {
+                            Put: {
+                                TableName: process.env.FRIENDSHIPS_TABLE,
+                                Item: {
+                                    email: userEmail,
+                                    friendEmail: sender,
+                                    status: 'accepted',
+                                    direction: 'received',
+                                    createdAt: now,
+                                    updatedAt: now,
+                                },
+                            },
+                        },
+                        {
+                            Put: {
+                                TableName: process.env.FRIENDSHIPS_TABLE,
+                                Item: {
+                                    email: sender,
+                                    friendEmail: userEmail,
+                                    status: 'accepted',
+                                    direction: 'sent',
+                                    createdAt: now,
+                                    updatedAt: now,
+                                },
+                            },
+                        },
+                    ],
                 }),
             );
             res.json({ message: 'Friend request accepted' });
         } catch (err) {
-            logger.error({ err }, 'DynamoDB PutItem error');
+            logger.error({ err }, 'DynamoDB TransactWrite error');
             return res.status(500).json({ error: 'Internal server error' });
         }
     } else {
-        // Delete both rows
+        // Delete both rows atomically
         try {
             await docClient.send(
-                new DeleteCommand({
-                    TableName: process.env.FRIENDSHIPS_TABLE,
-                    Key: { email: userEmail, friendEmail: sender },
-                }),
-            );
-            await docClient.send(
-                new DeleteCommand({
-                    TableName: process.env.FRIENDSHIPS_TABLE,
-                    Key: { email: sender, friendEmail: userEmail },
+                new TransactWriteCommand({
+                    TransactItems: [
+                        {
+                            Delete: {
+                                TableName: process.env.FRIENDSHIPS_TABLE,
+                                Key: { email: userEmail, friendEmail: sender },
+                            },
+                        },
+                        {
+                            Delete: {
+                                TableName: process.env.FRIENDSHIPS_TABLE,
+                                Key: { email: sender, friendEmail: userEmail },
+                            },
+                        },
+                    ],
                 }),
             );
             res.json({ message: 'Friend request rejected' });
         } catch (err) {
-            logger.error({ err }, 'DynamoDB DeleteItem error');
+            logger.error({ err }, 'DynamoDB TransactWrite error');
             return res.status(500).json({ error: 'Internal server error' });
         }
     }
@@ -288,20 +306,26 @@ router.delete('/:email', async (req, res) => {
 
     try {
         await docClient.send(
-            new DeleteCommand({
-                TableName: process.env.FRIENDSHIPS_TABLE,
-                Key: { email: userEmail, friendEmail },
-            }),
-        );
-        await docClient.send(
-            new DeleteCommand({
-                TableName: process.env.FRIENDSHIPS_TABLE,
-                Key: { email: friendEmail, friendEmail: userEmail },
+            new TransactWriteCommand({
+                TransactItems: [
+                    {
+                        Delete: {
+                            TableName: process.env.FRIENDSHIPS_TABLE,
+                            Key: { email: userEmail, friendEmail },
+                        },
+                    },
+                    {
+                        Delete: {
+                            TableName: process.env.FRIENDSHIPS_TABLE,
+                            Key: { email: friendEmail, friendEmail: userEmail },
+                        },
+                    },
+                ],
             }),
         );
         res.json({ message: 'Friend removed' });
     } catch (err) {
-        logger.error({ err }, 'DynamoDB DeleteItem error');
+        logger.error({ err }, 'DynamoDB TransactWrite error');
         return res.status(500).json({ error: 'Internal server error' });
     }
 });
