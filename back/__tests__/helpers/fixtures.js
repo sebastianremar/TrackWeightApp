@@ -3,6 +3,7 @@ const testUser = {
     name: 'Test User',
     password: '$2b$10$hashedpasswordplaceholdervalue1234567890abc', // fake bcrypt hash
     darkMode: false,
+    palette: 'ethereal-ivory',
     createdAt: '2024-01-01T00:00:00.000Z',
 };
 

@@ -178,6 +178,7 @@ describe('GET /api/me', () => {
         expect(res.body.name).toBe('Test User');
         expect(res.body).not.toHaveProperty('shareWeight');
         expect(res.body).toHaveProperty('darkMode');
+        expect(res.body.palette).toBe('ethereal-ivory');
     });
 
     test('returns 404 if user not found in DB', async () => {
@@ -245,6 +246,37 @@ describe('PATCH /api/me', () => {
         expect(res.status).toBe(200);
         expect(res.body.darkMode).toBe(true);
         expect(res.body).not.toHaveProperty('shareWeight');
+    });
+
+    test('updates palette with valid value', async () => {
+        ddbMock.on(UpdateCommand).resolves({
+            Attributes: { ...testUser, palette: 'midnight-bloom' },
+        });
+
+        const res = await request(app)
+            .patch('/api/me')
+            .set(authHeader('test@example.com'))
+            .send({ palette: 'midnight-bloom' });
+        expect(res.status).toBe(200);
+        expect(res.body.palette).toBe('midnight-bloom');
+    });
+
+    test('returns 400 for invalid palette', async () => {
+        const res = await request(app)
+            .patch('/api/me')
+            .set(authHeader('test@example.com'))
+            .send({ palette: 'neon-rainbow' });
+        expect(res.status).toBe(400);
+        expect(res.body.error).toMatch(/invalid palette/i);
+    });
+
+    test('returns 400 for non-string palette', async () => {
+        const res = await request(app)
+            .patch('/api/me')
+            .set(authHeader('test@example.com'))
+            .send({ palette: 123 });
+        expect(res.status).toBe(400);
+        expect(res.body.error).toMatch(/invalid palette/i);
     });
 });
 

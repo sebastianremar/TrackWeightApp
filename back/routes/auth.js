@@ -8,6 +8,8 @@ const authenticate = require('../middleware/auth');
 
 const router = express.Router();
 
+const ALLOWED_PALETTES = ['ethereal-ivory', 'serene-coastline', 'midnight-bloom', 'warm-sand', 'ocean-breeze'];
+
 const COOKIE_OPTIONS = {
     httpOnly: true,
     secure: process.env.NODE_ENV === 'production',
@@ -156,6 +158,7 @@ router.get('/me', authenticate, async (req, res) => {
             name: user.name,
             email: user.email,
             darkMode: user.darkMode || false,
+            palette: user.palette || 'ethereal-ivory',
             createdAt: user.createdAt,
         });
     } catch (err) {
@@ -166,7 +169,7 @@ router.get('/me', authenticate, async (req, res) => {
 
 // PATCH /api/me — update profile
 router.patch('/me', authenticate, async (req, res) => {
-    const { name, darkMode } = req.body;
+    const { name, darkMode, palette } = req.body;
     const updates = [];
     const names = {};
     const values = {};
@@ -186,6 +189,14 @@ router.patch('/me', authenticate, async (req, res) => {
         }
         updates.push('darkMode = :dm');
         values[':dm'] = darkMode;
+    }
+
+    if (palette !== undefined) {
+        if (typeof palette !== 'string' || !ALLOWED_PALETTES.includes(palette)) {
+            return res.status(400).json({ error: 'Invalid palette' });
+        }
+        updates.push('palette = :palette');
+        values[':palette'] = palette;
     }
 
     if (updates.length === 0) {
@@ -209,6 +220,7 @@ router.patch('/me', authenticate, async (req, res) => {
             name: user.name,
             email: user.email,
             darkMode: user.darkMode || false,
+            palette: user.palette || 'ethereal-ivory',
         });
     } catch (err) {
         logger.error({ err }, 'DynamoDB UpdateItem error');
