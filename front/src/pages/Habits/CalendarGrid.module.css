@@ -1,0 +1,56 @@
+.grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 2px;
+}
+
+.dayHeader {
+  text-align: center;
+  font-size: 0.7rem;
+  font-weight: 600;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  padding: 4px 0;
+}
+
+.empty {
+  aspect-ratio: 1;
+}
+
+.cell {
+  aspect-ratio: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  border-radius: var(--radius-sm);
+  background: var(--surface);
+  border: 2px solid transparent;
+  transition: background var(--transition), border-color var(--transition);
+  padding: 2px;
+}
+
+.cell:hover {
+  background: var(--surface-hover);
+}
+
+.cell.selected {
+  border-color: var(--primary);
+  background: var(--accent-light);
+}
+
+.cell.today .num {
+  color: var(--primary);
+  font-weight: 700;
+}
+
+.num {
+  font-size: 0.8rem;
+}
+
+.bar {
+  width: 80%;
+  height: 3px;
+  border-radius: 2px;
+}

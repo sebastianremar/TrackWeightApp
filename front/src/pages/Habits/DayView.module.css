@@ -1,0 +1,31 @@
+.nav {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+.arrow {
+  font-size: 1.2rem;
+  padding: 6px 12px;
+  border-radius: var(--radius-sm);
+  color: var(--text-secondary);
+  background: var(--neutral);
+}
+
+.arrow:hover:not(:disabled) {
+  background: var(--accent-light);
+  color: var(--text);
+}
+
+.arrow:disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+}
+
+.date {
+  font-weight: 600;
+  min-width: 100px;
+  text-align: center;
+}

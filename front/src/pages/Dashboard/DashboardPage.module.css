@@ -1,0 +1,11 @@
+.page {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.center {
+  display: flex;
+  justify-content: center;
+  padding: 40px 0;
+}

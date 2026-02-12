@@ -1,0 +1,10 @@
+.center {
+  display: flex;
+  justify-content: center;
+  padding: 20px 0;
+}
+
+.chartWrap {
+  width: 100%;
+  overflow: hidden;
+}

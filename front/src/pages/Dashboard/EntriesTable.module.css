@@ -1,0 +1,65 @@
+.title {
+  font-size: 1.1rem;
+  font-weight: 600;
+  margin-bottom: 12px;
+}
+
+.table {
+  display: flex;
+  flex-direction: column;
+}
+
+.row {
+  display: flex;
+  align-items: center;
+  padding: 10px 0;
+  border-bottom: 1px solid var(--border);
+  gap: 12px;
+}
+
+.row:last-child {
+  border-bottom: none;
+}
+
+.date {
+  flex: 1;
+  font-size: 0.9rem;
+  color: var(--text-secondary);
+}
+
+.weight {
+  font-weight: 600;
+  font-size: 0.95rem;
+  min-width: 70px;
+  text-align: right;
+}
+
+.actions {
+  display: flex;
+  gap: 6px;
+}
+
+.editBtn,
+.deleteBtn {
+  font-size: 0.8rem;
+  padding: 4px 10px;
+  border-radius: var(--radius-sm);
+}
+
+.editBtn {
+  color: var(--primary);
+  background: var(--accent-light);
+}
+
+.editBtn:hover {
+  background: var(--accent);
+}
+
+.deleteBtn {
+  color: var(--error);
+  background: var(--error-bg);
+}
+
+.deleteBtn:hover {
+  opacity: 0.8;
+}

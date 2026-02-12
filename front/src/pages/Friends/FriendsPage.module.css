@@ -1,0 +1,42 @@
+.page {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.title {
+  font-size: 1.2rem;
+  font-weight: 600;
+}
+
+.addBtn {
+  padding: 7px 14px;
+  background: var(--primary);
+  color: #fff;
+  border-radius: var(--radius-sm);
+  font-size: 0.85rem;
+  font-weight: 500;
+  transition: background var(--transition);
+}
+
+.addBtn:hover {
+  background: var(--primary-hover);
+}
+
+.sectionTitle {
+  font-size: 0.95rem;
+  font-weight: 600;
+  margin-bottom: 10px;
+}
+
+.center {
+  display: flex;
+  justify-content: center;
+  padding: 40px 0;
+}

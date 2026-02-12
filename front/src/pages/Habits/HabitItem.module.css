@@ -1,0 +1,56 @@
+.item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 0;
+  border-bottom: 1px solid var(--border);
+}
+
+.item:last-child {
+  border-bottom: none;
+}
+
+.checkbox {
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+}
+
+.input {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.check {
+  width: 22px;
+  height: 22px;
+  border: 2px solid;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background var(--transition);
+}
+
+.info {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.name {
+  font-size: 0.95rem;
+  text-align: left;
+  color: var(--text);
+}
+
+.name:hover {
+  color: var(--primary);
+}
+
+.progress {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+}

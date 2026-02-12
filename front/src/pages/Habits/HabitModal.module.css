@@ -1,0 +1,113 @@
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.label {
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: var(--text-secondary);
+}
+
+.input {
+  padding: 10px 12px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--surface);
+  font-size: 0.95rem;
+}
+
+.input:focus {
+  outline: none;
+  border-color: var(--primary);
+}
+
+.freqRow {
+  display: flex;
+  gap: 4px;
+}
+
+.freqBtn {
+  width: 36px;
+  height: 36px;
+  border-radius: var(--radius-sm);
+  background: var(--neutral);
+  font-weight: 500;
+  font-size: 0.9rem;
+  transition: background var(--transition), color var(--transition);
+}
+
+.freqBtn:hover {
+  background: var(--accent-light);
+}
+
+.freqActive {
+  background: var(--primary);
+  color: #fff;
+}
+
+.colorRow {
+  display: flex;
+  gap: 6px;
+}
+
+.colorBtn {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  border: 3px solid transparent;
+  transition: border-color var(--transition);
+}
+
+.colorBtn:hover {
+  opacity: 0.8;
+}
+
+.colorActive {
+  border-color: var(--text);
+}
+
+.actions {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  margin-top: 4px;
+}
+
+.deleteBtn {
+  padding: 8px 16px;
+  border-radius: var(--radius-sm);
+  color: var(--error);
+  background: var(--error-bg);
+  font-weight: 500;
+}
+
+.deleteBtn:hover {
+  opacity: 0.8;
+}
+
+.saveBtn {
+  padding: 8px 20px;
+  border-radius: var(--radius-sm);
+  background: var(--primary);
+  color: #fff;
+  font-weight: 600;
+  margin-left: auto;
+  transition: background var(--transition);
+}
+
+.saveBtn:hover:not(:disabled) {
+  background: var(--primary-hover);
+}
+
+.saveBtn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}

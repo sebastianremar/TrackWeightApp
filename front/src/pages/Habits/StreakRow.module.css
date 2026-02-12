@@ -1,0 +1,39 @@
+.row {
+  padding: 8px 0;
+  border-bottom: 1px solid var(--border);
+}
+
+.row:last-child {
+  border-bottom: none;
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 6px;
+}
+
+.dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.name {
+  font-size: 0.9rem;
+  font-weight: 500;
+}
+
+.heatmap {
+  display: flex;
+  gap: 3px;
+}
+
+.cell {
+  flex: 1;
+  height: 14px;
+  border-radius: 2px;
+  min-width: 0;
+}

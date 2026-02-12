@@ -1,0 +1,63 @@
+.nav {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  margin-bottom: 12px;
+}
+
+.arrow {
+  font-size: 1.2rem;
+  padding: 6px 12px;
+  border-radius: var(--radius-sm);
+  color: var(--text-secondary);
+  background: var(--neutral);
+}
+
+.arrow:hover {
+  background: var(--accent-light);
+  color: var(--text);
+}
+
+.label {
+  font-weight: 600;
+  min-width: 160px;
+  text-align: center;
+}
+
+.center {
+  display: flex;
+  justify-content: center;
+  padding: 40px 0;
+}
+
+.content {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.cardTitle {
+  font-size: 1rem;
+  font-weight: 600;
+  margin-bottom: 12px;
+}
+
+.donutWrap {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.donutLabel {
+  position: absolute;
+  font-size: 1.3rem;
+  font-weight: 700;
+  color: var(--primary);
+}
+
+.muted {
+  color: var(--text-muted);
+  font-size: 0.9rem;
+}
