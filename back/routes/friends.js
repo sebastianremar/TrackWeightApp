@@ -229,13 +229,11 @@ router.get('/', async (req, res) => {
                     return {
                         email: item.friendEmail,
                         name: userResult.Item ? userResult.Item.name : item.friendEmail,
-                        shareWeight: userResult.Item ? userResult.Item.shareWeight || false : false,
                     };
                 } catch {
                     return {
                         email: item.friendEmail,
                         name: item.friendEmail,
-                        shareWeight: false,
                     };
                 }
             }),
@@ -345,22 +343,6 @@ router.get('/:email/weight', async (req, res) => {
         );
         if (!friendship.Item || friendship.Item.status !== 'accepted') {
             return res.status(403).json({ error: 'Not friends with this user' });
-        }
-    } catch (err) {
-        logger.error({ err }, 'DynamoDB GetItem error');
-        return res.status(500).json({ error: 'Internal server error' });
-    }
-
-    // Check friend's privacy setting
-    try {
-        const friendUser = await docClient.send(
-            new GetCommand({
-                TableName: process.env.USERS_TABLE,
-                Key: { email: friendEmail },
-            }),
-        );
-        if (!friendUser.Item || !friendUser.Item.shareWeight) {
-            return res.status(403).json({ error: 'This friend does not share their weight data' });
         }
     } catch (err) {
         logger.error({ err }, 'DynamoDB GetItem error');

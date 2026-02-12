@@ -173,7 +173,7 @@ describe('GET /api/friends', () => {
         expect(res.status).toBe(200);
         expect(res.body.friends).toHaveLength(1);
         expect(res.body.friends[0].name).toBe('Friend User');
-        expect(res.body.friends[0].shareWeight).toBe(true);
+        expect(res.body.friends[0]).not.toHaveProperty('shareWeight');
     });
 
     test('returns empty array when no friends', async () => {
@@ -224,15 +224,11 @@ describe('DELETE /api/friends/:email', () => {
 
 // --- GET /api/friends/:email/weight ---
 describe('GET /api/friends/:email/weight', () => {
-    test('returns friend weight when friendship accepted and sharing enabled', async () => {
+    test('returns friend weight when friendship accepted', async () => {
         // Friendship check
         ddbMock
             .on(GetCommand, { TableName: process.env.FRIENDSHIPS_TABLE })
             .resolves({ Item: { status: 'accepted' } });
-        // Friend user with shareWeight=true
-        ddbMock
-            .on(GetCommand, { TableName: process.env.USERS_TABLE })
-            .resolves({ Item: friendUser });
         // Weight entries
         ddbMock.on(QueryCommand).resolves({
             Items: [{ date: '2024-06-15', weight: 160 }],
@@ -253,20 +249,5 @@ describe('GET /api/friends/:email/weight', () => {
             .set(authHeader('test@example.com'));
         expect(res.status).toBe(403);
         expect(res.body.error).toMatch(/not friends/i);
-    });
-
-    test('returns 403 when friend does not share weight', async () => {
-        ddbMock
-            .on(GetCommand, { TableName: process.env.FRIENDSHIPS_TABLE })
-            .resolves({ Item: { status: 'accepted' } });
-        ddbMock
-            .on(GetCommand, { TableName: process.env.USERS_TABLE })
-            .resolves({ Item: { ...friendUser, shareWeight: false } });
-
-        const res = await request(app)
-            .get('/api/friends/friend%40example.com/weight')
-            .set(authHeader('test@example.com'));
-        expect(res.status).toBe(403);
-        expect(res.body.error).toMatch(/does not share/i);
     });
 });

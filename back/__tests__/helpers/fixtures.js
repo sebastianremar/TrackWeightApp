@@ -2,7 +2,6 @@ const testUser = {
     email: 'test@example.com',
     name: 'Test User',
     password: '$2b$10$hashedpasswordplaceholdervalue1234567890abc', // fake bcrypt hash
-    shareWeight: false,
     darkMode: false,
     createdAt: '2024-01-01T00:00:00.000Z',
 };
@@ -11,7 +10,6 @@ const friendUser = {
     email: 'friend@example.com',
     name: 'Friend User',
     password: '$2b$10$hashedpasswordplaceholdervalue1234567890xyz',
-    shareWeight: true,
     darkMode: false,
     createdAt: '2024-01-02T00:00:00.000Z',
 };

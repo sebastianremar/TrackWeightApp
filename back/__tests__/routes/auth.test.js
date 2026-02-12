@@ -176,7 +176,7 @@ describe('GET /api/me', () => {
         expect(res.status).toBe(200);
         expect(res.body.email).toBe('test@example.com');
         expect(res.body.name).toBe('Test User');
-        expect(res.body).toHaveProperty('shareWeight');
+        expect(res.body).not.toHaveProperty('shareWeight');
         expect(res.body).toHaveProperty('darkMode');
     });
 
@@ -225,26 +225,26 @@ describe('PATCH /api/me', () => {
         expect(res.status).toBe(400);
     });
 
-    test('returns 400 for non-boolean shareWeight', async () => {
+    test('returns 400 for non-boolean darkMode', async () => {
         const res = await request(app)
             .patch('/api/me')
             .set(authHeader('test@example.com'))
-            .send({ shareWeight: 'yes' });
+            .send({ darkMode: 'yes' });
         expect(res.status).toBe(400);
     });
 
-    test('updates shareWeight and darkMode', async () => {
+    test('updates darkMode', async () => {
         ddbMock.on(UpdateCommand).resolves({
-            Attributes: { ...testUser, shareWeight: true, darkMode: true },
+            Attributes: { ...testUser, darkMode: true },
         });
 
         const res = await request(app)
             .patch('/api/me')
             .set(authHeader('test@example.com'))
-            .send({ shareWeight: true, darkMode: true });
+            .send({ darkMode: true });
         expect(res.status).toBe(200);
-        expect(res.body.shareWeight).toBe(true);
         expect(res.body.darkMode).toBe(true);
+        expect(res.body).not.toHaveProperty('shareWeight');
     });
 });
 

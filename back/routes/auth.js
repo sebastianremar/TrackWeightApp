@@ -62,7 +62,6 @@ router.post('/signup', async (req, res) => {
         email: email.trim().toLowerCase(),
         name: name.trim(),
         password: hashedPassword,
-        shareWeight: false,
         darkMode: false,
         createdAt: new Date().toISOString(),
     };
@@ -156,7 +155,6 @@ router.get('/me', authenticate, async (req, res) => {
         res.json({
             name: user.name,
             email: user.email,
-            shareWeight: user.shareWeight || false,
             darkMode: user.darkMode || false,
             createdAt: user.createdAt,
         });
@@ -168,7 +166,7 @@ router.get('/me', authenticate, async (req, res) => {
 
 // PATCH /api/me — update profile
 router.patch('/me', authenticate, async (req, res) => {
-    const { name, shareWeight, darkMode } = req.body;
+    const { name, darkMode } = req.body;
     const updates = [];
     const names = {};
     const values = {};
@@ -180,14 +178,6 @@ router.patch('/me', authenticate, async (req, res) => {
         updates.push('#n = :name');
         names['#n'] = 'name';
         values[':name'] = name.trim();
-    }
-
-    if (shareWeight !== undefined) {
-        if (typeof shareWeight !== 'boolean') {
-            return res.status(400).json({ error: 'shareWeight must be a boolean' });
-        }
-        updates.push('shareWeight = :sw');
-        values[':sw'] = shareWeight;
     }
 
     if (darkMode !== undefined) {
@@ -218,7 +208,6 @@ router.patch('/me', authenticate, async (req, res) => {
         res.json({
             name: user.name,
             email: user.email,
-            shareWeight: user.shareWeight || false,
             darkMode: user.darkMode || false,
         });
     } catch (err) {
