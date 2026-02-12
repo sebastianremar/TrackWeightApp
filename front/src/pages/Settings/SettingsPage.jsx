@@ -8,9 +8,17 @@ import InlineError from '../../components/InlineError/InlineError';
 import EditNameModal from './EditNameModal';
 import styles from './SettingsPage.module.css';
 
+const PALETTES = [
+  { id: 'ethereal-ivory', name: 'Ethereal Ivory', colors: ['#E4E4DE', '#C4C5BA', '#595f39', '#1B1B1B'] },
+  { id: 'serene-coastline', name: 'Serene Coastline', colors: ['#D1E8E2', '#A9D6E5', '#19747E', '#1a2e35'] },
+  { id: 'midnight-bloom', name: 'Midnight Bloom', colors: ['#e8e0f0', '#c9b8e0', '#6b4c9a', '#1e1528'] },
+  { id: 'warm-sand', name: 'Warm Sand', colors: ['#f0e6d6', '#dbc4a0', '#a0522d', '#2a1f14'] },
+  { id: 'ocean-breeze', name: 'Ocean Breeze', colors: ['#dce8f0', '#a8c8e0', '#2563a0', '#14202e'] },
+];
+
 export default function SettingsPage() {
   const { user, updateUser } = useAuth();
-  const { dark, toggleDark } = useTheme();
+  const { dark, toggleDark, palette, setPalette } = useTheme();
   const [nameModalOpen, setNameModalOpen] = useState(false);
 
   const [currentPw, setCurrentPw] = useState('');
@@ -72,6 +80,26 @@ export default function SettingsPage() {
         <div className={styles.row}>
           <span>Dark Mode</span>
           <Toggle checked={dark} onChange={toggleDark} />
+        </div>
+        <div className={styles.paletteSection}>
+          <span className={styles.label}>Color Palette</span>
+          <div className={styles.paletteGrid}>
+            {PALETTES.map((p) => (
+              <button
+                key={p.id}
+                className={`${styles.paletteSwatch} ${palette === p.id ? styles.paletteActive : ''}`}
+                onClick={() => setPalette(p.id)}
+                type="button"
+              >
+                <div className={styles.swatchColors}>
+                  {p.colors.map((c) => (
+                    <span key={c} className={styles.swatchDot} style={{ background: c }} />
+                  ))}
+                </div>
+                <span className={styles.swatchName}>{p.name}</span>
+              </button>
+            ))}
+          </div>
         </div>
       </Card>
 
