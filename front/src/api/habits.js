@@ -13,12 +13,12 @@ export function getHabits(includeArchived = false) {
 }
 
 export function updateHabit(id, fields) {
-  return api(`/api/habits/${id}`, {
+  return api(`/api/habits/${encodeURIComponent(id)}`, {
     method: 'PATCH',
     body: JSON.stringify(fields),
   });
 }
 
 export function archiveHabit(id) {
-  return api(`/api/habits/${id}`, { method: 'DELETE' });
+  return api(`/api/habits/${encodeURIComponent(id)}`, { method: 'DELETE' });
 }

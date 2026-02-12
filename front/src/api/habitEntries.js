@@ -1,14 +1,14 @@
 import { api } from './client';
 
 export function logHabitEntry(habitId, date) {
-  return api(`/api/habits/${habitId}/entries`, {
+  return api(`/api/habits/${encodeURIComponent(habitId)}/entries`, {
     method: 'POST',
     body: JSON.stringify({ date }),
   });
 }
 
 export function deleteHabitEntry(habitId, date) {
-  return api(`/api/habits/${habitId}/entries/${date}`, { method: 'DELETE' });
+  return api(`/api/habits/${encodeURIComponent(habitId)}/entries/${date}`, { method: 'DELETE' });
 }
 
 export function getHabitEntries(habitId, params = {}) {
@@ -18,7 +18,7 @@ export function getHabitEntries(habitId, params = {}) {
   if (params.limit) qs.set('limit', params.limit);
   if (params.cursor) qs.set('cursor', params.cursor);
   const query = qs.toString();
-  return api(`/api/habits/${habitId}/entries${query ? '?' + query : ''}`);
+  return api(`/api/habits/${encodeURIComponent(habitId)}/entries${query ? '?' + query : ''}`);
 }
 
 export function getAllHabitEntries(params = {}) {
@@ -32,5 +32,5 @@ export function getAllHabitEntries(params = {}) {
 }
 
 export function getHabitStats(habitId, weeks = 4) {
-  return api(`/api/habits/${habitId}/stats?weeks=${weeks}`);
+  return api(`/api/habits/${encodeURIComponent(habitId)}/stats?weeks=${weeks}`);
 }

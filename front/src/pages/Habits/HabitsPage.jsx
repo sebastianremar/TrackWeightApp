@@ -143,9 +143,9 @@ export default function HabitsPage() {
         open={!!deleteTarget}
         onClose={() => setDeleteTarget(null)}
         onConfirm={confirmDelete}
-        title="Archive Habit"
-        message={deleteTarget ? `Archive "${deleteTarget.name}"? It will be removed from your active habits.` : ''}
-        confirmLabel="Archive"
+        title="Delete Habit"
+        message={deleteTarget ? `Delete "${deleteTarget.name}"? It will be removed from your active habits.` : ''}
+        confirmLabel="Delete"
         danger
       />
     </div>

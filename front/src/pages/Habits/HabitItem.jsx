@@ -59,7 +59,7 @@ export default function HabitItem({ habit, completed, onToggle, onEdit, onDelete
               <div className={styles.dropdown}>
                 <button className={styles.dropdownItem} onClick={() => { setMenuOpen(false); onEdit(); }}>Edit</button>
                 {onDelete && (
-                  <button className={`${styles.dropdownItem} ${styles.dropdownDanger}`} onClick={() => { setMenuOpen(false); onDelete(); }}>Archive</button>
+                  <button className={`${styles.dropdownItem} ${styles.dropdownDanger}`} onClick={() => { setMenuOpen(false); onDelete(); }}>Delete</button>
                 )}
               </div>
             )}
