@@ -35,7 +35,7 @@ app.use(
         contentSecurityPolicy: {
             directives: {
                 defaultSrc: ["'self'"],
-                scriptSrc: ["'self'", 'https://d3js.org'],
+                scriptSrc: ["'self'"],
                 styleSrc: ["'self'", "'unsafe-inline'"],
                 imgSrc: ["'self'", 'data:'],
                 connectSrc: ["'self'"],
@@ -51,7 +51,7 @@ app.use(
 
 app.use(express.json());
 app.use(cookieParser());
-app.use(express.static(path.join(__dirname, '..', 'front')));
+app.use(express.static(path.join(__dirname, '..', 'front', 'dist')));
 
 // Request logging with request ID and response time
 app.use((req, res, next) => {
@@ -87,7 +87,7 @@ app.use('/api/friends', authenticate, friendRoutes);
 
 // SPA fallback — serve index.html for non-API routes
 app.get('/*path', (req, res) => {
-    res.sendFile(path.join(__dirname, '..', 'front', 'index.html'));
+    res.sendFile(path.join(__dirname, '..', 'front', 'dist', 'index.html'));
 });
 
 // Global error handler

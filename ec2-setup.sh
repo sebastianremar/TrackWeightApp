@@ -34,12 +34,15 @@ else
 fi
 
 echo ""
-echo "=== 4/6 Installing dependencies ==="
+echo "=== 4/7 Installing dependencies & building frontend ==="
+cd "$APP_DIR/front"
+npm ci
+npm run build
 cd "$APP_DIR/back"
 npm ci --production
 
 echo ""
-echo "=== 5/6 Creating .env file ==="
+echo "=== 5/7 Creating .env file ==="
 JWT_SECRET=$(node -e "console.log(require('crypto').randomBytes(64).toString('hex'))")
 
 if [ ! -f "$APP_DIR/back/.env" ]; then
@@ -62,7 +65,7 @@ else
 fi
 
 echo ""
-echo "=== 6/6 Setting up nginx ==="
+echo "=== 6/7 Setting up nginx ==="
 sudo yum install -y nginx
 
 sudo cp "$APP_DIR/nginx/sara-peso.conf" /etc/nginx/conf.d/sarapeso.conf
@@ -74,7 +77,7 @@ sudo systemctl enable nginx
 sudo systemctl restart nginx
 
 echo ""
-echo "=== Starting app with PM2 ==="
+echo "=== 7/7 Starting app with PM2 ==="
 cd "$APP_DIR/back"
 mkdir -p logs
 pm2 start ecosystem.config.js --env production
