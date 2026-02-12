@@ -43,8 +43,13 @@ export function ThemeProvider({ children }) {
     updateProfile({ palette: value }).catch(() => {});
   }, []);
 
+  const syncFromProfile = useCallback((profile) => {
+    if (profile.darkMode !== undefined) setDark(profile.darkMode);
+    if (profile.palette) setPaletteState(profile.palette);
+  }, []);
+
   return (
-    <ThemeContext.Provider value={{ dark, toggleDark, setDarkMode, palette, setPalette }}>
+    <ThemeContext.Provider value={{ dark, toggleDark, setDarkMode, palette, setPalette, syncFromProfile }}>
       {children}
     </ThemeContext.Provider>
   );

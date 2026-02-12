@@ -1,6 +1,7 @@
+import { useEffect } from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
-import { ThemeProvider } from './contexts/ThemeContext';
+import { ThemeProvider, useTheme } from './contexts/ThemeContext';
 import AppLayout from './layouts/AppLayout';
 import AuthLayout from './layouts/AuthLayout';
 import AuthPage from './pages/Auth/AuthPage';
@@ -12,6 +13,11 @@ import Spinner from './components/Spinner/Spinner';
 
 function AppRoutes() {
   const { user, loading } = useAuth();
+  const { syncFromProfile } = useTheme();
+
+  useEffect(() => {
+    if (user) syncFromProfile(user);
+  }, [user, syncFromProfile]);
 
   if (loading) {
     return (
