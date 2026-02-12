@@ -1,0 +1,178 @@
+.layout {
+  display: flex;
+  min-height: 100dvh;
+}
+
+/* --- Sidebar (desktop) --- */
+.sidebar {
+  display: none;
+  flex-direction: column;
+  width: var(--sidebar-width);
+  background: var(--surface);
+  border-right: 1px solid var(--border);
+  padding: 20px 0;
+  position: fixed;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  z-index: 100;
+}
+
+.logo {
+  font-size: 1.3rem;
+  font-weight: 700;
+  color: var(--primary);
+  padding: 0 20px 20px;
+}
+
+.sideNav {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 0 8px;
+}
+
+.sideLink {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  border-radius: var(--radius-sm);
+  color: var(--text-secondary);
+  text-decoration: none;
+  font-size: 0.95rem;
+  transition: background var(--transition), color var(--transition);
+}
+
+.sideLink:hover {
+  background: var(--background);
+  color: var(--text);
+}
+
+.sideLink.active {
+  background: var(--accent);
+  color: var(--primary);
+  font-weight: 600;
+}
+
+.sideFooter {
+  padding: 16px 20px;
+  border-top: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.userName {
+  font-size: 0.9rem;
+  color: var(--text-secondary);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.logoutBtn {
+  font-size: 0.85rem;
+  color: var(--error);
+  text-align: left;
+  padding: 4px 0;
+}
+
+.logoutBtn:hover {
+  text-decoration: underline;
+}
+
+/* --- Top nav (mobile) --- */
+.topNav {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: var(--nav-height);
+  padding: 0 16px;
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  position: sticky;
+  top: 0;
+  z-index: 50;
+}
+
+.topLogo {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--primary);
+}
+
+.topRight {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.topUser {
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+}
+
+/* --- Main content --- */
+.main {
+  flex: 1;
+  padding: 16px;
+  padding-bottom: calc(var(--bottom-nav-height) + 16px);
+  max-width: 800px;
+  width: 100%;
+  margin: 0 auto;
+}
+
+/* --- Bottom nav (mobile) --- */
+.bottomNav {
+  display: flex;
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: var(--bottom-nav-height);
+  background: var(--surface);
+  border-top: 1px solid var(--border);
+  z-index: 50;
+  padding-bottom: env(safe-area-inset-bottom);
+}
+
+.bottomLink {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  color: var(--text-muted);
+  text-decoration: none;
+  font-size: 0.7rem;
+  transition: color var(--transition);
+}
+
+.bottomLink.active {
+  color: var(--primary);
+}
+
+/* --- Desktop breakpoint --- */
+@media (min-width: 768px) {
+  .sidebar {
+    display: flex;
+  }
+
+  .topNav,
+  .bottomNav {
+    display: none;
+  }
+
+  .main {
+    margin-left: var(--sidebar-width);
+    padding: 24px 32px;
+    padding-bottom: 24px;
+  }
+
+  .layout {
+    flex-direction: row;
+  }
+}
