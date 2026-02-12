@@ -8,6 +8,10 @@ export function ThemeProvider({ children }) {
     return document.documentElement.classList.contains('dark');
   });
 
+  const [palette, setPaletteState] = useState(() => {
+    return document.documentElement.dataset.palette || 'ethereal-ivory';
+  });
+
   useEffect(() => {
     if (dark) {
       document.documentElement.classList.add('dark');
@@ -16,6 +20,11 @@ export function ThemeProvider({ children }) {
     }
     localStorage.setItem('darkMode', String(dark));
   }, [dark]);
+
+  useEffect(() => {
+    document.documentElement.dataset.palette = palette;
+    localStorage.setItem('palette', palette);
+  }, [palette]);
 
   const toggleDark = useCallback(() => {
     setDark((prev) => {
@@ -29,8 +38,13 @@ export function ThemeProvider({ children }) {
     setDark(value);
   }, []);
 
+  const setPalette = useCallback((value) => {
+    setPaletteState(value);
+    updateProfile({ palette: value }).catch(() => {});
+  }, []);
+
   return (
-    <ThemeContext.Provider value={{ dark, toggleDark, setDarkMode }}>
+    <ThemeContext.Provider value={{ dark, toggleDark, setDarkMode, palette, setPalette }}>
       {children}
     </ThemeContext.Provider>
   );

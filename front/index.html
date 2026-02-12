@@ -3,12 +3,16 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-    <title>SaraPeso</title>
+    <title>TrackMyWeight</title>
     <script>
       (function() {
         try {
           if (localStorage.getItem('darkMode') === 'true') document.documentElement.classList.add('dark');
-        } catch(e) {}
+          var p = localStorage.getItem('palette');
+          document.documentElement.dataset.palette = p || 'ethereal-ivory';
+        } catch(e) {
+          document.documentElement.dataset.palette = 'ethereal-ivory';
+        }
       })();
     </script>
   </head>
