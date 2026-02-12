@@ -1,0 +1,254 @@
+/* ===========================
+   1. Ethereal Ivory (default)
+   =========================== */
+[data-palette="ethereal-ivory"] {
+  --primary: #595f39;
+  --primary-hover: #4a4f2e;
+  --primary-light: #6e7548;
+  --background: #E4E4DE;
+  --background-secondary: #d8d8d0;
+  --accent: #C4C5BA;
+  --accent-light: #d2d3ca;
+  --neutral: #d6d6ce;
+  --neutral-dark: #a8a89e;
+  --surface: #ffffff;
+  --surface-hover: #f7f7f4;
+  --text: #1B1B1B;
+  --text-secondary: #4a4a44;
+  --text-muted: #7a7a70;
+  --border: #c2c2b8;
+  --error: #c43e2e;
+  --error-bg: #fce8e6;
+  --success: #3d7a4a;
+  --success-bg: #e6f4ea;
+  --warning: #b8860b;
+  --warning-bg: #fef7e0;
+}
+
+[data-palette="ethereal-ivory"].dark {
+  --primary: #a3ab74;
+  --primary-hover: #b5bc8a;
+  --primary-light: #7e855c;
+  --background: #141412;
+  --background-secondary: #1c1c18;
+  --accent: #2e2e28;
+  --accent-light: #38382f;
+  --neutral: #2a2a24;
+  --neutral-dark: #4a4a42;
+  --surface: #1e1e1a;
+  --surface-hover: #26261f;
+  --text: #e4e4de;
+  --text-secondary: #b0b0a4;
+  --text-muted: #787870;
+  --border: #3a3a32;
+  --error: #f28b82;
+  --error-bg: #3c1f1e;
+  --success: #81c995;
+  --success-bg: #1e3a28;
+  --warning: #fdd663;
+  --warning-bg: #3a3015;
+}
+
+/* ===========================
+   2. Serene Coastline
+   =========================== */
+[data-palette="serene-coastline"] {
+  --primary: #19747E;
+  --primary-hover: #145f67;
+  --primary-light: #1e8a96;
+  --background: #D1E8E2;
+  --background-secondary: #c2ded6;
+  --accent: #A9D6E5;
+  --accent-light: #c5e4ee;
+  --neutral: #E2E2E2;
+  --neutral-dark: #b0b0b0;
+  --surface: #ffffff;
+  --surface-hover: #f5faf8;
+  --text: #1a2e35;
+  --text-secondary: #4a6670;
+  --text-muted: #7a9aa5;
+  --border: #c0d8d0;
+  --error: #d93025;
+  --error-bg: #fce8e6;
+  --success: #188038;
+  --success-bg: #e6f4ea;
+  --warning: #e37400;
+  --warning-bg: #fef7e0;
+}
+
+[data-palette="serene-coastline"].dark {
+  --primary: #3ec1cf;
+  --primary-hover: #59d0dc;
+  --primary-light: #2ba8b5;
+  --background: #0f1a1c;
+  --background-secondary: #162224;
+  --accent: #1e4d5a;
+  --accent-light: #264f5c;
+  --neutral: #2a3a3e;
+  --neutral-dark: #4a5e63;
+  --surface: #1a2c30;
+  --surface-hover: #213538;
+  --text: #e0eff2;
+  --text-secondary: #a0bfc8;
+  --text-muted: #6a8a95;
+  --border: #2e4a50;
+  --error: #f28b82;
+  --error-bg: #3c1f1e;
+  --success: #81c995;
+  --success-bg: #1e3a28;
+  --warning: #fdd663;
+  --warning-bg: #3a3015;
+}
+
+/* ===========================
+   3. Midnight Bloom
+   =========================== */
+[data-palette="midnight-bloom"] {
+  --primary: #6b4c9a;
+  --primary-hover: #5a3d85;
+  --primary-light: #8264b0;
+  --background: #e8e0f0;
+  --background-secondary: #ddd4e8;
+  --accent: #c9b8e0;
+  --accent-light: #d8cce8;
+  --neutral: #e0dce6;
+  --neutral-dark: #b0a8be;
+  --surface: #ffffff;
+  --surface-hover: #f8f5fc;
+  --text: #1e1528;
+  --text-secondary: #524660;
+  --text-muted: #8a7ea0;
+  --border: #ccc2d8;
+  --error: #c43e2e;
+  --error-bg: #fce8e6;
+  --success: #3d7a4a;
+  --success-bg: #e6f4ea;
+  --warning: #b8860b;
+  --warning-bg: #fef7e0;
+}
+
+[data-palette="midnight-bloom"].dark {
+  --primary: #b08ee0;
+  --primary-hover: #c4a8ea;
+  --primary-light: #8b6cc0;
+  --background: #12101a;
+  --background-secondary: #1a1622;
+  --accent: #2a2240;
+  --accent-light: #342a4e;
+  --neutral: #282236;
+  --neutral-dark: #484060;
+  --surface: #1e1828;
+  --surface-hover: #262030;
+  --text: #e8e0f0;
+  --text-secondary: #b0a4c4;
+  --text-muted: #786c94;
+  --border: #382e4e;
+  --error: #f28b82;
+  --error-bg: #3c1f1e;
+  --success: #81c995;
+  --success-bg: #1e3a28;
+  --warning: #fdd663;
+  --warning-bg: #3a3015;
+}
+
+/* ===========================
+   4. Warm Sand
+   =========================== */
+[data-palette="warm-sand"] {
+  --primary: #a0522d;
+  --primary-hover: #8b4526;
+  --primary-light: #b86b3e;
+  --background: #f0e6d6;
+  --background-secondary: #e6dac8;
+  --accent: #dbc4a0;
+  --accent-light: #e4d2b4;
+  --neutral: #e2dcd2;
+  --neutral-dark: #b8b0a0;
+  --surface: #ffffff;
+  --surface-hover: #faf6f0;
+  --text: #2a1f14;
+  --text-secondary: #5e4e3a;
+  --text-muted: #9a8a74;
+  --border: #d2c4ae;
+  --error: #c43e2e;
+  --error-bg: #fce8e6;
+  --success: #3d7a4a;
+  --success-bg: #e6f4ea;
+  --warning: #c47a0a;
+  --warning-bg: #fef7e0;
+}
+
+[data-palette="warm-sand"].dark {
+  --primary: #d49a6a;
+  --primary-hover: #e0ae82;
+  --primary-light: #b87e50;
+  --background: #161210;
+  --background-secondary: #1e1a16;
+  --accent: #302820;
+  --accent-light: #3a302a;
+  --neutral: #2c2620;
+  --neutral-dark: #4c4438;
+  --surface: #201c18;
+  --surface-hover: #282420;
+  --text: #f0e6d6;
+  --text-secondary: #bca888;
+  --text-muted: #8a7860;
+  --border: #3e3428;
+  --error: #f28b82;
+  --error-bg: #3c1f1e;
+  --success: #81c995;
+  --success-bg: #1e3a28;
+  --warning: #fdd663;
+  --warning-bg: #3a3015;
+}
+
+/* ===========================
+   5. Ocean Breeze
+   =========================== */
+[data-palette="ocean-breeze"] {
+  --primary: #2563a0;
+  --primary-hover: #1e5088;
+  --primary-light: #3478b8;
+  --background: #dce8f0;
+  --background-secondary: #ccdde8;
+  --accent: #a8c8e0;
+  --accent-light: #c0d8ea;
+  --neutral: #dce0e4;
+  --neutral-dark: #a8b4be;
+  --surface: #ffffff;
+  --surface-hover: #f4f8fc;
+  --text: #14202e;
+  --text-secondary: #3e5468;
+  --text-muted: #7090a8;
+  --border: #bcccd8;
+  --error: #c43e2e;
+  --error-bg: #fce8e6;
+  --success: #3d7a4a;
+  --success-bg: #e6f4ea;
+  --warning: #b8860b;
+  --warning-bg: #fef7e0;
+}
+
+[data-palette="ocean-breeze"].dark {
+  --primary: #5ea0d8;
+  --primary-hover: #78b2e4;
+  --primary-light: #4488c0;
+  --background: #0e1418;
+  --background-secondary: #141c22;
+  --accent: #1e3040;
+  --accent-light: #263a4e;
+  --neutral: #222e38;
+  --neutral-dark: #405060;
+  --surface: #182430;
+  --surface-hover: #1e2c38;
+  --text: #dce8f0;
+  --text-secondary: #98b4c8;
+  --text-muted: #607888;
+  --border: #2c3e4e;
+  --error: #f28b82;
+  --error-bg: #3c1f1e;
+  --success: #81c995;
+  --success-bg: #1e3a28;
+  --warning: #fdd663;
+  --warning-bg: #3a3015;
+}
