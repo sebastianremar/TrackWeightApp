@@ -5,7 +5,7 @@ function fmt(d) {
   return d.toISOString().split('T')[0];
 }
 
-export default function DayView({ habits, entries, refDate, setRefDate, toggleEntry, onEditHabit }) {
+export default function DayView({ habits, entries, refDate, setRefDate, toggleEntry, onEditHabit, onDeleteHabit }) {
   const goDay = (offset) => {
     const d = new Date(refDate + 'T00:00:00');
     d.setDate(d.getDate() + offset);
@@ -37,6 +37,7 @@ export default function DayView({ habits, entries, refDate, setRefDate, toggleEn
         weekEntries={weekEntries}
         onToggle={toggleEntry}
         onEditHabit={onEditHabit}
+        onDeleteHabit={onDeleteHabit}
       />
     </div>
   );

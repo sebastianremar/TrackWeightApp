@@ -31,7 +31,7 @@ export default function AppLayout() {
     <div className={styles.layout}>
       {/* Desktop sidebar */}
       <aside className={styles.sidebar}>
-        <div className={styles.logo}>SaraPeso</div>
+        <div className={styles.logo}>TrackMyWeight</div>
         <nav className={styles.sideNav}>
           {NAV_ITEMS.map((item) => (
             <NavLink
@@ -52,7 +52,7 @@ export default function AppLayout() {
 
       {/* Top nav (mobile) */}
       <header className={styles.topNav}>
-        <span className={styles.topLogo}>SaraPeso</span>
+        <span className={styles.topLogo}>TrackMyWeight</span>
         <div className={styles.topRight}>
           <span className={styles.topUser}>{user?.name}</span>
           <button className={styles.logoutBtn} onClick={handleLogout}>Sign Out</button>

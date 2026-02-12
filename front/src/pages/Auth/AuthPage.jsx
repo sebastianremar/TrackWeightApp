@@ -9,7 +9,7 @@ export default function AuthPage() {
   return (
     <>
       <div className={styles.header}>
-        <h1 className={styles.title}>SaraPeso</h1>
+        <h1 className={styles.title}>TrackMyWeight</h1>
         <p className={styles.subtitle}>Weight & habit tracking</p>
       </div>
       <div className={styles.tabs} role="tablist">

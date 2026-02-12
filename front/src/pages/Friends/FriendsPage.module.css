@@ -35,6 +35,12 @@
   margin-bottom: 10px;
 }
 
+.friendList {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
 .center {
   display: flex;
   justify-content: center;

@@ -14,7 +14,7 @@ function getWeekStart(dateStr) {
   return fmt(d);
 }
 
-export default function WeekView({ habits, entries, refDate, setRefDate, toggleEntry, onEditHabit }) {
+export default function WeekView({ habits, entries, refDate, setRefDate, toggleEntry, onEditHabit, onDeleteHabit }) {
   const weekStart = getWeekStart(refDate);
   const [selectedDate, setSelectedDate] = useState(refDate);
 
@@ -54,6 +54,7 @@ export default function WeekView({ habits, entries, refDate, setRefDate, toggleE
           entries={entries}
           onToggle={toggleEntry}
           onEditHabit={onEditHabit}
+          onDeleteHabit={onDeleteHabit}
         />
       </div>
     </div>

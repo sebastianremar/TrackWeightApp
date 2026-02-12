@@ -1,9 +1,8 @@
 import { useState } from 'react';
 import { useFriends } from '../../hooks/useFriends';
 import FriendRequestCard from './FriendRequestCard';
-import FriendItem from './FriendItem';
+import FriendCard from './FriendCard';
 import AddFriendModal from './AddFriendModal';
-import CompareChartModal from './CompareChartModal';
 import Card from '../../components/Card/Card';
 import Spinner from '../../components/Spinner/Spinner';
 import EmptyState from '../../components/EmptyState/EmptyState';
@@ -13,7 +12,6 @@ import styles from './FriendsPage.module.css';
 export default function FriendsPage() {
   const { friends, requests, loading, error, addFriend, respond, removeFriend } = useFriends();
   const [addModalOpen, setAddModalOpen] = useState(false);
-  const [compareFriend, setCompareFriend] = useState(null);
 
   if (loading) {
     return <div className={styles.center}><Spinner size={32} /></div>;
@@ -37,32 +35,24 @@ export default function FriendsPage() {
         </Card>
       )}
 
-      <Card>
-        <h3 className={styles.sectionTitle}>Your Friends</h3>
-        {friends.length === 0 ? (
-          <EmptyState message="No friends yet. Add someone to get started!" />
-        ) : (
-          friends.map((friend) => (
-            <FriendItem
+      {friends.length === 0 ? (
+        <EmptyState message="No friends yet. Add someone to get started!" />
+      ) : (
+        <div className={styles.friendList}>
+          {friends.map((friend) => (
+            <FriendCard
               key={friend.email}
               friend={friend}
-              onViewProgress={() => setCompareFriend(friend)}
               onRemove={() => removeFriend(friend.email)}
             />
-          ))
-        )}
-      </Card>
+          ))}
+        </div>
+      )}
 
       <AddFriendModal
         open={addModalOpen}
         onClose={() => setAddModalOpen(false)}
         onAdd={addFriend}
-      />
-
-      <CompareChartModal
-        open={!!compareFriend}
-        onClose={() => setCompareFriend(null)}
-        friend={compareFriend}
       />
     </div>
   );

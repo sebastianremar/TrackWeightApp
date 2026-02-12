@@ -1,22 +1,44 @@
-.item {
+.card {
+  display: flex;
+  background: var(--surface);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-sm);
+  overflow: hidden;
+  transition: box-shadow var(--transition);
+}
+
+.card:hover {
+  box-shadow: var(--shadow-md);
+}
+
+.colorBar {
+  width: 4px;
+  flex-shrink: 0;
+}
+
+.body {
+  flex: 1;
+  padding: 12px 14px;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.row {
   display: flex;
   align-items: center;
   gap: 10px;
-  padding: 10px 0;
-  border-bottom: 1px solid var(--border);
-}
-
-.item:last-child {
-  border-bottom: none;
 }
 
 .checkbox {
   cursor: pointer;
   display: flex;
   align-items: center;
+  flex-shrink: 0;
 }
 
-.input {
+.hiddenInput {
   position: absolute;
   opacity: 0;
   pointer-events: none;
@@ -26,7 +48,7 @@
   width: 22px;
   height: 22px;
   border: 2px solid;
-  border-radius: 4px;
+  border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -35,22 +57,94 @@
 
 .info {
   flex: 1;
+  min-width: 0;
   display: flex;
-  align-items: center;
-  justify-content: space-between;
+  flex-direction: column;
+  gap: 2px;
 }
 
 .name {
   font-size: 0.95rem;
-  text-align: left;
+  font-weight: 500;
   color: var(--text);
+  transition: text-decoration var(--transition);
 }
 
-.name:hover {
-  color: var(--primary);
-}
-
-.progress {
-  font-size: 0.8rem;
+.done {
+  text-decoration: line-through;
   color: var(--text-muted);
+}
+
+.subtitle {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+}
+
+.menu {
+  position: relative;
+  flex-shrink: 0;
+}
+
+.menuBtn {
+  padding: 4px;
+  color: var(--text-muted);
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: color var(--transition), background var(--transition);
+}
+
+.menuBtn:hover {
+  color: var(--text);
+  background: var(--neutral);
+}
+
+.dropdown {
+  position: absolute;
+  right: 0;
+  top: 100%;
+  margin-top: 4px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  box-shadow: var(--shadow-md);
+  min-width: 120px;
+  z-index: 10;
+  overflow: hidden;
+}
+
+.dropdownItem {
+  display: block;
+  width: 100%;
+  padding: 8px 14px;
+  text-align: left;
+  font-size: 0.85rem;
+  color: var(--text);
+  transition: background var(--transition);
+}
+
+.dropdownItem:hover {
+  background: var(--surface-hover);
+}
+
+.dropdownDanger {
+  color: var(--error);
+}
+
+.dropdownDanger:hover {
+  background: var(--error-bg);
+}
+
+.progressBar {
+  height: 4px;
+  background: var(--neutral);
+  border-radius: 2px;
+  overflow: hidden;
+}
+
+.progressFill {
+  height: 100%;
+  border-radius: 2px;
+  transition: width 300ms ease;
 }

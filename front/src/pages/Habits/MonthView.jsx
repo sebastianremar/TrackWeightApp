@@ -9,7 +9,7 @@ function fmt(d) {
 
 const MONTH_NAMES = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
 
-export default function MonthView({ habits, entries, refDate, setRefDate, toggleEntry, onEditHabit }) {
+export default function MonthView({ habits, entries, refDate, setRefDate, toggleEntry, onEditHabit, onDeleteHabit }) {
   const ref = new Date(refDate + 'T00:00:00');
   const year = ref.getFullYear();
   const month = ref.getMonth();
@@ -44,6 +44,7 @@ export default function MonthView({ habits, entries, refDate, setRefDate, toggle
           entries={entries}
           onToggle={toggleEntry}
           onEditHabit={onEditHabit}
+          onDeleteHabit={onDeleteHabit}
         />
       </div>
     </div>

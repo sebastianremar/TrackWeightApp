@@ -6,6 +6,7 @@ import WeekView from './WeekView';
 import MonthView from './MonthView';
 import StatsView from './StatsView';
 import HabitModal from './HabitModal';
+import ConfirmDialog from '../../components/ConfirmDialog/ConfirmDialog';
 import Spinner from '../../components/Spinner/Spinner';
 import InlineError from '../../components/InlineError/InlineError';
 import styles from './HabitsPage.module.css';
@@ -53,14 +54,16 @@ export default function HabitsPage() {
   const [refDate, setRefDate] = useState(todayStr());
   const [modalOpen, setModalOpen] = useState(false);
   const [editingHabit, setEditingHabit] = useState(null);
+  const [deleteTarget, setDeleteTarget] = useState(null);
 
   const { habits, loading: habitsLoading, error: habitsError, addHabit, editHabit, removeHabit } = useHabits();
   const { entries, loading: entriesLoading, fetchEntries, toggleEntry } = useHabitEntries();
 
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => {
     const { from, to } = getDateRange(tab, refDate);
     fetchEntries(from, to);
-  }, [tab, refDate, fetchEntries]);
+  }, [tab, refDate]);
 
   const loading = habitsLoading || entriesLoading;
 
@@ -76,8 +79,22 @@ export default function HabitsPage() {
     setModalOpen(false);
   };
 
+  const handleDeleteHabit = (habit) => {
+    setDeleteTarget(habit);
+  };
+
+  const confirmDelete = () => {
+    if (deleteTarget) {
+      removeHabit(deleteTarget.habitId);
+    }
+  };
+
   const renderView = () => {
-    const props = { habits, entries, refDate, setRefDate, toggleEntry, onEditHabit: handleOpenEdit };
+    const props = {
+      habits, entries, refDate, setRefDate, toggleEntry,
+      onEditHabit: handleOpenEdit,
+      onDeleteHabit: handleDeleteHabit,
+    };
     switch (tab) {
       case 'day': return <DayView {...props} />;
       case 'week': return <WeekView {...props} />;
@@ -120,6 +137,16 @@ export default function HabitsPage() {
         onSave={handleSaveHabit}
         onDelete={editingHabit ? () => { removeHabit(editingHabit.habitId); setModalOpen(false); } : null}
         habit={editingHabit}
+      />
+
+      <ConfirmDialog
+        open={!!deleteTarget}
+        onClose={() => setDeleteTarget(null)}
+        onConfirm={confirmDelete}
+        title="Archive Habit"
+        message={deleteTarget ? `Archive "${deleteTarget.name}"? It will be removed from your active habits.` : ''}
+        confirmLabel="Archive"
+        danger
       />
     </div>
   );
