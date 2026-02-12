@@ -16,7 +16,6 @@ export async function api(url, options = {}) {
     });
 
     if (res.status === 401) {
-      window.location.href = '/login';
       throw new Error('Session expired');
     }
 
