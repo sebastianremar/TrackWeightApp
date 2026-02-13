@@ -117,15 +117,14 @@ export default function FriendChart({ friend, data }) {
           <XAxis {...xAxisProps} />
           <YAxis {...yAxisProps} />
           <Tooltip labelFormatter={formatDate} />
-          {isCompare ? (
-            <>
-              <Legend />
-              <Bar dataKey="you" name="You" fill="var(--primary)" />
-              <Bar dataKey="friend" name={friend.name} fill="var(--warning)" />
-            </>
-          ) : (
-            <Bar dataKey={dataKey} fill="var(--warning)" radius={[2, 2, 0, 0]} />
-          )}
+          {isCompare && <Legend />}
+          {isCompare
+            ? [
+                <Bar key="you" dataKey="you" name="You" fill="var(--primary)" />,
+                <Bar key="friend" dataKey="friend" name={friend.name} fill="var(--warning)" />,
+              ]
+            : <Bar dataKey={dataKey} fill="var(--warning)" radius={[2, 2, 0, 0]} />
+          }
         </BarChart>
       );
     }
@@ -137,15 +136,14 @@ export default function FriendChart({ friend, data }) {
           <XAxis {...xAxisProps} />
           <YAxis {...yAxisProps} />
           <Tooltip labelFormatter={formatDate} />
-          {isCompare ? (
-            <>
-              <Legend />
-              <Area type="monotone" dataKey="you" name="You" stroke="var(--primary)" fill="var(--primary)" fillOpacity={0.2} connectNulls />
-              <Area type="monotone" dataKey="friend" name={friend.name} stroke="var(--warning)" fill="var(--warning)" fillOpacity={0.2} connectNulls />
-            </>
-          ) : (
-            <Area type="monotone" dataKey={dataKey} stroke="var(--warning)" fill="var(--warning)" fillOpacity={0.2} />
-          )}
+          {isCompare && <Legend />}
+          {isCompare
+            ? [
+                <Area key="you" type="monotone" dataKey="you" name="You" stroke="var(--primary)" fill="var(--primary)" fillOpacity={0.2} connectNulls />,
+                <Area key="friend" type="monotone" dataKey="friend" name={friend.name} stroke="var(--warning)" fill="var(--warning)" fillOpacity={0.2} connectNulls />,
+              ]
+            : <Area type="monotone" dataKey={dataKey} stroke="var(--warning)" fill="var(--warning)" fillOpacity={0.2} />
+          }
         </AreaChart>
       );
     }
@@ -157,15 +155,14 @@ export default function FriendChart({ friend, data }) {
         <XAxis {...xAxisProps} />
         <YAxis {...yAxisProps} />
         <Tooltip labelFormatter={formatDate} />
-        {isCompare ? (
-          <>
-            <Legend />
-            <Line type="monotone" dataKey="you" name="You" stroke="var(--primary)" strokeWidth={2} dot={false} connectNulls />
-            <Line type="monotone" dataKey="friend" name={friend.name} stroke="var(--warning)" strokeWidth={2} dot={false} connectNulls />
-          </>
-        ) : (
-          <Line type="monotone" dataKey={dataKey} stroke="var(--warning)" strokeWidth={2} dot={false} />
-        )}
+        {isCompare && <Legend />}
+        {isCompare
+          ? [
+              <Line key="you" type="monotone" dataKey="you" name="You" stroke="var(--primary)" strokeWidth={2} dot={false} connectNulls />,
+              <Line key="friend" type="monotone" dataKey="friend" name={friend.name} stroke="var(--warning)" strokeWidth={2} dot={false} connectNulls />,
+            ]
+          : <Line type="monotone" dataKey={dataKey} stroke="var(--warning)" strokeWidth={2} dot={false} />
+        }
       </LineChart>
     );
   };
