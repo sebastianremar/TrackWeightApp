@@ -42,7 +42,11 @@ router.get('/entries/all', async (req, res) => {
 
     if (cursor) {
         try {
-            params.ExclusiveStartKey = JSON.parse(Buffer.from(cursor, 'base64url').toString());
+            const startKey = JSON.parse(Buffer.from(cursor, 'base64url').toString());
+            if (startKey.email !== email) {
+                return res.status(400).json({ error: 'Invalid cursor' });
+            }
+            params.ExclusiveStartKey = startKey;
         } catch {
             return res.status(400).json({ error: 'Invalid cursor' });
         }
@@ -170,7 +174,11 @@ router.get('/:id/entries', async (req, res) => {
 
     if (cursor) {
         try {
-            params.ExclusiveStartKey = JSON.parse(Buffer.from(cursor, 'base64url').toString());
+            const startKey = JSON.parse(Buffer.from(cursor, 'base64url').toString());
+            if (!startKey.emailHabitId || !startKey.emailHabitId.startsWith(email + '#')) {
+                return res.status(400).json({ error: 'Invalid cursor' });
+            }
+            params.ExclusiveStartKey = startKey;
         } catch {
             return res.status(400).json({ error: 'Invalid cursor' });
         }
@@ -202,7 +210,7 @@ router.get('/:id/entries', async (req, res) => {
 router.get('/:id/stats', async (req, res) => {
     const email = req.user.email;
     const habitId = req.params.id;
-    const weeks = parseInt(req.query.weeks) || 4;
+    const weeks = Math.min(Math.max(parseInt(req.query.weeks) || 4, 1), 52);
     const emailHabitId = email + '#' + habitId;
 
     // Calculate date range

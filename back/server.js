@@ -45,11 +45,15 @@ app.use(
 );
 
 const corsOrigin = process.env.CORS_ORIGIN;
+if (!corsOrigin && isProd) {
+    logger.fatal('CORS_ORIGIN must be set in production');
+    process.exit(1);
+}
 app.use(
     cors(corsOrigin ? { origin: corsOrigin.split(','), credentials: true } : { credentials: true }),
 );
 
-app.use(express.json());
+app.use(express.json({ limit: '16kb' }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, '..', 'front', 'dist')));
 

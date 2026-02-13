@@ -6,5 +6,6 @@ process.env.HABITS_TABLE = 'TestHabits';
 process.env.HABIT_ENTRIES_TABLE = 'TestHabitEntries';
 process.env.FRIENDSHIPS_TABLE = 'TestFriendships';
 process.env.NODE_ENV = 'production';
+process.env.CORS_ORIGIN = 'http://localhost:3000';
 process.env.LOG_LEVEL = 'silent';
 process.env.AWS_REGION = 'us-east-1';

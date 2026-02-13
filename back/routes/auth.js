@@ -140,7 +140,7 @@ router.post('/signin', async (req, res) => {
 
 // POST /api/signout
 router.post('/signout', (req, res) => {
-    res.clearCookie('token', { path: '/' });
+    res.clearCookie('token', COOKIE_OPTIONS);
     res.json({ message: 'Signed out' });
 });
 

@@ -5,6 +5,8 @@ const logger = require('../lib/logger');
 
 const router = express.Router();
 
+const COLOR_REGEX = /^#[0-9a-fA-F]{6}$/;
+
 function generateUlid() {
     // Simple ULID-like ID: timestamp + random
     var t = Date.now().toString(36);
@@ -24,6 +26,10 @@ router.post('/', async (req, res) => {
     const freq = parseInt(targetFrequency);
     if (!freq || freq < 1 || freq > 7) {
         return res.status(400).json({ error: 'Target frequency must be between 1 and 7' });
+    }
+
+    if (color !== undefined && (typeof color !== 'string' || !COLOR_REGEX.test(color))) {
+        return res.status(400).json({ error: 'Color must be a valid hex color (#rrggbb)' });
     }
 
     // Check max 20 active habits
@@ -145,6 +151,9 @@ router.patch('/:id', async (req, res) => {
     }
 
     if (color !== undefined) {
+        if (typeof color !== 'string' || !COLOR_REGEX.test(color)) {
+            return res.status(400).json({ error: 'Color must be a valid hex color (#rrggbb)' });
+        }
         updates.push('color = :color');
         values[':color'] = color;
     }

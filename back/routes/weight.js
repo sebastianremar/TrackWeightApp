@@ -92,7 +92,11 @@ router.get('/', async (req, res) => {
 
     if (cursor) {
         try {
-            params.ExclusiveStartKey = JSON.parse(Buffer.from(cursor, 'base64url').toString());
+            const startKey = JSON.parse(Buffer.from(cursor, 'base64url').toString());
+            if (startKey.email !== email) {
+                return res.status(400).json({ error: 'Invalid cursor' });
+            }
+            params.ExclusiveStartKey = startKey;
         } catch {
             return res.status(400).json({ error: 'Invalid cursor' });
         }
