@@ -129,7 +129,12 @@ router.post('/signin', async (req, res) => {
 
     res.json({
         message: 'Signed in successfully',
-        user: { name: user.name, email: user.email },
+        user: {
+            name: user.name,
+            email: user.email,
+            darkMode: user.darkMode || false,
+            palette: user.palette || 'ethereal-ivory',
+        },
     });
 });
 
