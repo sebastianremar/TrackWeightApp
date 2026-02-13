@@ -90,3 +90,9 @@
   opacity: 0.6;
   cursor: not-allowed;
 }
+
+@media (max-width: 480px) {
+  .inputWrap {
+    min-width: 0;
+  }
+}

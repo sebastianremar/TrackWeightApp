@@ -53,3 +53,9 @@
   gap: 2px;
   box-shadow: var(--shadow-sm);
 }
+
+@media (max-width: 480px) {
+  .rangeBtn {
+    padding: 8px 14px;
+  }
+}

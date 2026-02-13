@@ -6,7 +6,7 @@
 
 .dayHeader {
   text-align: center;
-  font-size: 0.7rem;
+  font-size: 0.75rem;
   font-weight: 600;
   color: var(--text-muted);
   text-transform: uppercase;
@@ -53,4 +53,11 @@
   width: 80%;
   height: 3px;
   border-radius: 2px;
+}
+
+@media (max-width: 480px) {
+  .cell {
+    min-width: 36px;
+    min-height: 36px;
+  }
 }

@@ -21,7 +21,7 @@
 }
 
 .tab {
-  padding: 7px 14px;
+  padding: 8px 14px;
   font-size: 0.85rem;
   font-weight: 500;
   border-radius: 4px;
@@ -51,6 +51,22 @@
 
 .addBtn:hover {
   background: var(--primary-hover);
+}
+
+@media (max-width: 480px) {
+  .header {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .tabs {
+    order: 2;
+  }
+
+  .addBtn {
+    order: 1;
+    text-align: center;
+  }
 }
 
 .center {

@@ -137,6 +137,19 @@
   background: var(--error-bg);
 }
 
+@media (max-width: 480px) {
+  .check {
+    width: 26px;
+    height: 26px;
+  }
+
+  .menuBtn {
+    padding: 8px;
+    min-width: 36px;
+    min-height: 36px;
+  }
+}
+
 .progressBar {
   height: 4px;
   background: var(--neutral);

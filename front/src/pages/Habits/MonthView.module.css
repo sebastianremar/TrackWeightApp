@@ -25,6 +25,12 @@
   text-align: center;
 }
 
+@media (max-width: 480px) {
+  .label {
+    min-width: auto;
+  }
+}
+
 .detail {
   margin-top: 16px;
 }

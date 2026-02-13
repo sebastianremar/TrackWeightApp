@@ -63,3 +63,13 @@
 .deleteBtn:hover {
   opacity: 0.8;
 }
+
+@media (max-width: 480px) {
+  .editBtn,
+  .deleteBtn {
+    padding: 8px 12px;
+    min-height: 44px;
+    display: flex;
+    align-items: center;
+  }
+}
