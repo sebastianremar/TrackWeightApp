@@ -34,3 +34,7 @@ export function getAllHabitEntries(params = {}) {
 export function getHabitStats(habitId, weeks = 4) {
   return api(`/api/habits/${encodeURIComponent(habitId)}/stats?weeks=${weeks}`);
 }
+
+export function getHabitStatsSummary(period = 'week') {
+  return api(`/api/habits/stats/summary?period=${period}`);
+}

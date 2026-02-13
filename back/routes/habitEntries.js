@@ -14,6 +14,59 @@ function isValidDate(dateStr) {
     return !isNaN(d.getTime());
 }
 
+// GET /api/habits/stats/summary — aggregated completion stats for all habits
+router.get('/stats/summary', async (req, res) => {
+    const email = req.user.email;
+    const period = req.query.period === 'month' ? 'month' : 'week';
+
+    const now = new Date();
+    let from, to;
+
+    if (period === 'week') {
+        const dow = now.getDay();
+        from = new Date(now);
+        from.setDate(now.getDate() - dow);
+        from.setHours(0, 0, 0, 0);
+        to = new Date(from);
+        to.setDate(from.getDate() + 6);
+    } else {
+        from = new Date(now.getFullYear(), now.getMonth(), 1);
+        to = new Date(now.getFullYear(), now.getMonth() + 1, 0);
+    }
+
+    const fromStr = from.toISOString().split('T')[0];
+    const toStr = to.toISOString().split('T')[0];
+
+    try {
+        const result = await docClient.send(
+            new QueryCommand({
+                TableName: process.env.HABIT_ENTRIES_TABLE,
+                IndexName: 'HabitEntriesByUser',
+                KeyConditionExpression: 'email = :email AND #d BETWEEN :from AND :to',
+                ExpressionAttributeNames: { '#d': 'date' },
+                ExpressionAttributeValues: { ':email': email, ':from': fromStr, ':to': toStr },
+            }),
+        );
+
+        // Group completions by habitId
+        const counts = {};
+        for (const item of result.Items || []) {
+            if (item.completed) {
+                counts[item.habitId] = (counts[item.habitId] || 0) + 1;
+            }
+        }
+
+        // Calculate total days in the period
+        const diffMs = to.getTime() - from.getTime();
+        const totalDays = Math.floor(diffMs / (24 * 60 * 60 * 1000)) + 1;
+
+        res.json({ counts, period, from: fromStr, to: toStr, totalDays });
+    } catch (err) {
+        logger.error({ err }, 'DynamoDB Query error');
+        return res.status(500).json({ error: 'Internal server error' });
+    }
+});
+
 // GET /api/habits/entries/all — MUST come before /:id routes
 router.get('/entries/all', async (req, res) => {
     const email = req.user.email;

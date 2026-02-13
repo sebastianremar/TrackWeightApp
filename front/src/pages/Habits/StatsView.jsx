@@ -1,7 +1,6 @@
 import { useState, useEffect } from 'react';
 import { ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
-import { getHabitStats } from '../../api/habitEntries';
-import { useHabits } from '../../hooks/useHabits';
+import { getHabitStats, getHabitStatsSummary } from '../../api/habitEntries';
 import Card from '../../components/Card/Card';
 import Spinner from '../../components/Spinner/Spinner';
 import StreakRow from './StreakRow';
@@ -9,54 +8,79 @@ import styles from './StatsView.module.css';
 
 const MONTH_NAMES = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
 
-function fmt(d) {
-  return d.toISOString().split('T')[0];
+function formatDateRange(period, from, to) {
+  if (period === 'week') {
+    const f = new Date(from + 'T00:00:00');
+    const t = new Date(to + 'T00:00:00');
+    const fmtShort = (d) => d.toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
+    return `${fmtShort(f)} - ${fmtShort(t)}`;
+  }
+  const d = new Date(from + 'T00:00:00');
+  return `${MONTH_NAMES[d.getMonth()]} ${d.getFullYear()}`;
 }
 
-export default function StatsView({ habits: propsHabits, refDate, setRefDate }) {
-  const ref = new Date(refDate + 'T00:00:00');
-  const year = ref.getFullYear();
-  const month = ref.getMonth();
-  const [statsMap, setStatsMap] = useState({});
+export default function StatsView({ habits }) {
+  const [period, setPeriod] = useState('week');
+  const [summary, setSummary] = useState(null);
+  const [streakMap, setStreakMap] = useState({});
   const [loading, setLoading] = useState(true);
-
-  const habits = propsHabits;
 
   useEffect(() => {
     if (habits.length === 0) { setLoading(false); return; }
     setLoading(true);
-    Promise.all(
-      habits.map((h) => getHabitStats(h.habitId, 8).then((data) => ({ habitId: h.habitId, stats: data.stats })))
-    ).then((results) => {
+
+    const streakWeeks = period === 'week' ? 4 : 16;
+
+    Promise.all([
+      getHabitStatsSummary(period),
+      ...habits.map((h) =>
+        getHabitStats(h.habitId, streakWeeks).then((data) => ({ habitId: h.habitId, stats: data.stats }))
+      ),
+    ]).then(([summaryData, ...streakResults]) => {
+      setSummary(summaryData);
       const map = {};
-      results.forEach((r) => { map[r.habitId] = r.stats; });
-      setStatsMap(map);
+      streakResults.forEach((r) => { map[r.habitId] = r.stats; });
+      setStreakMap(map);
     }).finally(() => setLoading(false));
-  }, [habits]);
+  }, [habits, period]);
 
-  const goMonth = (offset) => {
-    const d = new Date(year, month + offset, 1);
-    setRefDate(fmt(d));
-  };
+  // Compute overall completion
+  let completionRate = 0;
+  let totalCompletions = 0;
+  let totalTarget = 0;
+  if (summary && habits.length > 0) {
+    totalCompletions = Object.values(summary.counts || {}).reduce((s, c) => s + c, 0);
+    const daysInPeriod = summary.totalDays || 7;
+    const weeksInPeriod = Math.max(1, daysInPeriod / 7);
+    totalTarget = habits.reduce((s, h) => s + h.targetFrequency * weeksInPeriod, 0);
+    completionRate = totalTarget > 0 ? Math.round((totalCompletions / totalTarget) * 100) : 0;
+  }
 
-  // Overall completion donut
-  const totalCompletions = Object.values(statsMap).reduce((sum, stats) =>
-    sum + stats.reduce((s, w) => s + w.completions, 0), 0
-  );
-  const totalTarget = habits.reduce((sum, h) => sum + h.targetFrequency * 8, 0);
-  const completionRate = totalTarget > 0 ? Math.round((totalCompletions / totalTarget) * 100) : 0;
   const donutData = [
     { name: 'Done', value: completionRate },
-    { name: 'Remaining', value: 100 - completionRate },
+    { name: 'Remaining', value: Math.max(0, 100 - completionRate) },
   ];
 
   return (
     <div>
-      <div className={styles.nav}>
-        <button className={styles.arrow} onClick={() => goMonth(-1)}>&larr;</button>
-        <span className={styles.label}>{MONTH_NAMES[month]} {year}</span>
-        <button className={styles.arrow} onClick={() => goMonth(1)}>&rarr;</button>
+      <div className={styles.toggleRow}>
+        <button
+          className={`${styles.toggleBtn} ${period === 'week' ? styles.toggleActive : ''}`}
+          onClick={() => setPeriod('week')}
+        >
+          Week
+        </button>
+        <button
+          className={`${styles.toggleBtn} ${period === 'month' ? styles.toggleActive : ''}`}
+          onClick={() => setPeriod('month')}
+        >
+          Month
+        </button>
       </div>
+
+      {summary && (
+        <p className={styles.dateLabel}>{formatDateRange(period, summary.from, summary.to)}</p>
+      )}
 
       {loading ? (
         <div className={styles.center}><Spinner size={32} /></div>
@@ -83,6 +107,7 @@ export default function StatsView({ habits: propsHabits, refDate, setRefDate }) 
               </ResponsiveContainer>
               <span className={styles.donutLabel}>{completionRate}%</span>
             </div>
+            <p className={styles.subtext}>{totalCompletions} / {Math.round(totalTarget)} completions</p>
           </Card>
 
           <Card>
@@ -94,7 +119,7 @@ export default function StatsView({ habits: propsHabits, refDate, setRefDate }) 
                 <StreakRow
                   key={habit.habitId}
                   habit={habit}
-                  stats={statsMap[habit.habitId] || []}
+                  stats={streakMap[habit.habitId] || []}
                 />
               ))
             )}

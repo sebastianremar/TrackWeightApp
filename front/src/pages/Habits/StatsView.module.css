@@ -1,28 +1,39 @@
-.nav {
+.toggleRow {
   display: flex;
-  align-items: center;
   justify-content: center;
-  gap: 16px;
-  margin-bottom: 12px;
+  gap: 4px;
+  margin-bottom: 8px;
 }
 
-.arrow {
-  font-size: 1.2rem;
-  padding: 6px 12px;
+.toggleBtn {
+  padding: 6px 16px;
   border-radius: var(--radius-sm);
-  color: var(--text-secondary);
+  font-size: 0.85rem;
+  font-weight: 500;
   background: var(--neutral);
+  color: var(--text-secondary);
+  transition: all var(--transition);
 }
 
-.arrow:hover {
+.toggleBtn:hover {
   background: var(--accent-light);
-  color: var(--text);
 }
 
-.label {
-  font-weight: 600;
-  min-width: 160px;
+.toggleActive {
+  background: var(--primary);
+  color: #fff;
+}
+
+.toggleActive:hover {
+  background: var(--primary-hover);
+}
+
+.dateLabel {
   text-align: center;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+  margin-bottom: 12px;
 }
 
 .center {
@@ -55,6 +66,13 @@
   font-size: 1.3rem;
   font-weight: 700;
   color: var(--primary);
+}
+
+.subtext {
+  text-align: center;
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  margin-top: 4px;
 }
 
 .muted {
