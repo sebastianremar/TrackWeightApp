@@ -1,7 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useHabits } from '../../hooks/useHabits';
 import { useHabitEntries } from '../../hooks/useHabitEntries';
-import DayView from './DayView';
 import WeekView from './WeekView';
 import MonthView from './MonthView';
 import StatsView from './StatsView';
@@ -12,7 +11,6 @@ import InlineError from '../../components/InlineError/InlineError';
 import styles from './HabitsPage.module.css';
 
 const TABS = [
-  { key: 'day', label: 'Day' },
   { key: 'week', label: 'Week' },
   { key: 'month', label: 'Month' },
   { key: 'stats', label: 'Stats' },
@@ -20,11 +18,6 @@ const TABS = [
 
 function getDateRange(tab, refDate) {
   const d = new Date(refDate + 'T00:00:00');
-  if (tab === 'day') {
-    const start = new Date(d);
-    start.setDate(start.getDate() - 6);
-    return { from: fmt(start), to: refDate };
-  }
   if (tab === 'week') {
     const dow = d.getDay();
     const start = new Date(d);
@@ -50,7 +43,7 @@ function todayStr() {
 }
 
 export default function HabitsPage() {
-  const [tab, setTab] = useState('day');
+  const [tab, setTab] = useState('week');
   const [refDate, setRefDate] = useState(todayStr());
   const [modalOpen, setModalOpen] = useState(false);
   const [editingHabit, setEditingHabit] = useState(null);
@@ -96,10 +89,9 @@ export default function HabitsPage() {
       onDeleteHabit: handleDeleteHabit,
     };
     switch (tab) {
-      case 'day': return <DayView {...props} />;
       case 'week': return <WeekView {...props} />;
       case 'month': return <MonthView {...props} />;
-      case 'stats': return <StatsView habits={habits} refDate={refDate} setRefDate={setRefDate} />;
+      case 'stats': return <StatsView habits={habits} />;
       default: return null;
     }
   };
