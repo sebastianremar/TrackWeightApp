@@ -1,5 +1,5 @@
 const express = require('express');
-const { QueryCommand, GetCommand, TransactWriteCommand } = require('@aws-sdk/lib-dynamodb');
+const { QueryCommand, GetCommand, TransactWriteCommand, UpdateCommand } = require('@aws-sdk/lib-dynamodb');
 const { docClient } = require('../lib/db');
 const logger = require('../lib/logger');
 
@@ -229,11 +229,13 @@ router.get('/', async (req, res) => {
                     return {
                         email: item.friendEmail,
                         name: userResult.Item ? userResult.Item.name : item.friendEmail,
+                        favorite: item.favorite || false,
                     };
                 } catch {
                     return {
                         email: item.friendEmail,
                         name: item.friendEmail,
+                        favorite: item.favorite || false,
                     };
                 }
             }),
@@ -293,6 +295,37 @@ router.get('/requests', async (req, res) => {
         res.json({ requests });
     } catch (err) {
         logger.error({ err }, 'DynamoDB Query error');
+        return res.status(500).json({ error: 'Internal server error' });
+    }
+});
+
+// PATCH /api/friends/:email/favorite — toggle favorite status
+router.patch('/:email/favorite', async (req, res) => {
+    const userEmail = req.user.email;
+    const friendEmail = decodeURIComponent(req.params.email).trim().toLowerCase();
+    const { favorite } = req.body;
+
+    if (typeof favorite !== 'boolean') {
+        return res.status(400).json({ error: 'favorite must be a boolean' });
+    }
+
+    try {
+        await docClient.send(
+            new UpdateCommand({
+                TableName: process.env.FRIENDSHIPS_TABLE,
+                Key: { email: userEmail, friendEmail },
+                UpdateExpression: 'SET favorite = :fav',
+                ConditionExpression: '#s = :accepted',
+                ExpressionAttributeNames: { '#s': 'status' },
+                ExpressionAttributeValues: { ':fav': favorite, ':accepted': 'accepted' },
+            }),
+        );
+        res.json({ favorite });
+    } catch (err) {
+        if (err.name === 'ConditionalCheckFailedException') {
+            return res.status(404).json({ error: 'Friendship not found' });
+        }
+        logger.error({ err }, 'DynamoDB UpdateItem error');
         return res.status(500).json({ error: 'Internal server error' });
     }
 });

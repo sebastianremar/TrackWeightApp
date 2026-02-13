@@ -5,6 +5,7 @@ import {
   sendFriendRequest,
   respondToRequest,
   removeFriend as apiRemoveFriend,
+  toggleFriendFavorite,
 } from '../api/friends';
 
 export function useFriends() {
@@ -47,5 +48,16 @@ export function useFriends() {
     setFriends((prev) => prev.filter((f) => f.email !== email));
   }, []);
 
-  return { friends, requests, loading, error, addFriend, respond, removeFriend, refetch: fetchAll };
+  const toggleFavorite = useCallback(async (email, favorite) => {
+    // Optimistic update
+    setFriends((prev) => prev.map((f) => f.email === email ? { ...f, favorite } : f));
+    try {
+      await toggleFriendFavorite(email, favorite);
+    } catch {
+      // Rollback
+      setFriends((prev) => prev.map((f) => f.email === email ? { ...f, favorite: !favorite } : f));
+    }
+  }, []);
+
+  return { friends, requests, loading, error, addFriend, respond, removeFriend, toggleFavorite, refetch: fetchAll };
 }

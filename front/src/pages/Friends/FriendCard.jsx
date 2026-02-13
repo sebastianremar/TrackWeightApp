@@ -1,16 +1,11 @@
-import { useState } from 'react';
-import { ResponsiveContainer, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend } from 'recharts';
+import { useState, useEffect, useRef } from 'react';
 import { getFriendWeight } from '../../api/friends';
 import { getWeightHistory } from '../../api/weight';
+import FriendChart from './FriendChart';
 import ConfirmDialog from '../../components/ConfirmDialog/ConfirmDialog';
 import Spinner from '../../components/Spinner/Spinner';
 import InlineError from '../../components/InlineError/InlineError';
 import styles from './FriendCard.module.css';
-
-function formatDate(dateStr) {
-  const d = new Date(dateStr + 'T00:00:00');
-  return d.toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
-}
 
 function daysAgo(n) {
   const d = new Date();
@@ -26,7 +21,6 @@ function computeStats(entries) {
   const avg = Math.round((weights.reduce((s, w) => s + w, 0) / weights.length) * 10) / 10;
   const lowest = Math.min(...weights);
 
-  const today = new Date();
   const weekAgo = daysAgo(7);
   const monthAgo = daysAgo(30);
 
@@ -67,21 +61,17 @@ function StatBox({ label, value, colored }) {
   );
 }
 
-export default function FriendCard({ friend, onRemove }) {
-  const [expanded, setExpanded] = useState(false);
+export default function FriendCard({ friend, onRemove, onToggleFavorite, initialExpanded }) {
+  const [expanded, setExpanded] = useState(initialExpanded);
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [confirmOpen, setConfirmOpen] = useState(false);
+  const loadedRef = useRef(false);
 
-  const handleToggle = async () => {
-    if (expanded) {
-      setExpanded(false);
-      return;
-    }
-    setExpanded(true);
-    if (data) return; // already loaded
-
+  const loadData = async () => {
+    if (loadedRef.current) return;
+    loadedRef.current = true;
     setLoading(true);
     setError('');
     try {
@@ -113,12 +103,29 @@ export default function FriendCard({ friend, onRemove }) {
         friend: friendMap[date] || null,
       }));
 
-      setData({ stats: friendStats, miniData, compareData });
+      setData({ stats: friendStats, miniData, compareData, friendEntries, myEntries });
     } catch (err) {
       setError(err.message);
     } finally {
       setLoading(false);
     }
+  };
+
+  // Auto-load when initially expanded
+  useEffect(() => {
+    if (initialExpanded) {
+      loadData();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  const handleToggle = () => {
+    if (expanded) {
+      setExpanded(false);
+      return;
+    }
+    setExpanded(true);
+    loadData();
   };
 
   return (
@@ -133,6 +140,15 @@ export default function FriendCard({ friend, onRemove }) {
             </div>
           </div>
           <div className={styles.headerActions}>
+            <button
+              className={`${styles.starBtn} ${friend.favorite ? styles.starred : ''}`}
+              onClick={(e) => { e.stopPropagation(); onToggleFavorite(!friend.favorite); }}
+              aria-label={friend.favorite ? 'Remove from favorites' : 'Add to favorites'}
+            >
+              <svg viewBox="0 0 24 24" width="18" height="18" fill={friend.favorite ? 'currentColor' : 'none'} stroke="currentColor" strokeWidth="2" strokeLinejoin="round">
+                <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
+              </svg>
+            </button>
             <button
               className={styles.removeBtn}
               onClick={(e) => { e.stopPropagation(); setConfirmOpen(true); }}
@@ -165,37 +181,7 @@ export default function FriendCard({ friend, onRemove }) {
                   </div>
                 )}
 
-                {data.miniData.length > 0 && (
-                  <div className={styles.chartSection}>
-                    <h4 className={styles.chartTitle}>{friend.name}'s last 30 days</h4>
-                    <ResponsiveContainer width="100%" height={160}>
-                      <LineChart data={data.miniData} margin={{ top: 5, right: 10, bottom: 5, left: 0 }}>
-                        <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
-                        <XAxis dataKey="date" tickFormatter={formatDate} tick={{ fontSize: 10, fill: 'var(--text-muted)' }} interval="preserveStartEnd" />
-                        <YAxis domain={['dataMin - 1', 'dataMax + 1']} tick={{ fontSize: 10, fill: 'var(--text-muted)' }} width={36} />
-                        <Tooltip labelFormatter={formatDate} />
-                        <Line type="monotone" dataKey="weight" stroke="var(--warning)" strokeWidth={2} dot={false} />
-                      </LineChart>
-                    </ResponsiveContainer>
-                  </div>
-                )}
-
-                {data.compareData.length > 0 && (
-                  <div className={styles.chartSection}>
-                    <h4 className={styles.chartTitle}>You vs {friend.name}</h4>
-                    <ResponsiveContainer width="100%" height={200}>
-                      <LineChart data={data.compareData} margin={{ top: 5, right: 10, bottom: 5, left: 0 }}>
-                        <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
-                        <XAxis dataKey="date" tickFormatter={formatDate} tick={{ fontSize: 10, fill: 'var(--text-muted)' }} interval="preserveStartEnd" />
-                        <YAxis domain={['dataMin - 1', 'dataMax + 1']} tick={{ fontSize: 10, fill: 'var(--text-muted)' }} width={36} />
-                        <Tooltip labelFormatter={formatDate} />
-                        <Legend />
-                        <Line type="monotone" dataKey="you" name="You" stroke="var(--primary)" strokeWidth={2} dot={false} connectNulls />
-                        <Line type="monotone" dataKey="friend" name={friend.name} stroke="var(--warning)" strokeWidth={2} dot={false} connectNulls />
-                      </LineChart>
-                    </ResponsiveContainer>
-                  </div>
-                )}
+                <FriendChart friend={friend} data={data} />
 
                 {!data.stats && data.miniData.length === 0 && (
                   <p className={styles.emptyText}>No weight data yet</p>

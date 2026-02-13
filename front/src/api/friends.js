@@ -29,3 +29,10 @@ export function removeFriend(email) {
 export function getFriendWeight(email) {
   return api(`/api/friends/${encodeURIComponent(email)}/weight`);
 }
+
+export function toggleFriendFavorite(email, favorite) {
+  return api(`/api/friends/${encodeURIComponent(email)}/favorite`, {
+    method: 'PATCH',
+    body: JSON.stringify({ favorite }),
+  });
+}

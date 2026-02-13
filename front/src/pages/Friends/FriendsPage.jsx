@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { useFriends } from '../../hooks/useFriends';
 import FriendRequestCard from './FriendRequestCard';
 import FriendCard from './FriendCard';
@@ -10,8 +10,16 @@ import InlineError from '../../components/InlineError/InlineError';
 import styles from './FriendsPage.module.css';
 
 export default function FriendsPage() {
-  const { friends, requests, loading, error, addFriend, respond, removeFriend } = useFriends();
+  const { friends, requests, loading, error, addFriend, respond, removeFriend, toggleFavorite } = useFriends();
   const [addModalOpen, setAddModalOpen] = useState(false);
+
+  const initialExpandEmail = useMemo(() => {
+    if (friends.length === 0) return null;
+    const fav = friends.find((f) => f.favorite);
+    if (fav) return fav.email;
+    if (friends.length === 1) return friends[0].email;
+    return friends[Math.floor(Math.random() * friends.length)].email;
+  }, [friends]);
 
   if (loading) {
     return <div className={styles.center}><Spinner size={32} /></div>;
@@ -44,6 +52,8 @@ export default function FriendsPage() {
               key={friend.email}
               friend={friend}
               onRemove={() => removeFriend(friend.email)}
+              onToggleFavorite={(fav) => toggleFavorite(friend.email, fav)}
+              initialExpanded={friend.email === initialExpandEmail}
             />
           ))}
         </div>

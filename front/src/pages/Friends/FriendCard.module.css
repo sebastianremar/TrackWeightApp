@@ -67,6 +67,25 @@
   flex-shrink: 0;
 }
 
+.starBtn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 4px;
+  background: none;
+  color: var(--text-muted);
+  border-radius: var(--radius-sm);
+  transition: color var(--transition);
+}
+
+.starBtn:hover {
+  color: var(--warning);
+}
+
+.starred {
+  color: var(--warning);
+}
+
 .removeBtn {
   padding: 6px 12px;
   background: var(--error-bg);
