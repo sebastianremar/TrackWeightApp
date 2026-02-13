@@ -10,6 +10,9 @@ const router = express.Router();
 
 const ALLOWED_PALETTES = ['ethereal-ivory', 'serene-coastline', 'midnight-bloom', 'warm-sand', 'ocean-breeze'];
 
+const VALID_STAT_KEYS = ['current', 'avgWeeklyChange', 'weekOverWeek', 'lowest', 'highest', 'average'];
+const DEFAULT_STATS = ['current', 'avgWeeklyChange', 'lowest'];
+
 const COOKIE_OPTIONS = {
     httpOnly: true,
     secure: process.env.NODE_ENV === 'production',
@@ -134,6 +137,7 @@ router.post('/signin', async (req, res) => {
             email: user.email,
             darkMode: user.darkMode || false,
             palette: user.palette || 'ethereal-ivory',
+            dashboardStats: user.dashboardStats || DEFAULT_STATS,
         },
     });
 });
@@ -164,6 +168,7 @@ router.get('/me', authenticate, async (req, res) => {
             email: user.email,
             darkMode: user.darkMode || false,
             palette: user.palette || 'ethereal-ivory',
+            dashboardStats: user.dashboardStats || DEFAULT_STATS,
             createdAt: user.createdAt,
         });
     } catch (err) {
@@ -174,7 +179,7 @@ router.get('/me', authenticate, async (req, res) => {
 
 // PATCH /api/me — update profile
 router.patch('/me', authenticate, async (req, res) => {
-    const { name, darkMode, palette } = req.body;
+    const { name, darkMode, palette, dashboardStats } = req.body;
     const updates = [];
     const names = {};
     const values = {};
@@ -204,6 +209,17 @@ router.patch('/me', authenticate, async (req, res) => {
         values[':palette'] = palette;
     }
 
+    if (dashboardStats !== undefined) {
+        if (!Array.isArray(dashboardStats) || dashboardStats.length === 0 || dashboardStats.length > 6) {
+            return res.status(400).json({ error: 'dashboardStats must be an array of 1-6 stat keys' });
+        }
+        if (!dashboardStats.every((k) => VALID_STAT_KEYS.includes(k))) {
+            return res.status(400).json({ error: 'Invalid stat key' });
+        }
+        updates.push('dashboardStats = :ds');
+        values[':ds'] = dashboardStats;
+    }
+
     if (updates.length === 0) {
         return res.status(400).json({ error: 'No valid fields to update' });
     }
@@ -226,6 +242,7 @@ router.patch('/me', authenticate, async (req, res) => {
             email: user.email,
             darkMode: user.darkMode || false,
             palette: user.palette || 'ethereal-ivory',
+            dashboardStats: user.dashboardStats || DEFAULT_STATS,
         });
     } catch (err) {
         logger.error({ err }, 'DynamoDB UpdateItem error');
