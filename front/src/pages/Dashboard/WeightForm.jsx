@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { logWeight } from '../../api/weight';
 import Card from '../../components/Card/Card';
 import InlineError from '../../components/InlineError/InlineError';
@@ -13,11 +13,13 @@ export default function WeightForm({ editingEntry, onCancelEdit, onSaved }) {
   const [date, setDate] = useState(todayStr());
   const [error, setError] = useState('');
   const [submitting, setSubmitting] = useState(false);
+  const formRef = useRef(null);
 
   useEffect(() => {
     if (editingEntry) {
       setWeight(String(editingEntry.weight));
       setDate(editingEntry.date);
+      formRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
     }
   }, [editingEntry]);
 
@@ -43,7 +45,7 @@ export default function WeightForm({ editingEntry, onCancelEdit, onSaved }) {
   };
 
   return (
-    <Card>
+    <Card ref={formRef}>
       <h2 className={styles.title}>Log Weight</h2>
       {editingEntry && (
         <p className={styles.editing}>
