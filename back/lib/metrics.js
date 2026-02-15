@@ -91,6 +91,7 @@ async function flushMetrics() {
         byMethod: currentBucket.byMethod,
         byStatus: currentBucket.byStatus,
         uniqueUsers: currentBucket.uniqueUsers.size,
+        uniqueUserEmails: [...currentBucket.uniqueUsers],
         newSignups: currentBucket.newSignups,
         totalResponseTimeMs: currentBucket.totalResponseTimeMs,
         flushedAt: new Date().toISOString(),

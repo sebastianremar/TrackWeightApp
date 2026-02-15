@@ -69,8 +69,6 @@ export default function AdminPage() {
     label: formatTime(item.time, period),
   }));
 
-  const totalActiveUsers = timeSeries.reduce((sum, item) => sum + item.uniqueUsers, 0);
-
   return (
     <div className={styles.page}>
       <div className={styles.header}>
@@ -122,7 +120,7 @@ export default function AdminPage() {
         <Card>
           <div className={styles.stat}>
             <span className={styles.statLabel}>Active Users</span>
-            <span className={styles.statValue}>{totalActiveUsers}</span>
+            <span className={styles.statValue}>{summary.activeUsers ?? '-'}</span>
           </div>
         </Card>
       </div>

@@ -58,6 +58,7 @@ router.get('/metrics', async (req, res) => {
         let totalErrors = 0;
         let totalSignups = 0;
         const endpointTotals = {};
+        const activeUsersSet = new Set();
 
         for (const item of items) {
             totalRequests += item.totalRequests;
@@ -68,6 +69,12 @@ router.get('/metrics', async (req, res) => {
             if (item.byEndpoint) {
                 for (const [ep, count] of Object.entries(item.byEndpoint)) {
                     endpointTotals[ep] = (endpointTotals[ep] || 0) + count;
+                }
+            }
+
+            if (item.uniqueUserEmails) {
+                for (const email of item.uniqueUserEmails) {
+                    activeUsersSet.add(email);
                 }
             }
         }
@@ -82,6 +89,7 @@ router.get('/metrics', async (req, res) => {
             avgResponseMs: totalRequests > 0 ? Math.round(totalResponseTimeMs / totalRequests) : 0,
             errorRate: totalRequests > 0 ? Math.round((totalErrors / totalRequests) * 10000) / 100 : 0,
             newSignups: totalSignups,
+            activeUsers: activeUsersSet.size,
             topEndpoints,
         };
 
