@@ -138,6 +138,7 @@ router.post('/signin', async (req, res) => {
             darkMode: user.darkMode || false,
             palette: user.palette || 'ethereal-ivory',
             dashboardStats: user.dashboardStats || DEFAULT_STATS,
+            todoCategories: user.todoCategories || [],
             isAdmin: user.isAdmin || false,
         },
     });
@@ -170,6 +171,7 @@ router.get('/me', authenticate, async (req, res) => {
             darkMode: user.darkMode || false,
             palette: user.palette || 'ethereal-ivory',
             dashboardStats: user.dashboardStats || DEFAULT_STATS,
+            todoCategories: user.todoCategories || [],
             isAdmin: user.isAdmin || false,
             createdAt: user.createdAt,
         });
@@ -181,7 +183,7 @@ router.get('/me', authenticate, async (req, res) => {
 
 // PATCH /api/me — update profile
 router.patch('/me', authenticate, async (req, res) => {
-    const { name, darkMode, palette, dashboardStats } = req.body;
+    const { name, darkMode, palette, dashboardStats, todoCategories } = req.body;
     const updates = [];
     const names = {};
     const values = {};
@@ -222,6 +224,21 @@ router.patch('/me', authenticate, async (req, res) => {
         values[':ds'] = dashboardStats;
     }
 
+    if (todoCategories !== undefined) {
+        if (!Array.isArray(todoCategories) || todoCategories.length > 20) {
+            return res.status(400).json({ error: 'todoCategories must be an array of up to 20 items' });
+        }
+        if (!todoCategories.every((c) => typeof c === 'string' && c.trim().length > 0 && c.trim().length <= 50)) {
+            return res.status(400).json({ error: 'Each category must be a string of 1-50 characters' });
+        }
+        const unique = new Set(todoCategories.map((c) => c.trim()));
+        if (unique.size !== todoCategories.length) {
+            return res.status(400).json({ error: 'Duplicate categories are not allowed' });
+        }
+        updates.push('todoCategories = :tc');
+        values[':tc'] = todoCategories.map((c) => c.trim());
+    }
+
     if (updates.length === 0) {
         return res.status(400).json({ error: 'No valid fields to update' });
     }
@@ -245,6 +262,7 @@ router.patch('/me', authenticate, async (req, res) => {
             darkMode: user.darkMode || false,
             palette: user.palette || 'ethereal-ivory',
             dashboardStats: user.dashboardStats || DEFAULT_STATS,
+            todoCategories: user.todoCategories || [],
         });
     } catch (err) {
         logger.error({ err }, 'DynamoDB UpdateItem error');

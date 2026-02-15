@@ -19,6 +19,7 @@ const weightRoutes = require('./routes/weight');
 const habitRoutes = require('./routes/habits');
 const habitEntryRoutes = require('./routes/habitEntries');
 const friendRoutes = require('./routes/friends');
+const todoRoutes = require('./routes/todos');
 const adminRoutes = require('./routes/admin');
 const authenticate = require('./middleware/auth');
 const rateLimit = require('./middleware/rateLimit');
@@ -94,6 +95,7 @@ app.use('/api', authRoutes);
 app.use('/api/weight', authenticate, weightRoutes);
 app.use('/api/habits', authenticate, habitEntryRoutes);
 app.use('/api/habits', authenticate, habitRoutes);
+app.use('/api/todos', authenticate, todoRoutes);
 app.use('/api/friends', authenticate, friendRoutes);
 app.use('/api/admin', authenticate, requireAdmin, adminRoutes);
 

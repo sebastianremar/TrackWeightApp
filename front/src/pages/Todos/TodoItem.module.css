@@ -1,0 +1,138 @@
+.item {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 12px 16px;
+  background: var(--surface);
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border);
+  transition: box-shadow var(--transition);
+}
+
+.item:hover {
+  box-shadow: var(--shadow-sm);
+}
+
+.checkbox {
+  flex-shrink: 0;
+  width: 22px;
+  height: 22px;
+  margin-top: 2px;
+  border-radius: 50%;
+  border: 2px solid var(--border);
+  background: var(--surface);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all var(--transition);
+}
+
+.checkbox:hover {
+  border-color: var(--primary);
+}
+
+.checkboxChecked {
+  background: var(--primary);
+  border-color: var(--primary);
+}
+
+.content {
+  flex: 1;
+  min-width: 0;
+  cursor: pointer;
+}
+
+.title {
+  font-size: 0.95rem;
+  font-weight: 500;
+  color: var(--text);
+  word-break: break-word;
+}
+
+.titleCompleted {
+  text-decoration: line-through;
+  color: var(--text-secondary);
+}
+
+.description {
+  font-size: 0.82rem;
+  color: var(--text-secondary);
+  margin-top: 2px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.meta {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 6px;
+  flex-wrap: wrap;
+}
+
+.categoryBadge {
+  font-size: 0.72rem;
+  font-weight: 500;
+  padding: 2px 8px;
+  border-radius: 9999px;
+  background: var(--accent-light);
+  color: var(--primary);
+}
+
+.dueDate {
+  font-size: 0.78rem;
+  color: var(--text-secondary);
+}
+
+.overdue {
+  color: var(--error);
+  font-weight: 500;
+}
+
+.priorityDot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.priorityHigh {
+  background: var(--error);
+}
+
+.priorityMedium {
+  background: #f59e0b;
+}
+
+.priorityLow {
+  background: var(--text-secondary);
+}
+
+.actions {
+  flex-shrink: 0;
+  display: flex;
+  gap: 4px;
+}
+
+.actionBtn {
+  width: 32px;
+  height: 32px;
+  border-radius: var(--radius-sm);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-secondary);
+  transition: background var(--transition), color var(--transition);
+}
+
+.actionBtn:hover {
+  background: var(--neutral);
+  color: var(--text);
+}
+
+.deleteBtn:hover {
+  background: var(--error-bg);
+  color: var(--error);
+}
