@@ -57,7 +57,6 @@ router.get('/metrics', async (req, res) => {
         let totalResponseTimeMs = 0;
         let totalErrors = 0;
         let totalSignups = 0;
-        let activeUsers = new Set();
         const endpointTotals = {};
 
         for (const item of items) {
