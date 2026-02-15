@@ -117,9 +117,13 @@ if (require.main === module) {
     });
 
     // Graceful shutdown
-    function shutdown(signal) {
+    async function shutdown(signal) {
         logger.info(`${signal} received, shutting down gracefully...`);
-        stopFlushInterval();
+        try {
+            await stopFlushInterval();
+        } catch (err) {
+            logger.error({ err }, 'Failed to flush metrics on shutdown');
+        }
         server.close(() => {
             logger.info('HTTP server closed');
             process.exit(0);

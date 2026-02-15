@@ -95,13 +95,23 @@ router.get('/metrics', async (req, res) => {
 // GET /api/admin/users/count
 router.get('/users/count', async (req, res) => {
     try {
-        const result = await docClient.send(
-            new ScanCommand({
+        let count = 0;
+        let lastKey;
+
+        do {
+            const params = {
                 TableName: process.env.USERS_TABLE,
                 Select: 'COUNT',
-            }),
-        );
-        res.json({ count: result.Count });
+            };
+            if (lastKey) {
+                params.ExclusiveStartKey = lastKey;
+            }
+            const result = await docClient.send(new ScanCommand(params));
+            count += result.Count;
+            lastKey = result.LastEvaluatedKey;
+        } while (lastKey);
+
+        res.json({ count });
     } catch (err) {
         logger.error({ err }, 'Failed to count users');
         return res.status(500).json({ error: 'Internal server error' });

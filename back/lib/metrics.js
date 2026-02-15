@@ -29,13 +29,20 @@ function createEmptyBucket() {
 function normalizeEndpoint(method, url) {
     const path = url.split('?')[0];
     const normalized = path
+        // habits: preserve fixed sub-routes before dynamic replacements
+        .replace(/\/api\/habits\/(stats|entries)(\/|$)/, '/api/habits/$1$2')
         .replace(/\/api\/habits\/[^/]+\/entries\/\d{4}-\d{2}-\d{2}/, '/api/habits/:id/entries/:date')
         .replace(/\/api\/habits\/[^/]+\/entries/, '/api/habits/:id/entries')
         .replace(/\/api\/habits\/[^/]+\/stats/, '/api/habits/:id/stats')
-        .replace(/\/api\/habits\/[^/]+/, '/api/habits/:id')
-        .replace(/\/api\/weight\/[^/]+/, '/api/weight/:date')
-        .replace(/\/api\/friends\/[^/]+\/weight/, '/api/friends/:id/weight')
-        .replace(/\/api\/friends\/[^/]+/, '/api/friends/:id');
+        .replace(/\/api\/habits\/(?!stats|entries)[^/]+/, '/api/habits/:id')
+        // weight: preserve /weight/latest
+        .replace(/\/api\/weight\/(?!latest)[^/]+/, '/api/weight/:date')
+        // friends: preserve fixed sub-routes before dynamic replacements
+        .replace(/\/api\/friends\/(?!request$|respond$|requests$)[^/]+\/weight/, '/api/friends/:email/weight')
+        .replace(/\/api\/friends\/(?!request$|respond$|requests$)[^/]+\/habits\/stats/, '/api/friends/:email/habits/stats')
+        .replace(/\/api\/friends\/(?!request$|respond$|requests$)[^/]+\/habits/, '/api/friends/:email/habits')
+        .replace(/\/api\/friends\/(?!request$|respond$|requests$)[^/]+\/favorite/, '/api/friends/:email/favorite')
+        .replace(/\/api\/friends\/(?!request|respond|requests)[^/]+/, '/api/friends/:email');
     return `${method} ${normalized}`;
 }
 

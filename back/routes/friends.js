@@ -1,5 +1,5 @@
 const express = require('express');
-const { QueryCommand, GetCommand, TransactWriteCommand, UpdateCommand } = require('@aws-sdk/lib-dynamodb');
+const { QueryCommand, GetCommand, TransactWriteCommand, UpdateCommand, BatchGetCommand } = require('@aws-sdk/lib-dynamodb');
 const { docClient } = require('../lib/db');
 const logger = require('../lib/logger');
 
@@ -216,30 +216,40 @@ router.get('/', async (req, res) => {
             }),
         );
 
-        // Look up friend names in parallel
-        const friends = await Promise.all(
-            (result.Items || []).map(async (item) => {
-                try {
-                    const userResult = await docClient.send(
-                        new GetCommand({
-                            TableName: process.env.USERS_TABLE,
-                            Key: { email: item.friendEmail },
-                        }),
-                    );
-                    return {
-                        email: item.friendEmail,
-                        name: userResult.Item ? userResult.Item.name : item.friendEmail,
-                        favorite: item.favorite || false,
-                    };
-                } catch {
-                    return {
-                        email: item.friendEmail,
-                        name: item.friendEmail,
-                        favorite: item.favorite || false,
-                    };
+        const items = result.Items || [];
+        if (items.length === 0) {
+            return res.json({ friends: [] });
+        }
+
+        // Batch lookup friend names (up to 100 per BatchGet)
+        const nameMap = {};
+        const keys = items.map((item) => ({ email: item.friendEmail }));
+        for (let i = 0; i < keys.length; i += 100) {
+            try {
+                const batch = await docClient.send(
+                    new BatchGetCommand({
+                        RequestItems: {
+                            [process.env.USERS_TABLE]: {
+                                Keys: keys.slice(i, i + 100),
+                                ProjectionExpression: 'email, #n',
+                                ExpressionAttributeNames: { '#n': 'name' },
+                            },
+                        },
+                    }),
+                );
+                for (const user of batch.Responses[process.env.USERS_TABLE] || []) {
+                    nameMap[user.email] = user.name;
                 }
-            }),
-        );
+            } catch (err) {
+                logger.error({ err }, 'BatchGet friend names failed');
+            }
+        }
+
+        const friends = items.map((item) => ({
+            email: item.friendEmail,
+            name: nameMap[item.friendEmail] || item.friendEmail,
+            favorite: item.favorite || false,
+        }));
 
         res.json({ friends });
     } catch (err) {
@@ -267,30 +277,40 @@ router.get('/requests', async (req, res) => {
             }),
         );
 
-        // Look up friend names in parallel
-        const requests = await Promise.all(
-            (result.Items || []).map(async (item) => {
-                try {
-                    const userResult = await docClient.send(
-                        new GetCommand({
-                            TableName: process.env.USERS_TABLE,
-                            Key: { email: item.friendEmail },
-                        }),
-                    );
-                    return {
-                        email: item.friendEmail,
-                        name: userResult.Item ? userResult.Item.name : item.friendEmail,
-                        createdAt: item.createdAt,
-                    };
-                } catch {
-                    return {
-                        email: item.friendEmail,
-                        name: item.friendEmail,
-                        createdAt: item.createdAt,
-                    };
+        const items = result.Items || [];
+        if (items.length === 0) {
+            return res.json({ requests: [] });
+        }
+
+        // Batch lookup requester names
+        const nameMap = {};
+        const keys = items.map((item) => ({ email: item.friendEmail }));
+        for (let i = 0; i < keys.length; i += 100) {
+            try {
+                const batch = await docClient.send(
+                    new BatchGetCommand({
+                        RequestItems: {
+                            [process.env.USERS_TABLE]: {
+                                Keys: keys.slice(i, i + 100),
+                                ProjectionExpression: 'email, #n',
+                                ExpressionAttributeNames: { '#n': 'name' },
+                            },
+                        },
+                    }),
+                );
+                for (const user of batch.Responses[process.env.USERS_TABLE] || []) {
+                    nameMap[user.email] = user.name;
                 }
-            }),
-        );
+            } catch (err) {
+                logger.error({ err }, 'BatchGet requester names failed');
+            }
+        }
+
+        const requests = items.map((item) => ({
+            email: item.friendEmail,
+            name: nameMap[item.friendEmail] || item.friendEmail,
+            createdAt: item.createdAt,
+        }));
 
         res.json({ requests });
     } catch (err) {

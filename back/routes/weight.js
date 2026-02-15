@@ -75,6 +75,13 @@ router.get('/', async (req, res) => {
         Limit: limit,
     };
 
+    if (from && !isValidDate(from)) {
+        return res.status(400).json({ error: 'Invalid "from" date format' });
+    }
+    if (to && !isValidDate(to)) {
+        return res.status(400).json({ error: 'Invalid "to" date format' });
+    }
+
     if (from && to) {
         params.KeyConditionExpression += ' AND #d BETWEEN :from AND :to';
         params.ExpressionAttributeNames = { '#d': 'date' };
