@@ -99,6 +99,17 @@
   justify-content: center;
 }
 
+.habitProgress {
+  font-size: 0.6rem;
+  color: var(--text-muted);
+  font-weight: 500;
+  margin-top: 1px;
+}
+
+.habitProgressDone {
+  color: var(--success);
+}
+
 .dayContent {
   padding: 4px;
   display: flex;

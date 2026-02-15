@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import styles from './DayView.module.css';
 
 const HOUR_HEIGHT = 60;
@@ -34,13 +34,23 @@ function formatHour12(h) {
   return `${h - 12} PM`;
 }
 
-export default function DayView({ events, todos, refDate, setRefDate, onEditEvent, onCreateEvent }) {
+function getWeekRange(dateStr) {
+  const d = new Date(dateStr + 'T00:00:00');
+  const dow = (d.getDay() + 6) % 7;
+  const start = new Date(d);
+  start.setDate(start.getDate() - dow);
+  const end = new Date(start);
+  end.setDate(end.getDate() + 6);
+  return { from: fmt(start), to: fmt(end) };
+}
+
+export default function DayView({ events, todos, habits, habitEntries, refDate, setRefDate, onEditEvent, onCreateEvent }) {
   const d = new Date(refDate + 'T00:00:00');
   const today = todayStr();
   const isToday = refDate === today;
   const [now, setNow] = useState(new Date());
+  const [habitsOpen, setHabitsOpen] = useState(false);
 
-  // Update current time every minute for the time indicator
   useEffect(() => {
     if (!isToday) return;
     const id = setInterval(() => setNow(new Date()), 900000);
@@ -63,12 +73,26 @@ export default function DayView({ events, todos, refDate, setRefDate, onEditEven
   const dayTodos = todos.filter((t) => t.dueDate === refDate);
   const dayEvents = events.filter((e) => e.date === refDate);
 
+  // Habit completion data
+  const weekRange = useMemo(() => getWeekRange(refDate), [refDate]);
+  const habitData = useMemo(() => {
+    if (!habits || habits.length === 0) return [];
+    return habits.map((h) => {
+      const doneToday = habitEntries.some((e) => e.habitId === h.habitId && e.date === refDate);
+      const weekCount = habitEntries.filter(
+        (e) => e.habitId === h.habitId && e.date >= weekRange.from && e.date <= weekRange.to
+      ).length;
+      return { ...h, doneToday, weekCount };
+    });
+  }, [habits, habitEntries, refDate, weekRange]);
+
+  const doneCount = habitData.filter((h) => h.doneToday).length;
+
   const handleTimeClick = (hour) => {
     const time = `${String(hour).padStart(2, '0')}:00`;
     onCreateEvent(time);
   };
 
-  // Current time indicator position
   const nowH = now.getHours();
   const nowM = now.getMinutes();
   const showNowLine = isToday && nowH >= START_HOUR && nowH <= END_HOUR;
@@ -93,6 +117,50 @@ export default function DayView({ events, todos, refDate, setRefDate, onEditEven
         )}
       </div>
 
+      {habitData.length > 0 && (
+        <div className={`${styles.habitsPanel} ${habitsOpen ? styles.habitsPanelOpen : ''}`}>
+          <button className={styles.habitsToggle} onClick={() => setHabitsOpen(!habitsOpen)}>
+            <div className={styles.habitsDots}>
+              {habitData.map((h) => (
+                <span
+                  key={h.habitId}
+                  className={`${styles.habitDotSmall} ${h.doneToday ? styles.habitDotDone : ''}`}
+                  style={{ background: h.doneToday ? h.color : 'transparent', borderColor: h.color }}
+                />
+              ))}
+            </div>
+            <span className={styles.habitsLabel}>
+              {doneCount}/{habitData.length} habits
+            </span>
+            <svg
+              className={`${styles.habitsChevron} ${habitsOpen ? styles.habitsChevronOpen : ''}`}
+              viewBox="0 0 16 16" width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"
+            >
+              <path d="M4 6l4 4 4-4" />
+            </svg>
+          </button>
+
+          {habitsOpen && (
+            <div className={styles.habitsList}>
+              {habitData.map((h) => (
+                <div key={h.habitId} className={styles.habitRow}>
+                  <span className={styles.habitColor} style={{ background: h.color }} />
+                  <span className={styles.habitName}>{h.name}</span>
+                  <span className={styles.habitWeek}>{h.weekCount}/{h.targetFrequency}</span>
+                  {h.doneToday ? (
+                    <svg className={styles.habitCheck} viewBox="0 0 16 16" width="16" height="16" fill="none" stroke={h.color} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                      <path d="M3 8l3.5 3.5L13 5" />
+                    </svg>
+                  ) : (
+                    <span className={styles.habitUndone} />
+                  )}
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
+
       {dayTodos.length > 0 && (
         <div className={styles.todoSection}>
           <div className={styles.todoHeader}>Tasks due today</div>
@@ -107,7 +175,7 @@ export default function DayView({ events, todos, refDate, setRefDate, onEditEven
         </div>
       )}
 
-      {dayEvents.length === 0 && dayTodos.length === 0 && (
+      {dayEvents.length === 0 && dayTodos.length === 0 && habitData.length === 0 && (
         <div className={styles.emptyHint}>
           <span>No events today. Tap a time slot or</span>
           <button className={styles.emptyBtn} onClick={() => onCreateEvent(null)}>+ Add event</button>

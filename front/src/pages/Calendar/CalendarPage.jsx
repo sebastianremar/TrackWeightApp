@@ -1,5 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useCalendarEvents } from '../../hooks/useCalendarEvents';
+import { useHabits } from '../../hooks/useHabits';
+import { useHabitEntries } from '../../hooks/useHabitEntries';
 import { getTodos } from '../../api/todos';
 import DayView from './DayView';
 import CalendarWeekView from './CalendarWeekView';
@@ -53,6 +55,10 @@ export default function CalendarPage() {
   const [prefillTime, setPrefillTime] = useState(null);
 
   const { events, loading, error, fetchEvents, addEvent, editEvent, removeEvent } = useCalendarEvents();
+  const { habits } = useHabits();
+  const { entries: habitEntries, fetchEntries: fetchHabitEntries } = useHabitEntries();
+
+  const goodHabits = habits.filter((h) => h.type !== 'bad');
 
   const tabIndex = TABS.findIndex((t) => t.key === tab);
 
@@ -60,6 +66,7 @@ export default function CalendarPage() {
   useEffect(() => {
     const { from, to } = getDateRange(tab, refDate);
     fetchEvents(from, to);
+    fetchHabitEntries(from, to);
     getTodos(false).then((data) => setTodos(data.todos || [])).catch(() => {});
   }, [tab, refDate]);
 
@@ -110,6 +117,8 @@ export default function CalendarPage() {
     const props = {
       events,
       todos: visibleTodos,
+      habits: goodHabits,
+      habitEntries,
       refDate,
       setRefDate,
       onEditEvent: handleOpenEdit,

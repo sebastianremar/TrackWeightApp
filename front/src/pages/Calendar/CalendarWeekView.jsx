@@ -25,7 +25,7 @@ function formatTime12(t) {
   return `${hour}:${String(m).padStart(2, '0')} ${period}`;
 }
 
-export default function CalendarWeekView({ events, todos, refDate, setRefDate, onEditEvent, onDayClick }) {
+export default function CalendarWeekView({ events, todos, habits, habitEntries, refDate, setRefDate, onEditEvent, onDayClick }) {
   const weekStart = getWeekStart(refDate);
   const today = todayStr();
   const currentWeekStart = getWeekStart(today);
@@ -81,6 +81,8 @@ export default function CalendarWeekView({ events, todos, refDate, setRefDate, o
           const visible = allItems.slice(0, MAX_VISIBLE);
           const overflow = allItems.length - MAX_VISIBLE;
           const dayNum = new Date(date + 'T00:00:00').getDate();
+          const habitsDone = habits ? habits.filter((h) => habitEntries.some((e) => e.habitId === h.habitId && e.date === date)).length : 0;
+          const habitsTotal = habits ? habits.length : 0;
 
           return (
             <div key={date} className={styles.dayColumn}>
@@ -90,6 +92,11 @@ export default function CalendarWeekView({ events, todos, refDate, setRefDate, o
               >
                 <span className={styles.dayName}>{DAY_NAMES[i]}</span>
                 <span className={styles.dayNum}>{dayNum}</span>
+                {habitsTotal > 0 && (
+                  <span className={`${styles.habitProgress} ${habitsDone === habitsTotal ? styles.habitProgressDone : ''}`}>
+                    {habitsDone}/{habitsTotal}
+                  </span>
+                )}
               </button>
               <div className={styles.dayContent}>
                 {visible.map((entry) => {
