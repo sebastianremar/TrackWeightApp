@@ -58,6 +58,16 @@ export default function StatsCards({ stats, visibleStats, onUpdateVisibleStats }
 
   return (
     <div className={styles.wrapper}>
+      <div className={styles.sectionHeader}>
+        <h3 className={styles.sectionTitle}>Your Stats</h3>
+        <button className={styles.customizeBtn} onClick={handleOpenModal}>
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+            <circle cx="8" cy="8" r="2.5" />
+            <path d="M13.5 8a5.5 5.5 0 01-.3 1.2l1.2.7-.8 1.4-1.2-.7a5.5 5.5 0 01-1.1.6v1.4H9.8v-1.4a5.5 5.5 0 01-1.1-.6l-1.2.7-.8-1.4 1.2-.7A5.5 5.5 0 017.5 8a5.5 5.5 0 01.3-1.2l-1.2-.7.8-1.4 1.2.7a5.5 5.5 0 011.1-.6V3.4h1.4v1.4a5.5 5.5 0 011.1.6l1.2-.7.8 1.4-1.2.7A5.5 5.5 0 0113.5 8z" />
+          </svg>
+          Customize
+        </button>
+      </div>
       <div className={styles.grid}>
         {visibleStats.map((key) => {
           const metric = ALL_METRICS.find((m) => m.key === key);
@@ -73,12 +83,6 @@ export default function StatsCards({ stats, visibleStats, onUpdateVisibleStats }
           );
         })}
       </div>
-      <button className={styles.gearBtn} onClick={handleOpenModal} aria-label="Customize stats">
-        <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-          <circle cx="8" cy="8" r="2.5" />
-          <path d="M13.5 8a5.5 5.5 0 01-.3 1.2l1.2.7-.8 1.4-1.2-.7a5.5 5.5 0 01-1.1.6v1.4H9.8v-1.4a5.5 5.5 0 01-1.1-.6l-1.2.7-.8-1.4 1.2-.7A5.5 5.5 0 017.5 8a5.5 5.5 0 01.3-1.2l-1.2-.7.8-1.4 1.2.7a5.5 5.5 0 011.1-.6V3.4h1.4v1.4a5.5 5.5 0 011.1.6l1.2-.7.8 1.4-1.2.7A5.5 5.5 0 0113.5 8z" />
-        </svg>
-      </button>
       <Modal open={modalOpen} onClose={() => setModalOpen(false)} title="Customize Stats">
         <div className={styles.checkList}>
           {ALL_METRICS.map((m) => (

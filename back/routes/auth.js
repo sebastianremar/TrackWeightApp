@@ -27,14 +27,22 @@ function isStrongPassword(password) {
 
 // POST /api/signup
 router.post('/signup', async (req, res) => {
-    const { name, email, password } = req.body;
+    const { firstName, lastName, name, email, password } = req.body;
 
-    if (!name || !email || !password) {
-        return res.status(400).json({ error: 'Name, email, and password are required' });
+    // Support both new (firstName+lastName) and legacy (name) fields
+    const fName = firstName || (name ? name.trim().split(/\s+/)[0] : '');
+    const lName = lastName || (name ? name.trim().split(/\s+/).slice(1).join(' ') : '');
+
+    if (!fName || !email || !password) {
+        return res.status(400).json({ error: 'First name, email, and password are required' });
     }
 
-    if (typeof name !== 'string' || name.trim().length > 100) {
-        return res.status(400).json({ error: 'Name must be 100 characters or less' });
+    if (typeof fName !== 'string' || fName.trim().length > 50) {
+        return res.status(400).json({ error: 'First name must be 50 characters or less' });
+    }
+
+    if (lName && (typeof lName !== 'string' || lName.trim().length > 50)) {
+        return res.status(400).json({ error: 'Last name must be 50 characters or less' });
     }
 
     if (typeof email !== 'string' || email.trim().length > 254) {
@@ -63,13 +71,18 @@ router.post('/signup', async (req, res) => {
 
     const hashedPassword = await bcrypt.hash(password, 10);
 
+    const fullName = lName.trim() ? `${fName.trim()} ${lName.trim()}` : fName.trim();
     const user = {
         email: email.trim().toLowerCase(),
-        name: name.trim(),
+        firstName: fName.trim(),
+        lastName: lName.trim() || undefined,
+        name: fullName,
         password: hashedPassword,
         darkMode: false,
         createdAt: new Date().toISOString(),
     };
+    // Remove undefined fields
+    if (!user.lastName) delete user.lastName;
 
     try {
         await docClient.send(
@@ -92,7 +105,7 @@ router.post('/signup', async (req, res) => {
 
     res.status(201).json({
         message: 'Account created successfully',
-        user: { name: user.name, email: user.email },
+        user: { firstName: user.firstName, lastName: user.lastName || '', name: user.name, email: user.email },
     });
 });
 
@@ -133,6 +146,8 @@ router.post('/signin', async (req, res) => {
     res.json({
         message: 'Signed in successfully',
         user: {
+            firstName: user.firstName || user.name.split(' ')[0],
+            lastName: user.lastName || user.name.split(' ').slice(1).join(' '),
             name: user.name,
             email: user.email,
             darkMode: user.darkMode || false,
@@ -166,6 +181,8 @@ router.get('/me', authenticate, async (req, res) => {
 
         const user = result.Item;
         res.json({
+            firstName: user.firstName || user.name.split(' ')[0],
+            lastName: user.lastName || user.name.split(' ').slice(1).join(' '),
             name: user.name,
             email: user.email,
             darkMode: user.darkMode || false,
@@ -183,12 +200,31 @@ router.get('/me', authenticate, async (req, res) => {
 
 // PATCH /api/me — update profile
 router.patch('/me', authenticate, async (req, res) => {
-    const { name, darkMode, palette, dashboardStats, todoCategories } = req.body;
+    const { firstName, lastName, name, darkMode, palette, dashboardStats, todoCategories } = req.body;
     const updates = [];
     const names = {};
     const values = {};
 
-    if (name !== undefined) {
+    if (firstName !== undefined) {
+        if (typeof firstName !== 'string' || firstName.trim().length === 0 || firstName.trim().length > 50) {
+            return res.status(400).json({ error: 'First name must be between 1 and 50 characters' });
+        }
+        updates.push('firstName = :fn');
+        values[':fn'] = firstName.trim();
+        const ln = lastName !== undefined ? (lastName || '').trim() : '';
+        const fullName = ln ? `${firstName.trim()} ${ln}` : firstName.trim();
+        updates.push('#n = :name');
+        names['#n'] = 'name';
+        values[':name'] = fullName;
+    }
+    if (lastName !== undefined) {
+        if (typeof lastName !== 'string' || lastName.trim().length > 50) {
+            return res.status(400).json({ error: 'Last name must be 50 characters or less' });
+        }
+        updates.push('lastName = :ln');
+        values[':ln'] = lastName.trim();
+    } else if (name !== undefined && firstName === undefined) {
+        // Legacy name update
         if (typeof name !== 'string' || name.trim().length === 0 || name.trim().length > 100) {
             return res.status(400).json({ error: 'Name must be between 1 and 100 characters' });
         }
@@ -257,6 +293,8 @@ router.patch('/me', authenticate, async (req, res) => {
 
         const user = result.Attributes;
         res.json({
+            firstName: user.firstName || user.name.split(' ')[0],
+            lastName: user.lastName || user.name.split(' ').slice(1).join(' '),
             name: user.name,
             email: user.email,
             darkMode: user.darkMode || false,

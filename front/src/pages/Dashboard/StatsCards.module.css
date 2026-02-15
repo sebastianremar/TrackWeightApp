@@ -1,5 +1,39 @@
 .wrapper {
-  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.sectionHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.sectionTitle {
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--text);
+  margin: 0;
+}
+
+.customizeBtn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: var(--neutral);
+  color: var(--text-secondary);
+  padding: 6px 12px;
+  min-height: 36px;
+  border-radius: var(--radius-sm);
+  font-size: 0.8rem;
+  font-weight: 500;
+  transition: background var(--transition), color var(--transition);
+}
+
+.customizeBtn:hover {
+  background: var(--accent-light);
+  color: var(--text);
 }
 
 .grid {
@@ -20,26 +54,6 @@
 .value {
   font-size: 1.3rem;
   font-weight: 700;
-}
-
-.gearBtn {
-  position: absolute;
-  top: -28px;
-  right: 0;
-  background: none;
-  color: var(--text-muted);
-  padding: 4px;
-  min-width: 44px;
-  min-height: 44px;
-  border-radius: var(--radius-sm);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: color var(--transition);
-}
-
-.gearBtn:hover {
-  color: var(--text);
 }
 
 .checkList {

@@ -145,7 +145,6 @@ export default function FriendCard({ friend, onRemove, onToggleFavorite, initial
             <span className={styles.avatar}>{friend.name.charAt(0).toUpperCase()}</span>
             <div className={styles.nameBlock}>
               <span className={styles.name}>{friend.name}</span>
-              <span className={styles.email}>{friend.email}</span>
             </div>
           </div>
           <div className={styles.headerActions}>

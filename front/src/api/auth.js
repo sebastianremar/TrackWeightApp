@@ -7,10 +7,10 @@ export function signin(email, password) {
   });
 }
 
-export function signup(name, email, password) {
+export function signup(firstName, lastName, email, password) {
   return api('/api/signup', {
     method: 'POST',
-    body: JSON.stringify({ name, email, password }),
+    body: JSON.stringify({ firstName, lastName, email, password }),
   });
 }
 

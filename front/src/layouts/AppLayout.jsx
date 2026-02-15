@@ -51,7 +51,7 @@ export default function AppLayout() {
           ))}
         </nav>
         <div className={styles.sideFooter}>
-          <span className={styles.userName}>{user?.name}</span>
+          <span className={styles.userName}>{user?.firstName || user?.name?.split(' ')[0]}</span>
           <button className={styles.logoutBtn} onClick={handleLogout}>Sign Out</button>
         </div>
       </aside>
@@ -60,7 +60,7 @@ export default function AppLayout() {
       <header className={styles.topNav}>
         <span className={styles.topLogo}>TrackMyWeight</span>
         <div className={styles.topRight}>
-          <span className={styles.topUser}>{user?.name}</span>
+          <span className={styles.topUser}>{user?.firstName || user?.name?.split(' ')[0]}</span>
           <button className={styles.logoutBtn} onClick={handleLogout}>Sign Out</button>
         </div>
       </header>

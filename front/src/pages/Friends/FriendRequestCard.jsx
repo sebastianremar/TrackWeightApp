@@ -24,7 +24,6 @@ export default function FriendRequestCard({ request, onRespond }) {
         <span className={styles.avatar}>{request.name.charAt(0).toUpperCase()}</span>
         <div>
           <span className={styles.name}>{request.name}</span>
-          <span className={styles.email}>{request.email}</span>
         </div>
       </div>
       <div className={styles.actions}>

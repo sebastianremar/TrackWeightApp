@@ -6,7 +6,8 @@ import InlineError from '../../components/InlineError/InlineError';
 import styles from './AuthForms.module.css';
 
 export default function SignUpForm() {
-  const [name, setName] = useState('');
+  const [firstName, setFirstName] = useState('');
+  const [lastName, setLastName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirm, setConfirm] = useState('');
@@ -26,7 +27,7 @@ export default function SignUpForm() {
 
     setSubmitting(true);
     try {
-      const data = await signup(name, email, password);
+      const data = await signup(firstName, lastName, email, password);
       login(data.user);
       navigate('/weight');
     } catch (err) {
@@ -38,19 +39,34 @@ export default function SignUpForm() {
 
   return (
     <form className={styles.form} onSubmit={handleSubmit}>
-      <div className={styles.field}>
-        <label htmlFor="signup-name" className={styles.label}>Full Name</label>
-        <input
-          id="signup-name"
-          type="text"
-          className={styles.input}
-          value={name}
-          onChange={(e) => setName(e.target.value)}
-          placeholder="Your name"
-          required
-          maxLength={100}
-          autoComplete="name"
-        />
+      <div className={styles.nameRow}>
+        <div className={styles.field}>
+          <label htmlFor="signup-first" className={styles.label}>First Name</label>
+          <input
+            id="signup-first"
+            type="text"
+            className={styles.input}
+            value={firstName}
+            onChange={(e) => setFirstName(e.target.value)}
+            placeholder="First name"
+            required
+            maxLength={50}
+            autoComplete="given-name"
+          />
+        </div>
+        <div className={styles.field}>
+          <label htmlFor="signup-last" className={styles.label}>Last Name</label>
+          <input
+            id="signup-last"
+            type="text"
+            className={styles.input}
+            value={lastName}
+            onChange={(e) => setLastName(e.target.value)}
+            placeholder="Last name"
+            maxLength={50}
+            autoComplete="family-name"
+          />
+        </div>
       </div>
       <div className={styles.field}>
         <label htmlFor="signup-email" className={styles.label}>Email</label>

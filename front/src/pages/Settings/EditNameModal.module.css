@@ -4,6 +4,27 @@
   gap: 12px;
 }
 
+.nameRow {
+  display: flex;
+  gap: 12px;
+}
+
+.nameRow .field {
+  flex: 1;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.label {
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: var(--text-secondary);
+}
+
 .input {
   padding: 10px 12px;
   border: 1px solid var(--border);

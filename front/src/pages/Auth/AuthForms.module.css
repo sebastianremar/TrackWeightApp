@@ -4,6 +4,15 @@
   gap: 16px;
 }
 
+.nameRow {
+  display: flex;
+  gap: 12px;
+}
+
+.nameRow .field {
+  flex: 1;
+}
+
 .field {
   display: flex;
   flex-direction: column;

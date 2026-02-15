@@ -46,9 +46,9 @@ export default function SettingsPage() {
     }
   };
 
-  const handleNameSave = async (newName) => {
-    await updateProfile({ name: newName });
-    updateUser({ name: newName });
+  const handleNameSave = async (firstName, lastName) => {
+    await updateProfile({ firstName, lastName });
+    updateUser({ firstName, lastName, name: `${firstName} ${lastName}`.trim() });
     setNameModalOpen(false);
   };
 
@@ -62,7 +62,7 @@ export default function SettingsPage() {
         <div className={styles.row}>
           <div>
             <span className={styles.label}>Name</span>
-            <span className={styles.value}>{user?.name}</span>
+            <span className={styles.value}>{user?.firstName || user?.name?.split(' ')[0]} {user?.lastName || user?.name?.split(' ').slice(1).join(' ')}</span>
           </div>
           <button className={styles.editBtn} onClick={() => setNameModalOpen(true)}>Edit</button>
         </div>
@@ -139,7 +139,8 @@ export default function SettingsPage() {
       <EditNameModal
         open={nameModalOpen}
         onClose={() => setNameModalOpen(false)}
-        currentName={user?.name || ''}
+        currentFirstName={user?.firstName || user?.name?.split(' ')[0] || ''}
+        currentLastName={user?.lastName || user?.name?.split(' ').slice(1).join(' ') || ''}
         onSave={handleNameSave}
       />
     </div>
