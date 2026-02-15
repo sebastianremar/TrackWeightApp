@@ -4,7 +4,7 @@ function fmt(d) {
   return d.toISOString().split('T')[0];
 }
 
-const DAY_NAMES = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+const DAY_NAMES = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
 
 export default function WeekStrip({ weekStart, selectedDate, onSelectDate, habits, entries }) {
   const days = [];
@@ -19,7 +19,7 @@ export default function WeekStrip({ weekStart, selectedDate, onSelectDate, habit
   return (
     <div className={styles.strip}>
       {days.map((date) => {
-        const dayNum = new Date(date + 'T00:00:00').getDay();
+        const dayNum = (new Date(date + 'T00:00:00').getDay() + 6) % 7;
         const completedCount = habits.filter((h) =>
           entries.some((e) => e.habitId === h.habitId && e.date === date)
         ).length;

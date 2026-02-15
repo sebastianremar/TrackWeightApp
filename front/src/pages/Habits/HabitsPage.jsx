@@ -19,7 +19,7 @@ const TABS = [
 function getDateRange(tab, refDate) {
   const d = new Date(refDate + 'T00:00:00');
   if (tab === 'week') {
-    const dow = d.getDay();
+    const dow = (d.getDay() + 6) % 7; // Monday=0
     const start = new Date(d);
     start.setDate(start.getDate() - dow);
     const end = new Date(start);

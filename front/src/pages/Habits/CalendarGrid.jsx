@@ -1,6 +1,6 @@
 import styles from './CalendarGrid.module.css';
 
-const DAY_NAMES = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+const DAY_NAMES = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
 
 function fmt(d) {
   return d.toISOString().split('T')[0];
@@ -9,7 +9,7 @@ function fmt(d) {
 export default function CalendarGrid({ year, month, selectedDate, onSelectDate, habits, entries }) {
   const firstDay = new Date(year, month, 1);
   const lastDay = new Date(year, month + 1, 0);
-  const startDow = firstDay.getDay();
+  const startDow = (firstDay.getDay() + 6) % 7; // Monday=0
   const daysInMonth = lastDay.getDate();
   const today = new Date().toISOString().split('T')[0];
 

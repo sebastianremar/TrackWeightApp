@@ -23,7 +23,7 @@ router.get('/stats/summary', async (req, res) => {
     let from, to;
 
     if (period === 'week') {
-        const dow = now.getDay();
+        const dow = (now.getDay() + 6) % 7; // Monday=0
         from = new Date(now);
         from.setDate(now.getDate() - dow);
         from.setHours(0, 0, 0, 0);

@@ -9,7 +9,7 @@ function fmt(d) {
 
 function getWeekStart(dateStr) {
   const d = new Date(dateStr + 'T00:00:00');
-  const dow = d.getDay();
+  const dow = (d.getDay() + 6) % 7; // Monday=0
   d.setDate(d.getDate() - dow);
   return fmt(d);
 }
