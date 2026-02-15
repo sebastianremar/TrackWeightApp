@@ -32,7 +32,7 @@ function CompletionRing({ completed, total, pct }) {
   );
 }
 
-export default function DayDetailPanel({ date, habits, entries, onToggle, onEditHabit, onDeleteHabit, weekEntries, onOpenCreate }) {
+export default function DayDetailPanel({ date, habits, entries, onToggle, updateNote, onEditHabit, onDeleteHabit, weekEntries, onOpenCreate }) {
   if (habits.length === 0) {
     return (
       <EmptyState
@@ -70,7 +70,9 @@ export default function DayDetailPanel({ date, habits, entries, onToggle, onEdit
       </div>
       <div className={styles.list}>
         {habits.map((habit, index) => {
-          const completed = entries.some((e) => e.habitId === habit.habitId && e.date === date);
+          const entry = entries.find((e) => e.habitId === habit.habitId && e.date === date);
+          const completed = !!entry;
+          const note = entry?.note || '';
           const weekProgress = weekEntries
             ? weekEntries.filter((e) => e.habitId === habit.habitId).length
             : undefined;
@@ -88,6 +90,8 @@ export default function DayDetailPanel({ date, habits, entries, onToggle, onEdit
                 onEdit={() => onEditHabit(habit)}
                 onDelete={onDeleteHabit ? () => onDeleteHabit(habit) : undefined}
                 progress={weekProgress}
+                note={note}
+                onNoteChange={updateNote ? (val) => updateNote(habit.habitId, date, val) : undefined}
               />
             </div>
           );

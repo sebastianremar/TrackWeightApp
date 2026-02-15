@@ -168,3 +168,47 @@
   border-radius: 2px;
   transition: width 300ms ease;
 }
+
+.reflection {
+  position: relative;
+  margin-top: 4px;
+  animation: fadeIn 200ms ease;
+}
+
+.reflectionInput {
+  width: 100%;
+  padding: 8px 10px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--surface);
+  color: var(--text);
+  font-size: 0.85rem;
+  font-family: inherit;
+  resize: vertical;
+  min-height: 48px;
+  max-height: 120px;
+  line-height: 1.4;
+}
+
+.reflectionInput::placeholder {
+  color: var(--text-muted);
+}
+
+.reflectionInput:focus {
+  outline: none;
+  border-color: var(--primary);
+}
+
+.reflectionCount {
+  position: absolute;
+  bottom: 6px;
+  right: 8px;
+  font-size: 0.7rem;
+  color: var(--text-muted);
+  pointer-events: none;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(-4px); }
+  to { opacity: 1; transform: translateY(0); }
+}

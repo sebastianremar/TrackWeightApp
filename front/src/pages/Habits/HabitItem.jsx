@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect } from 'react';
 import styles from './HabitItem.module.css';
 
-export default function HabitItem({ habit, completed, onToggle, onEdit, onDelete, progress }) {
+export default function HabitItem({ habit, completed, onToggle, onEdit, onDelete, progress, note, onNoteChange }) {
   const [menuOpen, setMenuOpen] = useState(false);
   const [bouncing, setBouncing] = useState(false);
   const menuRef = useRef(null);
@@ -91,6 +91,19 @@ export default function HabitItem({ habit, completed, onToggle, onEdit, onDelete
                 background: exceeded ? 'var(--error)' : habit.color,
               }}
             />
+          </div>
+        )}
+        {isBad && completed && onNoteChange && (
+          <div className={styles.reflection}>
+            <textarea
+              className={styles.reflectionInput}
+              placeholder="Why did this happen? (optional)"
+              maxLength={500}
+              rows={2}
+              value={note || ''}
+              onChange={(e) => onNoteChange(e.target.value)}
+            />
+            {note && <span className={styles.reflectionCount}>{note.length}/500</span>}
           </div>
         )}
       </div>

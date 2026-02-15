@@ -9,6 +9,8 @@ const NAV_ITEMS = [
   { to: '/settings', label: 'Settings', icon: 'M12 15a3 3 0 100-6 3 3 0 000 6z' },
 ];
 
+const ADMIN_NAV_ITEM = { to: '/admin', label: 'Admin', icon: 'M3 3v18h18 M7 16l4-4 4 4 4-8' };
+
 function NavIcon({ d }) {
   const paths = d.split(' M').map((p, i) => (i === 0 ? p : 'M' + p));
   return (
@@ -22,6 +24,8 @@ export default function AppLayout() {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
 
+  const navItems = user?.isAdmin ? [...NAV_ITEMS, ADMIN_NAV_ITEM] : NAV_ITEMS;
+
   const handleLogout = async () => {
     await logout();
     navigate('/login');
@@ -33,7 +37,7 @@ export default function AppLayout() {
       <aside className={styles.sidebar}>
         <div className={styles.logo}>TrackMyWeight</div>
         <nav className={styles.sideNav}>
-          {NAV_ITEMS.map((item) => (
+          {navItems.map((item) => (
             <NavLink
               key={item.to}
               to={item.to}
@@ -66,7 +70,7 @@ export default function AppLayout() {
 
       {/* Bottom nav (mobile) */}
       <nav className={styles.bottomNav}>
-        {NAV_ITEMS.map((item) => (
+        {navItems.map((item) => (
           <NavLink
             key={item.to}
             to={item.to}

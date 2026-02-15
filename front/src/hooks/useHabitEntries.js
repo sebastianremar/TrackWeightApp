@@ -1,10 +1,17 @@
-import { useState, useCallback } from 'react';
-import { getAllHabitEntries, logHabitEntry, deleteHabitEntry } from '../api/habitEntries';
+import { useState, useCallback, useRef, useEffect } from 'react';
+import { getAllHabitEntries, logHabitEntry, deleteHabitEntry, updateHabitEntryNote } from '../api/habitEntries';
 
 export function useHabitEntries() {
   const [entries, setEntries] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+  const debounceTimers = useRef({});
+
+  useEffect(() => {
+    return () => {
+      Object.values(debounceTimers.current).forEach(clearTimeout);
+    };
+  }, []);
 
   const fetchEntries = useCallback(async (from, to) => {
     setLoading(true);
@@ -26,11 +33,11 @@ export function useHabitEntries() {
       try {
         await deleteHabitEntry(habitId, date);
       } catch (err) {
-        setEntries((prev) => [...prev, { habitId, date, completed: true }]);
+        setEntries((prev) => [...prev, { habitId, date, completed: true, note: '' }]);
         throw err;
       }
     } else {
-      setEntries((prev) => [...prev, { habitId, date, completed: true }]);
+      setEntries((prev) => [...prev, { habitId, date, completed: true, note: '' }]);
       try {
         await logHabitEntry(habitId, date);
       } catch (err) {
@@ -40,5 +47,24 @@ export function useHabitEntries() {
     }
   }, []);
 
-  return { entries, loading, error, fetchEntries, toggleEntry };
+  const updateNote = useCallback((habitId, date, note) => {
+    // Update local state immediately
+    setEntries((prev) =>
+      prev.map((e) =>
+        e.habitId === habitId && e.date === date ? { ...e, note } : e,
+      ),
+    );
+
+    // Debounce API call
+    const key = `${habitId}#${date}`;
+    if (debounceTimers.current[key]) {
+      clearTimeout(debounceTimers.current[key]);
+    }
+    debounceTimers.current[key] = setTimeout(() => {
+      delete debounceTimers.current[key];
+      updateHabitEntryNote(habitId, date, note).catch(() => {});
+    }, 1000);
+  }, []);
+
+  return { entries, loading, error, fetchEntries, toggleEntry, updateNote };
 }

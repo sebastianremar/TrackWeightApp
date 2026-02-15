@@ -138,6 +138,7 @@ router.post('/signin', async (req, res) => {
             darkMode: user.darkMode || false,
             palette: user.palette || 'ethereal-ivory',
             dashboardStats: user.dashboardStats || DEFAULT_STATS,
+            isAdmin: user.isAdmin || false,
         },
     });
 });
@@ -169,6 +170,7 @@ router.get('/me', authenticate, async (req, res) => {
             darkMode: user.darkMode || false,
             palette: user.palette || 'ethereal-ivory',
             dashboardStats: user.dashboardStats || DEFAULT_STATS,
+            isAdmin: user.isAdmin || false,
             createdAt: user.createdAt,
         });
     } catch (err) {

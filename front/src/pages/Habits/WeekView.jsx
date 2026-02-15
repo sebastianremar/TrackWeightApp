@@ -18,7 +18,7 @@ function todayStr() {
   return new Date().toISOString().split('T')[0];
 }
 
-export default function WeekView({ habits, entries, refDate, setRefDate, toggleEntry, onEditHabit, onDeleteHabit }) {
+export default function WeekView({ habits, entries, refDate, setRefDate, toggleEntry, updateNote, onEditHabit, onDeleteHabit }) {
   const weekStart = getWeekStart(refDate);
   const [selectedDate, setSelectedDate] = useState(refDate);
   const today = todayStr();
@@ -76,6 +76,7 @@ export default function WeekView({ habits, entries, refDate, setRefDate, toggleE
           habits={habits}
           entries={entries}
           onToggle={toggleEntry}
+          updateNote={updateNote}
           onEditHabit={onEditHabit}
           onDeleteHabit={onDeleteHabit}
           weekEntries={entries}

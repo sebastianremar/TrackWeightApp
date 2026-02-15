@@ -50,7 +50,7 @@ export default function HabitsPage() {
   const [deleteTarget, setDeleteTarget] = useState(null);
 
   const { habits, loading: habitsLoading, error: habitsError, addHabit, editHabit, removeHabit } = useHabits();
-  const { entries, loading: entriesLoading, fetchEntries, toggleEntry } = useHabitEntries();
+  const { entries, loading: entriesLoading, fetchEntries, toggleEntry, updateNote } = useHabitEntries();
 
   const tabIndex = TABS.findIndex((t) => t.key === tab);
 
@@ -86,7 +86,7 @@ export default function HabitsPage() {
 
   const renderView = () => {
     const props = {
-      habits, entries, refDate, setRefDate, toggleEntry,
+      habits, entries, refDate, setRefDate, toggleEntry, updateNote,
       onEditHabit: handleOpenEdit,
       onDeleteHabit: handleDeleteHabit,
     };

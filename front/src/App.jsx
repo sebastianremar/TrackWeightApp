@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, lazy, Suspense } from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
 import { ThemeProvider, useTheme } from './contexts/ThemeContext';
@@ -10,6 +10,8 @@ import HabitsPage from './pages/Habits/HabitsPage';
 import FriendsPage from './pages/Friends/FriendsPage';
 import SettingsPage from './pages/Settings/SettingsPage';
 import Spinner from './components/Spinner/Spinner';
+
+const AdminPage = lazy(() => import('./pages/Admin/AdminPage'));
 
 function AppRoutes() {
   const { user, loading } = useAuth();
@@ -45,6 +47,9 @@ function AppRoutes() {
         <Route path="/habits" element={<HabitsPage />} />
         <Route path="/friends" element={<FriendsPage />} />
         <Route path="/settings" element={<SettingsPage />} />
+        {user.isAdmin && (
+          <Route path="/admin" element={<Suspense fallback={<Spinner size={32} />}><AdminPage /></Suspense>} />
+        )}
       </Route>
       <Route path="*" element={<Navigate to="/weight" replace />} />
     </Routes>

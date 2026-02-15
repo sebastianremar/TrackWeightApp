@@ -1,5 +1,5 @@
 const express = require('express');
-const { PutCommand, DeleteCommand, QueryCommand } = require('@aws-sdk/lib-dynamodb');
+const { PutCommand, DeleteCommand, QueryCommand, UpdateCommand } = require('@aws-sdk/lib-dynamodb');
 const { docClient } = require('../lib/db');
 const logger = require('../lib/logger');
 
@@ -111,6 +111,7 @@ router.get('/entries/all', async (req, res) => {
             habitId: item.habitId,
             date: item.date,
             completed: item.completed,
+            note: item.note || '',
         }));
 
         const response = { entries };
@@ -164,6 +165,48 @@ router.post('/:id/entries', async (req, res) => {
         res.status(201).json({ entry: { date, completed: true, note: item.note } });
     } catch (err) {
         logger.error({ err }, 'DynamoDB PutItem error');
+        return res.status(500).json({ error: 'Internal server error' });
+    }
+});
+
+// PATCH /api/habits/:id/entries/:date — update entry note
+router.patch('/:id/entries/:date', async (req, res) => {
+    const email = req.user.email;
+    const habitId = req.params.id;
+    const date = req.params.date;
+    const { note } = req.body;
+
+    if (!isValidDate(date)) {
+        return res.status(400).json({ error: 'Date must be in YYYY-MM-DD format' });
+    }
+
+    if (typeof note !== 'string') {
+        return res.status(400).json({ error: 'Note must be a string' });
+    }
+
+    if (note.length > 500) {
+        return res.status(400).json({ error: 'Note must be 500 characters or less' });
+    }
+
+    const emailHabitId = email + '#' + habitId;
+
+    try {
+        const result = await docClient.send(
+            new UpdateCommand({
+                TableName: process.env.HABIT_ENTRIES_TABLE,
+                Key: { emailHabitId, date },
+                UpdateExpression: 'SET note = :note',
+                ConditionExpression: 'attribute_exists(emailHabitId)',
+                ExpressionAttributeValues: { ':note': note.trim() },
+                ReturnValues: 'ALL_NEW',
+            }),
+        );
+        res.json({ entry: { date, completed: true, note: result.Attributes.note } });
+    } catch (err) {
+        if (err.name === 'ConditionalCheckFailedException') {
+            return res.status(404).json({ error: 'Entry not found' });
+        }
+        logger.error({ err }, 'DynamoDB UpdateItem error');
         return res.status(500).json({ error: 'Internal server error' });
     }
 });

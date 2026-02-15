@@ -31,6 +31,13 @@ export function getAllHabitEntries(params = {}) {
   return api(`/api/habits/entries/all${query ? '?' + query : ''}`);
 }
 
+export function updateHabitEntryNote(habitId, date, note) {
+  return api(`/api/habits/${encodeURIComponent(habitId)}/entries/${date}`, {
+    method: 'PATCH',
+    body: JSON.stringify({ note }),
+  });
+}
+
 export function getHabitStats(habitId, weeks = 4) {
   return api(`/api/habits/${encodeURIComponent(habitId)}/stats?weeks=${weeks}`);
 }

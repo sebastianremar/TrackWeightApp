@@ -19,8 +19,12 @@ const weightRoutes = require('./routes/weight');
 const habitRoutes = require('./routes/habits');
 const habitEntryRoutes = require('./routes/habitEntries');
 const friendRoutes = require('./routes/friends');
+const adminRoutes = require('./routes/admin');
 const authenticate = require('./middleware/auth');
 const rateLimit = require('./middleware/rateLimit');
+const metricsMiddleware = require('./middleware/metrics');
+const requireAdmin = require('./middleware/admin');
+const { startFlushInterval, stopFlushInterval } = require('./lib/metrics');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -73,6 +77,9 @@ app.use((req, res, next) => {
     next();
 });
 
+// Metrics collection
+app.use(metricsMiddleware);
+
 // Health check (before auth, no rate limit)
 app.get('/health', (req, res) => {
     res.json({ status: 'ok', uptime: process.uptime() });
@@ -88,6 +95,7 @@ app.use('/api/weight', authenticate, weightRoutes);
 app.use('/api/habits', authenticate, habitEntryRoutes);
 app.use('/api/habits', authenticate, habitRoutes);
 app.use('/api/friends', authenticate, friendRoutes);
+app.use('/api/admin', authenticate, requireAdmin, adminRoutes);
 
 // SPA fallback — serve index.html for non-API routes
 app.get('/*path', (req, res) => {
@@ -105,11 +113,13 @@ module.exports = app;
 if (require.main === module) {
     const server = app.listen(PORT, '0.0.0.0', () => {
         logger.info(`Server running on port ${PORT} (${isProd ? 'production' : 'development'})`);
+        startFlushInterval(60000);
     });
 
     // Graceful shutdown
     function shutdown(signal) {
         logger.info(`${signal} received, shutting down gracefully...`);
+        stopFlushInterval();
         server.close(() => {
             logger.info('HTTP server closed');
             process.exit(0);
