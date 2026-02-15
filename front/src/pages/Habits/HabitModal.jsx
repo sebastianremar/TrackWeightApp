@@ -71,7 +71,7 @@ export default function HabitModal({ open, onClose, onSave, onDelete, habit }) {
             className={styles.input}
             value={name}
             onChange={(e) => setName(e.target.value)}
-            placeholder="e.g., Exercise"
+            placeholder={isBad ? 'e.g., Smoking' : 'e.g., Exercise'}
             maxLength={100}
             required
           />
