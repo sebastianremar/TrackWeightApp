@@ -8,6 +8,7 @@ const {
     PutCommand,
     QueryCommand,
     DeleteCommand,
+    BatchGetCommand,
 } = require('@aws-sdk/lib-dynamodb');
 
 beforeEach(() => {
@@ -167,7 +168,9 @@ describe('GET /api/friends', () => {
         ddbMock.on(QueryCommand).resolves({
             Items: [{ friendEmail: 'friend@example.com', status: 'accepted' }],
         });
-        ddbMock.on(GetCommand).resolves({ Item: friendUser });
+        ddbMock.on(BatchGetCommand).resolves({
+            Responses: { [process.env.USERS_TABLE]: [friendUser] },
+        });
 
         const res = await request(app).get('/api/friends').set(authHeader('test@example.com'));
         expect(res.status).toBe(200);
@@ -198,7 +201,9 @@ describe('GET /api/friends/requests', () => {
                 },
             ],
         });
-        ddbMock.on(GetCommand).resolves({ Item: friendUser });
+        ddbMock.on(BatchGetCommand).resolves({
+            Responses: { [process.env.USERS_TABLE]: [friendUser] },
+        });
 
         const res = await request(app)
             .get('/api/friends/requests')
