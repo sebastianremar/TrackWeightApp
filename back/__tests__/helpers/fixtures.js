@@ -42,4 +42,16 @@ const habitEntry = {
     createdAt: '2024-06-15T12:00:00.000Z',
 };
 
-module.exports = { testUser, friendUser, weightEntry, habit, habitEntry };
+const calendarEvent = {
+    email: testUser.email,
+    eventId: 'event#test123',
+    title: 'Team Meeting',
+    date: '2024-06-15',
+    startTime: '09:00',
+    endTime: '10:00',
+    category: 'Work',
+    color: '#2563EB',
+    createdAt: '2024-06-15T08:00:00.000Z',
+};
+
+module.exports = { testUser, friendUser, weightEntry, habit, habitEntry, calendarEvent };

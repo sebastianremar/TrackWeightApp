@@ -1,0 +1,148 @@
+.monthNav {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  margin-bottom: 12px;
+}
+
+.arrow {
+  padding: 8px 14px;
+  min-width: 44px;
+  min-height: 44px;
+  border-radius: var(--radius-sm);
+  color: var(--text-secondary);
+  background: var(--neutral);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.arrow:hover {
+  background: var(--accent-light);
+  color: var(--text);
+}
+
+.label {
+  font-weight: 600;
+  min-width: 160px;
+  text-align: center;
+}
+
+.todayBtn {
+  padding: 6px 14px;
+  min-height: 36px;
+  background: var(--primary);
+  color: #fff;
+  border-radius: 999px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  animation: fadeIn 200ms ease;
+  transition: background var(--transition);
+}
+
+.todayBtn:hover {
+  background: var(--primary-hover);
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 2px;
+}
+
+.dayHeader {
+  text-align: center;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  padding: 4px 0;
+}
+
+.empty {
+  aspect-ratio: 1;
+}
+
+.dayCell {
+  aspect-ratio: 1;
+  min-width: 36px;
+  min-height: 36px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+  border-radius: var(--radius-sm);
+  background: var(--surface);
+  border: 2px solid transparent;
+  transition: background var(--transition), border-color var(--transition), transform var(--transition);
+  padding: 2px;
+  cursor: pointer;
+}
+
+.dayCell:hover {
+  background: var(--surface-hover);
+  transform: scale(1.05);
+}
+
+.selected {
+  background: var(--primary);
+  border-color: var(--primary);
+  color: #fff;
+}
+
+.selected .dayNumber {
+  color: #fff;
+}
+
+.today .dayNumber {
+  color: var(--primary);
+  font-weight: 700;
+}
+
+.selected.today .dayNumber {
+  color: #fff;
+}
+
+.dayNumber {
+  font-size: 0.8rem;
+}
+
+.dots {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+}
+
+.dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+}
+
+.countBadge {
+  font-size: 0.55rem;
+  color: var(--text-muted);
+  font-weight: 600;
+}
+
+.selected .countBadge {
+  color: rgba(255, 255, 255, 0.8);
+}
+
+@media (max-width: 480px) {
+  .label {
+    min-width: auto;
+  }
+
+  .monthNav {
+    gap: 8px;
+  }
+}
+
+@media (max-width: 360px) {
+  .grid {
+    gap: 1px;
+  }
+}

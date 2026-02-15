@@ -1,0 +1,218 @@
+.weekNav {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  margin-bottom: 12px;
+}
+
+.arrow {
+  padding: 8px 14px;
+  min-width: 44px;
+  min-height: 44px;
+  border-radius: var(--radius-sm);
+  color: var(--text-secondary);
+  background: var(--neutral);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.arrow:hover {
+  background: var(--accent-light);
+  color: var(--text);
+}
+
+.label {
+  font-weight: 600;
+  min-width: 160px;
+  text-align: center;
+}
+
+.todayBtn {
+  padding: 6px 14px;
+  min-height: 36px;
+  background: var(--primary);
+  color: #fff;
+  border-radius: 999px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  animation: fadeIn 200ms ease;
+  transition: background var(--transition);
+}
+
+.todayBtn:hover {
+  background: var(--primary-hover);
+}
+
+.weekGrid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 4px;
+}
+
+.dayColumn {
+  display: flex;
+  flex-direction: column;
+  min-height: 140px;
+  background: var(--surface);
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border);
+  overflow: hidden;
+}
+
+.dayHeader {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 8px 4px;
+  border-bottom: 1px solid var(--border);
+  cursor: pointer;
+  transition: background var(--transition);
+  text-align: center;
+}
+
+.dayHeader:hover {
+  background: var(--surface-hover);
+}
+
+.dayName {
+  font-size: 0.7rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+.dayNum {
+  font-size: 0.95rem;
+  font-weight: 600;
+}
+
+.today .dayNum {
+  color: var(--primary);
+  background: var(--accent-light);
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.dayContent {
+  padding: 4px;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  flex: 1;
+}
+
+.eventCard {
+  display: flex;
+  align-items: flex-start;
+  gap: 4px;
+  padding: 4px;
+  border-radius: 4px;
+  cursor: pointer;
+  text-align: left;
+  transition: background var(--transition);
+}
+
+.eventCard:hover {
+  background: var(--surface-hover);
+}
+
+.eventDot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  margin-top: 3px;
+}
+
+.eventInfo {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.eventCardTime {
+  font-size: 0.65rem;
+  color: var(--text-muted);
+}
+
+.eventCardTitle {
+  font-size: 0.75rem;
+  font-weight: 500;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.todoCard {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 4px;
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+}
+
+.todoCard svg {
+  flex-shrink: 0;
+}
+
+.todoCardTitle {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.overflow {
+  font-size: 0.7rem;
+  color: var(--text-muted);
+  padding: 2px 4px;
+  cursor: pointer;
+  text-align: left;
+}
+
+.overflow:hover {
+  color: var(--primary);
+}
+
+@media (max-width: 768px) {
+  .weekGrid {
+    grid-template-columns: repeat(7, 1fr);
+    gap: 2px;
+  }
+
+  .dayColumn {
+    min-height: 100px;
+  }
+
+  .eventCardTime {
+    display: none;
+  }
+
+  .eventCardTitle {
+    font-size: 0.7rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .label {
+    min-width: auto;
+  }
+
+  .weekNav {
+    gap: 8px;
+  }
+
+  .dayName {
+    font-size: 0.6rem;
+  }
+
+  .dayNum {
+    font-size: 0.8rem;
+  }
+}

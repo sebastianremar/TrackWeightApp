@@ -5,6 +5,7 @@ process.env.WEIGHT_TABLE = 'TestWeightEntries';
 process.env.HABITS_TABLE = 'TestHabits';
 process.env.HABIT_ENTRIES_TABLE = 'TestHabitEntries';
 process.env.FRIENDSHIPS_TABLE = 'TestFriendships';
+process.env.CALENDAR_EVENTS_TABLE = 'TestCalendarEvents';
 process.env.NODE_ENV = 'production';
 process.env.CORS_ORIGIN = 'http://localhost:3000';
 process.env.LOG_LEVEL = 'silent';

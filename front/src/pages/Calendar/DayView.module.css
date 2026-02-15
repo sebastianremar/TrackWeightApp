@@ -1,0 +1,171 @@
+.dayNav {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  margin-bottom: 12px;
+}
+
+.arrow {
+  padding: 8px 14px;
+  min-width: 44px;
+  min-height: 44px;
+  border-radius: var(--radius-sm);
+  color: var(--text-secondary);
+  background: var(--neutral);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.arrow:hover {
+  background: var(--accent-light);
+  color: var(--text);
+}
+
+.dateHeader {
+  font-weight: 600;
+  min-width: 200px;
+  text-align: center;
+  font-size: 0.95rem;
+}
+
+.todayBtn {
+  padding: 6px 14px;
+  min-height: 36px;
+  background: var(--primary);
+  color: #fff;
+  border-radius: 999px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  animation: fadeIn 200ms ease;
+  transition: background var(--transition);
+}
+
+.todayBtn:hover {
+  background: var(--primary-hover);
+}
+
+.todoSection {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: 12px;
+  margin-bottom: 16px;
+}
+
+.todoHeader {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  margin-bottom: 8px;
+}
+
+.todoItem {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 0;
+  font-size: 0.9rem;
+  color: var(--text);
+}
+
+.todoItem svg {
+  color: var(--text-muted);
+  flex-shrink: 0;
+}
+
+.timeline {
+  position: relative;
+  margin-left: 56px;
+  border-left: 1px solid var(--border);
+}
+
+.hourRow {
+  position: absolute;
+  left: 0;
+  right: 0;
+  display: flex;
+  border-top: 1px solid var(--border);
+}
+
+.hourLabel {
+  position: absolute;
+  left: -56px;
+  top: -8px;
+  width: 48px;
+  text-align: right;
+  font-size: 0.75rem;
+  color: var(--text-muted);
+}
+
+.hourContent {
+  flex: 1;
+  height: 100%;
+  cursor: pointer;
+}
+
+.hourContent:hover {
+  background: var(--surface-hover);
+}
+
+.eventBlock {
+  position: absolute;
+  left: 4px;
+  right: 4px;
+  border-radius: var(--radius-sm);
+  background: var(--surface);
+  border-left: 4px solid var(--primary);
+  padding: 6px 10px;
+  overflow: hidden;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  box-shadow: var(--shadow-sm);
+  transition: box-shadow var(--transition);
+  text-align: left;
+  z-index: 1;
+}
+
+.eventBlock:hover {
+  box-shadow: var(--shadow-md);
+}
+
+.eventTitle {
+  font-size: 0.85rem;
+  font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.eventTime {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+}
+
+@media (max-width: 480px) {
+  .dateHeader {
+    min-width: auto;
+    font-size: 0.85rem;
+  }
+
+  .dayNav {
+    gap: 8px;
+  }
+}
+
+@media (max-width: 360px) {
+  .timeline {
+    margin-left: 44px;
+  }
+
+  .hourLabel {
+    left: -44px;
+    width: 38px;
+    font-size: 0.7rem;
+  }
+}
