@@ -16,6 +16,12 @@
   color: var(--text-secondary);
 }
 
+.optional {
+  font-weight: 400;
+  color: var(--text-muted);
+  font-size: 0.8rem;
+}
+
 .input {
   padding: 10px 12px;
   border: 1px solid var(--border);

@@ -1,3 +1,4 @@
+import { useState, useEffect } from 'react';
 import styles from './DayView.module.css';
 
 const HOUR_HEIGHT = 60;
@@ -26,10 +27,25 @@ function formatTime12(t) {
   return `${hour}:${String(m).padStart(2, '0')} ${period}`;
 }
 
+function formatHour12(h) {
+  if (h === 0) return '12 AM';
+  if (h < 12) return `${h} AM`;
+  if (h === 12) return '12 PM';
+  return `${h - 12} PM`;
+}
+
 export default function DayView({ events, todos, refDate, setRefDate, onEditEvent, onCreateEvent }) {
   const d = new Date(refDate + 'T00:00:00');
   const today = todayStr();
   const isToday = refDate === today;
+  const [now, setNow] = useState(new Date());
+
+  // Update current time every minute for the time indicator
+  useEffect(() => {
+    if (!isToday) return;
+    const id = setInterval(() => setNow(new Date()), 900000);
+    return () => clearInterval(id);
+  }, [isToday]);
 
   const dateLabel = `${DAY_NAMES[d.getDay()]}, ${MONTH_NAMES[d.getMonth()]} ${d.getDate()}, ${d.getFullYear()}`;
 
@@ -45,11 +61,18 @@ export default function DayView({ events, todos, refDate, setRefDate, onEditEven
   for (let h = START_HOUR; h <= END_HOUR; h++) hours.push(h);
 
   const dayTodos = todos.filter((t) => t.dueDate === refDate);
+  const dayEvents = events.filter((e) => e.date === refDate);
 
   const handleTimeClick = (hour) => {
     const time = `${String(hour).padStart(2, '0')}:00`;
     onCreateEvent(time);
   };
+
+  // Current time indicator position
+  const nowH = now.getHours();
+  const nowM = now.getMinutes();
+  const showNowLine = isToday && nowH >= START_HOUR && nowH <= END_HOUR;
+  const nowTop = showNowLine ? ((nowH - START_HOUR) * 60 + nowM) / 60 * HOUR_HEIGHT : 0;
 
   return (
     <div>
@@ -84,17 +107,38 @@ export default function DayView({ events, todos, refDate, setRefDate, onEditEven
         </div>
       )}
 
+      {dayEvents.length === 0 && dayTodos.length === 0 && (
+        <div className={styles.emptyHint}>
+          <span>No events today. Tap a time slot or</span>
+          <button className={styles.emptyBtn} onClick={() => onCreateEvent(null)}>+ Add event</button>
+        </div>
+      )}
+
       <div className={styles.timeline} style={{ height: (END_HOUR - START_HOUR + 1) * HOUR_HEIGHT }}>
         {hours.map((h) => (
-          <div key={h} className={styles.hourRow} style={{ top: (h - START_HOUR) * HOUR_HEIGHT, height: HOUR_HEIGHT }}>
-            <span className={styles.hourLabel}>
-              {h === 0 ? '12 AM' : h < 12 ? `${h} AM` : h === 12 ? '12 PM' : `${h - 12} PM`}
+          <button
+            key={h}
+            className={styles.hourRow}
+            style={{ top: (h - START_HOUR) * HOUR_HEIGHT, height: HOUR_HEIGHT }}
+            onClick={() => handleTimeClick(h)}
+            aria-label={`Create event at ${formatHour12(h)}`}
+          >
+            <span className={styles.hourLabel}>{formatHour12(h)}</span>
+            <span className={styles.hourHint}>
+              <svg viewBox="0 0 16 16" width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+                <path d="M8 3v10M3 8h10" />
+              </svg>
             </span>
-            <div className={styles.hourContent} onClick={() => handleTimeClick(h)} />
-          </div>
+          </button>
         ))}
 
-        {events.filter((e) => e.date === refDate).map((event) => {
+        {showNowLine && (
+          <div className={styles.nowLine} style={{ top: nowTop }}>
+            <span className={styles.nowDot} />
+          </div>
+        )}
+
+        {dayEvents.map((event) => {
           const start = parseTime(event.startTime);
           const end = event.endTime ? parseTime(event.endTime) : { h: start.h + 1, m: start.m };
           const topMin = (start.h - START_HOUR) * 60 + start.m;
@@ -118,6 +162,7 @@ export default function DayView({ events, todos, refDate, setRefDate, onEditEven
                 {formatTime12(event.startTime)}
                 {event.endTime ? ` - ${formatTime12(event.endTime)}` : ''}
               </span>
+              {event.category && <span className={styles.eventCategory}>{event.category}</span>}
             </button>
           );
         })}

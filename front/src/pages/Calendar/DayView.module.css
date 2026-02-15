@@ -77,6 +77,27 @@
   flex-shrink: 0;
 }
 
+.emptyHint {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 12px;
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  margin-bottom: 8px;
+}
+
+.emptyBtn {
+  color: var(--primary);
+  font-weight: 600;
+  font-size: 0.85rem;
+}
+
+.emptyBtn:hover {
+  text-decoration: underline;
+}
+
 .timeline {
   position: relative;
   margin-left: 56px;
@@ -88,7 +109,15 @@
   left: 0;
   right: 0;
   display: flex;
+  align-items: flex-start;
   border-top: 1px solid var(--border);
+  cursor: pointer;
+  text-align: left;
+  transition: background 150ms ease;
+}
+
+.hourRow:hover {
+  background: var(--accent-light);
 }
 
 .hourLabel {
@@ -99,16 +128,43 @@
   text-align: right;
   font-size: 0.75rem;
   color: var(--text-muted);
+  pointer-events: none;
 }
 
-.hourContent {
-  flex: 1;
-  height: 100%;
-  cursor: pointer;
+.hourHint {
+  position: absolute;
+  right: 8px;
+  top: 50%;
+  transform: translateY(-50%);
+  opacity: 0;
+  color: var(--primary);
+  transition: opacity 150ms ease;
+  pointer-events: none;
 }
 
-.hourContent:hover {
-  background: var(--surface-hover);
+.hourRow:hover .hourHint {
+  opacity: 0.6;
+}
+
+/* Current time indicator */
+.nowLine {
+  position: absolute;
+  left: -8px;
+  right: 0;
+  height: 2px;
+  background: var(--error);
+  z-index: 2;
+  pointer-events: none;
+}
+
+.nowDot {
+  position: absolute;
+  left: -3px;
+  top: -4px;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--error);
 }
 
 .eventBlock {
@@ -127,7 +183,7 @@
   box-shadow: var(--shadow-sm);
   transition: box-shadow var(--transition);
   text-align: left;
-  z-index: 1;
+  z-index: 3;
 }
 
 .eventBlock:hover {
@@ -145,6 +201,12 @@
 .eventTime {
   font-size: 0.75rem;
   color: var(--text-muted);
+}
+
+.eventCategory {
+  font-size: 0.7rem;
+  color: var(--text-muted);
+  font-style: italic;
 }
 
 @media (max-width: 480px) {

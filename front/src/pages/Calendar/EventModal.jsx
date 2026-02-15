@@ -131,7 +131,7 @@ export default function EventModal({ open, onClose, onSave, onDelete, event, def
         </div>
 
         <div className={styles.field}>
-          <label className={styles.label}>Category</label>
+          <label className={styles.label}>Category <span className={styles.optional}>(optional)</span></label>
           <input
             className={styles.input}
             value={category}
