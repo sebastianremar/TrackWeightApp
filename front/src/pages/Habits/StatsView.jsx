@@ -44,15 +44,21 @@ export default function StatsView({ habits }) {
     }).finally(() => setLoading(false));
   }, [habits, period]);
 
-  // Compute overall completion
+  const goodHabits = habits.filter((h) => h.type !== 'bad');
+  const badHabits = habits.filter((h) => h.type === 'bad');
+
+  // Compute overall completion (good habits only)
   let completionRate = 0;
   let totalCompletions = 0;
   let totalTarget = 0;
-  if (summary && habits.length > 0) {
-    totalCompletions = Object.values(summary.counts || {}).reduce((s, c) => s + c, 0);
+  if (summary && goodHabits.length > 0) {
+    const goodIds = new Set(goodHabits.map((h) => h.habitId));
+    totalCompletions = Object.entries(summary.counts || {})
+      .filter(([id]) => goodIds.has(id))
+      .reduce((s, [, c]) => s + c, 0);
     const daysInPeriod = summary.totalDays || 7;
     const weeksInPeriod = Math.max(1, daysInPeriod / 7);
-    totalTarget = habits.reduce((s, h) => s + h.targetFrequency * weeksInPeriod, 0);
+    totalTarget = goodHabits.reduce((s, h) => s + h.targetFrequency * weeksInPeriod, 0);
     completionRate = totalTarget > 0 ? Math.round((totalCompletions / totalTarget) * 100) : 0;
   }
 
@@ -124,6 +130,30 @@ export default function StatsView({ habits }) {
               ))
             )}
           </Card>
+
+          {badHabits.length > 0 && summary && (
+            <Card>
+              <h3 className={styles.cardTitle}>Bad Habits</h3>
+              {badHabits.map((habit) => {
+                const count = (summary.counts || {})[habit.habitId] || 0;
+                const habitPeriod = habit.limitPeriod || 'week';
+                const matchesPeriod = period === habitPeriod;
+                const exceeded = matchesPeriod && count > habit.targetFrequency;
+
+                return (
+                  <div key={habit.habitId} className={styles.badHabitRow}>
+                    <span className={styles.badHabitDot} style={{ background: habit.color }} />
+                    <span className={styles.badHabitName}>{habit.name}</span>
+                    <span className={`${styles.badHabitCount} ${exceeded ? styles.badHabitExceeded : ''}`}>
+                      {matchesPeriod
+                        ? `${count}/${habit.targetFrequency} this ${habitPeriod}`
+                        : `${count} this ${period}`}
+                    </span>
+                  </div>
+                );
+              })}
+            </Card>
+          )}
         </div>
       )}
     </div>

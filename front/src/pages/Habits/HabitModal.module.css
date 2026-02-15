@@ -53,6 +53,35 @@
   color: #fff;
 }
 
+.toggleRow {
+  display: flex;
+  gap: 4px;
+}
+
+.toggleBtn {
+  flex: 1;
+  padding: 6px 12px;
+  border-radius: var(--radius-sm);
+  font-size: 0.85rem;
+  font-weight: 500;
+  background: var(--neutral);
+  color: var(--text-secondary);
+  transition: all var(--transition);
+}
+
+.toggleBtn:hover {
+  background: var(--accent-light);
+}
+
+.toggleActive {
+  background: var(--primary);
+  color: #fff;
+}
+
+.toggleActive:hover {
+  background: var(--primary-hover);
+}
+
 .colorRow {
   display: flex;
   gap: 6px;

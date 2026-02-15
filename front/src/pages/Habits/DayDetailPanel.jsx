@@ -36,14 +36,15 @@ export default function DayDetailPanel({ date, habits, entries, onToggle, onEdit
     weekday: 'long', month: 'short', day: 'numeric',
   });
 
-  const completedCount = habits.filter((h) => entries.some((e) => e.habitId === h.habitId && e.date === date)).length;
-  const allDone = completedCount === habits.length;
-  const pct = Math.round((completedCount / habits.length) * 100);
+  const goodHabits = habits.filter((h) => h.type !== 'bad');
+  const goodCompletedCount = goodHabits.filter((h) => entries.some((e) => e.habitId === h.habitId && e.date === date)).length;
+  const allDone = goodHabits.length > 0 && goodCompletedCount === goodHabits.length;
+  const pct = goodHabits.length > 0 ? Math.round((goodCompletedCount / goodHabits.length) * 100) : 0;
 
   return (
     <div className={styles.panel}>
       <div className={styles.summary}>
-        <CompletionRing completed={completedCount} total={habits.length} />
+        <CompletionRing completed={goodCompletedCount} total={goodHabits.length} />
         <div className={styles.summaryText}>
           <h3 className={styles.dayLabel}>{dayLabel}</h3>
           <span className={styles.summaryLine}>

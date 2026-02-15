@@ -55,6 +55,7 @@ export default function WeekView({ habits, entries, refDate, setRefDate, toggleE
           onToggle={toggleEntry}
           onEditHabit={onEditHabit}
           onDeleteHabit={onDeleteHabit}
+          weekEntries={entries}
         />
       </div>
     </div>

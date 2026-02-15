@@ -75,6 +75,72 @@ describe('POST /api/habits', () => {
         expect(res.status).toBe(400);
     });
 
+    test('creates a bad habit with type and limitPeriod', async () => {
+        ddbMock.on(QueryCommand).resolves({ Items: [] });
+        ddbMock.on(PutCommand).resolves({});
+
+        const res = await request(app)
+            .post('/api/habits')
+            .set(authHeader('test@example.com'))
+            .send({ name: 'Junk food', targetFrequency: 3, type: 'bad', limitPeriod: 'week' });
+        expect(res.status).toBe(201);
+        expect(res.body.habit.type).toBe('bad');
+        expect(res.body.habit.limitPeriod).toBe('week');
+        expect(res.body.habit.targetFrequency).toBe(3);
+    });
+
+    test('creates a bad habit with monthly limit up to 30', async () => {
+        ddbMock.on(QueryCommand).resolves({ Items: [] });
+        ddbMock.on(PutCommand).resolves({});
+
+        const res = await request(app)
+            .post('/api/habits')
+            .set(authHeader('test@example.com'))
+            .send({ name: 'Sweets', targetFrequency: 15, type: 'bad', limitPeriod: 'month' });
+        expect(res.status).toBe(201);
+        expect(res.body.habit.targetFrequency).toBe(15);
+    });
+
+    test('returns 400 for bad habit with weekly frequency > 7', async () => {
+        const res = await request(app)
+            .post('/api/habits')
+            .set(authHeader('test@example.com'))
+            .send({ name: 'Snack', targetFrequency: 10, type: 'bad', limitPeriod: 'week' });
+        expect(res.status).toBe(400);
+        expect(res.body.error).toMatch(/1 and 7/);
+    });
+
+    test('returns 400 for invalid type', async () => {
+        const res = await request(app)
+            .post('/api/habits')
+            .set(authHeader('test@example.com'))
+            .send({ name: 'Test', targetFrequency: 3, type: 'neutral' });
+        expect(res.status).toBe(400);
+        expect(res.body.error).toMatch(/Type/);
+    });
+
+    test('returns 400 for invalid limitPeriod on bad habit', async () => {
+        const res = await request(app)
+            .post('/api/habits')
+            .set(authHeader('test@example.com'))
+            .send({ name: 'Test', targetFrequency: 3, type: 'bad', limitPeriod: 'year' });
+        expect(res.status).toBe(400);
+        expect(res.body.error).toMatch(/Limit period/);
+    });
+
+    test('defaults type to good when not provided', async () => {
+        ddbMock.on(QueryCommand).resolves({ Items: [] });
+        ddbMock.on(PutCommand).resolves({});
+
+        const res = await request(app)
+            .post('/api/habits')
+            .set(authHeader('test@example.com'))
+            .send({ name: 'Yoga', targetFrequency: 4 });
+        expect(res.status).toBe(201);
+        expect(res.body.habit.type).toBe('good');
+        expect(res.body.habit.limitPeriod).toBeUndefined();
+    });
+
     test('returns 400 when 20 active habits exist', async () => {
         ddbMock.on(QueryCommand).resolves({ Items: new Array(20).fill(habit) });
 
@@ -149,6 +215,51 @@ describe('PATCH /api/habits/:id', () => {
             .set(authHeader('test@example.com'))
             .send({});
         expect(res.status).toBe(400);
+    });
+
+    test('updates type and limitPeriod', async () => {
+        ddbMock.on(UpdateCommand).resolves({
+            Attributes: { ...habit, type: 'bad', limitPeriod: 'month' },
+        });
+
+        const res = await request(app)
+            .patch('/api/habits/habit%23test123')
+            .set(authHeader('test@example.com'))
+            .send({ type: 'bad', limitPeriod: 'month' });
+        expect(res.status).toBe(200);
+        expect(res.body.habit.type).toBe('bad');
+        expect(res.body.habit.limitPeriod).toBe('month');
+    });
+
+    test('returns 400 for invalid type on PATCH', async () => {
+        const res = await request(app)
+            .patch('/api/habits/habit%23test123')
+            .set(authHeader('test@example.com'))
+            .send({ type: 'neutral' });
+        expect(res.status).toBe(400);
+        expect(res.body.error).toMatch(/Type/);
+    });
+
+    test('returns 400 for invalid limitPeriod on PATCH', async () => {
+        const res = await request(app)
+            .patch('/api/habits/habit%23test123')
+            .set(authHeader('test@example.com'))
+            .send({ limitPeriod: 'year' });
+        expect(res.status).toBe(400);
+        expect(res.body.error).toMatch(/Limit period/);
+    });
+
+    test('allows frequency up to 30 on PATCH', async () => {
+        ddbMock.on(UpdateCommand).resolves({
+            Attributes: { ...habit, targetFrequency: 20 },
+        });
+
+        const res = await request(app)
+            .patch('/api/habits/habit%23test123')
+            .set(authHeader('test@example.com'))
+            .send({ targetFrequency: 20 });
+        expect(res.status).toBe(200);
+        expect(res.body.habit.targetFrequency).toBe(20);
     });
 
     test('returns 404 when habit not found (conditional check)', async () => {

@@ -27,10 +27,11 @@ export default function CalendarGrid({ year, month, selectedDate, onSelectDate, 
       {cells.map((date, i) => {
         if (!date) return <div key={`empty-${i}`} className={styles.empty} />;
 
-        const completedCount = habits.filter((h) =>
+        const goodHabits = habits.filter((h) => h.type !== 'bad');
+        const completedCount = goodHabits.filter((h) =>
           entries.some((e) => e.habitId === h.habitId && e.date === date)
         ).length;
-        const totalHabits = habits.length;
+        const totalHabits = goodHabits.length;
         const isSelected = date === selectedDate;
         const isToday = date === today;
         const ratio = totalHabits > 0 ? completedCount / totalHabits : 0;

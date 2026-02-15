@@ -6,6 +6,8 @@ const logger = require('../lib/logger');
 const router = express.Router();
 
 const COLOR_REGEX = /^#[0-9a-fA-F]{6}$/;
+const VALID_TYPES = ['good', 'bad'];
+const VALID_LIMIT_PERIODS = ['week', 'month'];
 
 function generateUlid() {
     // Simple ULID-like ID: timestamp + random
@@ -17,15 +19,26 @@ function generateUlid() {
 // POST /api/habits — create a habit
 router.post('/', async (req, res) => {
     const email = req.user.email;
-    const { name, targetFrequency, color } = req.body;
+    const { name, targetFrequency, color, type, limitPeriod } = req.body;
 
     if (!name || typeof name !== 'string' || name.trim().length === 0 || name.trim().length > 100) {
         return res.status(400).json({ error: 'Name is required (max 100 chars)' });
     }
 
+    const habitType = type || 'good';
+    if (!VALID_TYPES.includes(habitType)) {
+        return res.status(400).json({ error: 'Type must be "good" or "bad"' });
+    }
+
+    const period = limitPeriod || 'week';
+    if (habitType === 'bad' && !VALID_LIMIT_PERIODS.includes(period)) {
+        return res.status(400).json({ error: 'Limit period must be "week" or "month"' });
+    }
+
+    const maxFreq = habitType === 'bad' && period === 'month' ? 30 : 7;
     const freq = parseInt(targetFrequency);
-    if (!freq || freq < 1 || freq > 7) {
-        return res.status(400).json({ error: 'Target frequency must be between 1 and 7' });
+    if (!freq || freq < 1 || freq > maxFreq) {
+        return res.status(400).json({ error: `Target frequency must be between 1 and ${maxFreq}` });
     }
 
     if (color !== undefined && (typeof color !== 'string' || !COLOR_REGEX.test(color))) {
@@ -57,9 +70,13 @@ router.post('/', async (req, res) => {
         name: name.trim(),
         targetFrequency: freq,
         color: color || '#667eea',
+        type: habitType,
         archived: false,
         createdAt: new Date().toISOString(),
     };
+    if (habitType === 'bad') {
+        item.limitPeriod = period;
+    }
 
     try {
         await docClient.send(
@@ -126,7 +143,7 @@ router.get('/:id', async (req, res) => {
 router.patch('/:id', async (req, res) => {
     const email = req.user.email;
     const habitId = req.params.id;
-    const { name, targetFrequency, color } = req.body;
+    const { name, targetFrequency, color, type, limitPeriod } = req.body;
 
     const updates = [];
     const values = {};
@@ -143,8 +160,8 @@ router.patch('/:id', async (req, res) => {
 
     if (targetFrequency !== undefined) {
         const freq = parseInt(targetFrequency);
-        if (!freq || freq < 1 || freq > 7) {
-            return res.status(400).json({ error: 'Target frequency must be between 1 and 7' });
+        if (!freq || freq < 1 || freq > 30) {
+            return res.status(400).json({ error: 'Target frequency must be between 1 and 30' });
         }
         updates.push('targetFrequency = :freq');
         values[':freq'] = freq;
@@ -156,6 +173,23 @@ router.patch('/:id', async (req, res) => {
         }
         updates.push('color = :color');
         values[':color'] = color;
+    }
+
+    if (type !== undefined) {
+        if (!VALID_TYPES.includes(type)) {
+            return res.status(400).json({ error: 'Type must be "good" or "bad"' });
+        }
+        updates.push('#t = :type');
+        names['#t'] = 'type';
+        values[':type'] = type;
+    }
+
+    if (limitPeriod !== undefined) {
+        if (!VALID_LIMIT_PERIODS.includes(limitPeriod)) {
+            return res.status(400).json({ error: 'Limit period must be "week" or "month"' });
+        }
+        updates.push('limitPeriod = :limitPeriod');
+        values[':limitPeriod'] = limitPeriod;
     }
 
     if (updates.length === 0) {

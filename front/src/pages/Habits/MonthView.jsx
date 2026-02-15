@@ -45,6 +45,7 @@ export default function MonthView({ habits, entries, refDate, setRefDate, toggle
           onToggle={toggleEntry}
           onEditHabit={onEditHabit}
           onDeleteHabit={onDeleteHabit}
+          weekEntries={entries}
         />
       </div>
     </div>

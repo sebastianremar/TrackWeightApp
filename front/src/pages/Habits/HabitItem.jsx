@@ -14,8 +14,14 @@ export default function HabitItem({ habit, completed, onToggle, onEdit, onDelete
     return () => document.removeEventListener('mousedown', handleClick);
   }, [menuOpen]);
 
+  const isBad = habit.type === 'bad';
+  const period = habit.limitPeriod || 'week';
+  const exceeded = isBad && progress !== undefined && progress > habit.targetFrequency;
+
   const pct = progress !== undefined && habit.targetFrequency
-    ? Math.min(100, Math.round((progress / habit.targetFrequency) * 100))
+    ? (isBad
+      ? Math.round((progress / habit.targetFrequency) * 100)
+      : Math.min(100, Math.round((progress / habit.targetFrequency) * 100)))
     : 0;
 
   return (
@@ -44,7 +50,9 @@ export default function HabitItem({ habit, completed, onToggle, onEdit, onDelete
           <div className={styles.info}>
             <span className={`${styles.name} ${completed ? styles.done : ''}`}>{habit.name}</span>
             {progress !== undefined && (
-              <span className={styles.subtitle}>{progress}/{habit.targetFrequency} this week</span>
+              <span className={`${styles.subtitle} ${exceeded ? styles.subtitleDanger : ''}`}>
+                {progress}/{habit.targetFrequency} this {period}
+              </span>
             )}
           </div>
           <div className={styles.menu} ref={menuRef}>
@@ -66,8 +74,14 @@ export default function HabitItem({ habit, completed, onToggle, onEdit, onDelete
           </div>
         </div>
         {progress !== undefined && habit.targetFrequency > 0 && (
-          <div className={styles.progressBar}>
-            <div className={styles.progressFill} style={{ width: `${pct}%`, background: habit.color }} />
+          <div className={`${styles.progressBar} ${exceeded ? styles.progressBarDanger : ''}`}>
+            <div
+              className={styles.progressFill}
+              style={{
+                width: `${Math.min(100, pct)}%`,
+                background: exceeded ? 'var(--error)' : habit.color,
+              }}
+            />
           </div>
         )}
       </div>

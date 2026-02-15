@@ -1,9 +1,12 @@
 import { api } from './client';
 
-export function createHabit(name, targetFrequency, color) {
+export function createHabit(name, targetFrequency, color, type, limitPeriod) {
+  const body = { name, targetFrequency, color };
+  if (type) body.type = type;
+  if (type === 'bad' && limitPeriod) body.limitPeriod = limitPeriod;
   return api('/api/habits', {
     method: 'POST',
-    body: JSON.stringify({ name, targetFrequency, color }),
+    body: JSON.stringify(body),
   });
 }
 

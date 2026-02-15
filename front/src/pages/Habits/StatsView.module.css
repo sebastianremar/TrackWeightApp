@@ -79,3 +79,42 @@
   color: var(--text-muted);
   font-size: 0.9rem;
 }
+
+.badHabitRow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 0;
+}
+
+.badHabitRow + .badHabitRow {
+  border-top: 1px solid var(--border);
+}
+
+.badHabitDot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.badHabitName {
+  flex: 1;
+  font-size: 0.9rem;
+  font-weight: 500;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.badHabitCount {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  flex-shrink: 0;
+}
+
+.badHabitExceeded {
+  color: var(--error);
+  font-weight: 600;
+}

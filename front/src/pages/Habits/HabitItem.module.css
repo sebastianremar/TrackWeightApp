@@ -150,6 +150,14 @@
   }
 }
 
+.subtitleDanger {
+  color: var(--error);
+}
+
+.progressBarDanger {
+  background: var(--error-bg);
+}
+
 .progressBar {
   height: 4px;
   background: var(--neutral);

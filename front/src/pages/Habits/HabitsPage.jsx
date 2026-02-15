@@ -67,7 +67,7 @@ export default function HabitsPage() {
     if (editingHabit) {
       await editHabit(editingHabit.habitId, data);
     } else {
-      await addHabit(data.name, data.targetFrequency, data.color);
+      await addHabit(data.name, data.targetFrequency, data.color, data.type, data.limitPeriod);
     }
     setModalOpen(false);
   };

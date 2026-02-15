@@ -21,8 +21,8 @@ export function useHabits() {
 
   useEffect(() => { fetchHabits(); }, [fetchHabits]);
 
-  const addHabit = useCallback(async (name, targetFrequency, color) => {
-    const data = await createHabit(name, targetFrequency, color);
+  const addHabit = useCallback(async (name, targetFrequency, color, type, limitPeriod) => {
+    const data = await createHabit(name, targetFrequency, color, type, limitPeriod);
     setHabits((prev) => [...prev, data.habit]);
     return data.habit;
   }, []);
