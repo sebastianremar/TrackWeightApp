@@ -1,0 +1,146 @@
+.panel {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.center {
+  display: flex;
+  justify-content: center;
+  padding: 12px 0;
+}
+
+.empty {
+  text-align: center;
+  color: var(--text-muted);
+  font-size: 0.85rem;
+  padding: 8px 0;
+}
+
+.periodToggle {
+  display: flex;
+  gap: 4px;
+  justify-content: center;
+}
+
+.periodBtn {
+  padding: 5px 14px;
+  border-radius: var(--radius-sm);
+  font-size: 0.8rem;
+  font-weight: 500;
+  background: var(--neutral);
+  color: var(--text-secondary);
+  transition: all var(--transition);
+}
+
+.periodBtn:hover {
+  background: var(--accent-light);
+}
+
+.periodActive {
+  background: var(--primary);
+  color: #fff;
+}
+
+.periodActive:hover {
+  background: var(--primary-hover);
+}
+
+.overallRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 12px;
+  background: var(--background);
+  border-radius: var(--radius-sm);
+}
+
+.overallLabel {
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: var(--text-secondary);
+}
+
+.overallPct {
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--primary);
+}
+
+.list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.habitRow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.habitDot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.habitName {
+  font-size: 0.85rem;
+  font-weight: 500;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  flex: 1;
+}
+
+.habitTypeBadge {
+  font-size: 0.65rem;
+  font-weight: 600;
+  padding: 1px 6px;
+  border-radius: 999px;
+  background: var(--accent-light);
+  color: var(--primary);
+  flex-shrink: 0;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+}
+
+.habitTypeBadgeBad {
+  background: var(--error-bg);
+  color: var(--error);
+}
+
+.habitBar {
+  width: 60px;
+  height: 5px;
+  background: var(--neutral);
+  border-radius: 3px;
+  overflow: hidden;
+  flex-shrink: 0;
+}
+
+.habitBarDanger {
+  background: var(--error-bg);
+}
+
+.habitBarFill {
+  height: 100%;
+  border-radius: 3px;
+  transition: width 300ms ease;
+}
+
+.habitCount {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  flex-shrink: 0;
+  min-width: 32px;
+  text-align: right;
+}
+
+.habitCountDanger {
+  color: var(--error);
+  font-weight: 600;
+}

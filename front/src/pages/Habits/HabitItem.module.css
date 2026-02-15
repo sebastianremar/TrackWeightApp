@@ -1,25 +1,22 @@
 .card {
   display: flex;
   position: relative;
-  background: var(--surface);
   border-radius: var(--radius-md);
   box-shadow: var(--shadow-sm);
-  transition: box-shadow var(--transition);
+  transition: box-shadow var(--transition), transform var(--transition);
 }
 
 .card:hover {
   box-shadow: var(--shadow-md);
 }
 
-.colorBar {
-  width: 4px;
-  flex-shrink: 0;
-  border-radius: var(--radius-md) 0 0 var(--radius-md);
+.card:active {
+  transform: scale(0.98);
 }
 
 .body {
   flex: 1;
-  padding: 12px 14px;
+  padding: 14px 16px;
   min-width: 0;
   display: flex;
   flex-direction: column;
@@ -46,14 +43,18 @@
 }
 
 .check {
-  width: 22px;
-  height: 22px;
+  width: 28px;
+  height: 28px;
   border: 2px solid;
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
   transition: background var(--transition);
+}
+
+.checkBounce {
+  animation: checkBounce 300ms cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
 .info {
@@ -65,7 +66,7 @@
 }
 
 .name {
-  font-size: 0.95rem;
+  font-size: 1rem;
   font-weight: 500;
   color: var(--text);
   transition: text-decoration var(--transition);
@@ -77,7 +78,7 @@
 }
 
 .subtitle {
-  font-size: 0.75rem;
+  font-size: 0.8rem;
   color: var(--text-muted);
 }
 
@@ -139,8 +140,8 @@
 
 @media (max-width: 480px) {
   .check {
-    width: 26px;
-    height: 26px;
+    width: 32px;
+    height: 32px;
   }
 
   .menuBtn {
@@ -159,7 +160,7 @@
 }
 
 .progressBar {
-  height: 4px;
+  height: 6px;
   background: var(--neutral);
   border-radius: 2px;
   overflow: hidden;

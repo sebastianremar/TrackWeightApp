@@ -52,6 +52,8 @@ export default function HabitsPage() {
   const { habits, loading: habitsLoading, error: habitsError, addHabit, editHabit, removeHabit } = useHabits();
   const { entries, loading: entriesLoading, fetchEntries, toggleEntry } = useHabitEntries();
 
+  const tabIndex = TABS.findIndex((t) => t.key === tab);
+
   // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => {
     const { from, to } = getDateRange(tab, refDate);
@@ -99,11 +101,15 @@ export default function HabitsPage() {
   return (
     <div className={styles.page}>
       <div className={styles.header}>
-        <div className={styles.tabs} role="tablist">
+        <div className={styles.segmentedControl} role="tablist">
+          <div
+            className={styles.segmentIndicator}
+            style={{ transform: `translateX(${tabIndex * 100}%)` }}
+          />
           {TABS.map((t) => (
             <button
               key={t.key}
-              className={`${styles.tab} ${tab === t.key ? styles.active : ''}`}
+              className={`${styles.segment} ${tab === t.key ? styles.segmentActive : ''}`}
               role="tab"
               aria-selected={tab === t.key}
               onClick={() => setTab(t.key)}
@@ -112,7 +118,6 @@ export default function HabitsPage() {
             </button>
           ))}
         </div>
-        <button className={styles.addBtn} onClick={handleOpenCreate}>+ New Habit</button>
       </div>
 
       {habitsError && <InlineError message={habitsError} />}
@@ -122,6 +127,12 @@ export default function HabitsPage() {
       ) : (
         renderView()
       )}
+
+      <button className={styles.fab} onClick={handleOpenCreate} aria-label="New habit">
+        <svg viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
+          <path d="M12 5v14M5 12h14" />
+        </svg>
+      </button>
 
       <HabitModal
         open={modalOpen}

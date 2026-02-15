@@ -24,6 +24,21 @@
 .name {
   font-size: 0.9rem;
   font-weight: 500;
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.bestBadge {
+  font-size: 0.7rem;
+  font-weight: 600;
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: var(--success-bg, rgba(72, 187, 120, 0.15));
+  color: var(--success);
+  flex-shrink: 0;
 }
 
 .heatmap {
@@ -33,7 +48,7 @@
 
 .cell {
   flex: 1;
-  height: 14px;
-  border-radius: 2px;
+  height: 18px;
+  border-radius: 4px;
   min-width: 0;
 }

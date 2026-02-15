@@ -5,6 +5,7 @@ function fmt(d) {
 }
 
 const DAY_NAMES = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+const MAX_DOTS = 5;
 
 export default function WeekStrip({ weekStart, selectedDate, onSelectDate, habits, entries }) {
   const days = [];
@@ -20,11 +21,15 @@ export default function WeekStrip({ weekStart, selectedDate, onSelectDate, habit
     <div className={styles.strip}>
       {days.map((date) => {
         const dayNum = (new Date(date + 'T00:00:00').getDay() + 6) % 7;
-        const completedCount = habits.filter((h) =>
-          entries.some((e) => e.habitId === h.habitId && e.date === date)
-        ).length;
         const isSelected = date === selectedDate;
         const isToday = date === today;
+
+        // Build per-habit dots
+        const habitDots = habits.slice(0, MAX_DOTS).map((h) => {
+          const completed = entries.some((e) => e.habitId === h.habitId && e.date === date);
+          return { color: completed ? h.color : 'var(--neutral-dark)', key: h.habitId };
+        });
+        const extra = habits.length > MAX_DOTS ? habits.length - MAX_DOTS : 0;
 
         return (
           <button
@@ -36,8 +41,10 @@ export default function WeekStrip({ weekStart, selectedDate, onSelectDate, habit
             <span className={styles.dayNum}>{new Date(date + 'T00:00:00').getDate()}</span>
             {habits.length > 0 && (
               <div className={styles.dots}>
-                {completedCount > 0 && <span className={styles.dot} style={{ background: 'var(--success)' }} />}
-                {completedCount === 0 && <span className={styles.dot} style={{ background: 'var(--neutral-dark)' }} />}
+                {habitDots.map((dot) => (
+                  <span key={dot.key} className={styles.dot} style={{ background: dot.color }} />
+                ))}
+                {extra > 0 && <span className={styles.dotExtra}>+{extra}</span>}
               </div>
             )}
           </button>

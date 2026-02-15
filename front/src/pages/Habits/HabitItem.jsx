@@ -3,6 +3,7 @@ import styles from './HabitItem.module.css';
 
 export default function HabitItem({ habit, completed, onToggle, onEdit, onDelete, progress }) {
   const [menuOpen, setMenuOpen] = useState(false);
+  const [bouncing, setBouncing] = useState(false);
   const menuRef = useRef(null);
 
   useEffect(() => {
@@ -24,24 +25,32 @@ export default function HabitItem({ habit, completed, onToggle, onEdit, onDelete
       : Math.min(100, Math.round((progress / habit.targetFrequency) * 100)))
     : 0;
 
+  const handleToggle = () => {
+    setBouncing(true);
+    setTimeout(() => setBouncing(false), 300);
+    onToggle();
+  };
+
+  const tintOpacity = completed ? '26' : '12';
+  const cardBg = habit.color ? `${habit.color}${tintOpacity}` : undefined;
+
   return (
-    <div className={styles.card}>
-      <div className={styles.colorBar} style={{ background: habit.color }} />
+    <div className={styles.card} style={{ background: cardBg }}>
       <div className={styles.body}>
         <div className={styles.row}>
           <label className={styles.checkbox}>
             <input
               type="checkbox"
               checked={completed}
-              onChange={onToggle}
+              onChange={handleToggle}
               className={styles.hiddenInput}
             />
             <span
-              className={styles.check}
+              className={`${styles.check} ${bouncing ? styles.checkBounce : ''}`}
               style={{ borderColor: habit.color, background: completed ? habit.color : 'transparent' }}
             >
               {completed && (
-                <svg viewBox="0 0 12 12" width="12" height="12">
+                <svg viewBox="0 0 12 12" width="14" height="14">
                   <path d="M2 6l3 3 5-5" fill="none" stroke="#fff" strokeWidth="2" />
                 </svg>
               )}

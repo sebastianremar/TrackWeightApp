@@ -36,3 +36,11 @@ export function toggleFriendFavorite(email, favorite) {
     body: JSON.stringify({ favorite }),
   });
 }
+
+export function getFriendHabits(email) {
+  return api(`/api/friends/${encodeURIComponent(email)}/habits`);
+}
+
+export function getFriendHabitsStats(email, period = 'week') {
+  return api(`/api/friends/${encodeURIComponent(email)}/habits/stats?period=${period}`);
+}

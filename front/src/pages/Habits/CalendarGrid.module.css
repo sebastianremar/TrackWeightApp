@@ -23,21 +23,27 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 2px;
+  gap: 3px;
   border-radius: var(--radius-sm);
   background: var(--surface);
   border: 2px solid transparent;
-  transition: background var(--transition), border-color var(--transition);
+  transition: background var(--transition), border-color var(--transition), transform var(--transition);
   padding: 2px;
 }
 
 .cell:hover {
   background: var(--surface-hover);
+  transform: scale(1.05);
 }
 
 .cell.selected {
+  background: var(--primary);
   border-color: var(--primary);
-  background: var(--accent-light);
+  color: #fff;
+}
+
+.cell.selected .num {
+  color: #fff;
 }
 
 .cell.today .num {
@@ -45,14 +51,18 @@
   font-weight: 700;
 }
 
+.cell.selected.today .num {
+  color: #fff;
+}
+
 .num {
   font-size: 0.8rem;
 }
 
-.bar {
-  width: 80%;
-  height: 3px;
-  border-radius: 2px;
+.completionDot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
 }
 
 @media (max-width: 480px) {

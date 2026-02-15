@@ -7,11 +7,13 @@
 }
 
 .arrow {
-  font-size: 1.2rem;
-  padding: 6px 12px;
+  padding: 8px 14px;
   border-radius: var(--radius-sm);
   color: var(--text-secondary);
   background: var(--neutral);
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .arrow:hover {
@@ -23,6 +25,21 @@
   font-weight: 600;
   min-width: 160px;
   text-align: center;
+}
+
+.todayBtn {
+  padding: 6px 14px;
+  background: var(--primary);
+  color: #fff;
+  border-radius: 999px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  animation: fadeIn 200ms ease;
+  transition: background var(--transition);
+}
+
+.todayBtn:hover {
+  background: var(--primary-hover);
 }
 
 @media (max-width: 480px) {

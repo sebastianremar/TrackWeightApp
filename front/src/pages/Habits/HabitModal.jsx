@@ -3,7 +3,22 @@ import Modal from '../../components/Modal/Modal';
 import InlineError from '../../components/InlineError/InlineError';
 import styles from './HabitModal.module.css';
 
-const COLORS = ['#667eea', '#f56565', '#48bb78', '#ed8936', '#9f7aea', '#38b2ac', '#e53e3e', '#4299e1'];
+const COLORS = [
+  // Reds
+  '#991B1B', '#DC2626', '#F87171', '#FECACA',
+  // Oranges
+  '#9A3412', '#EA580C', '#FB923C', '#FED7AA',
+  // Yellows
+  '#854D0E', '#CA8A04', '#FACC15', '#FEF08A',
+  // Greens
+  '#166534', '#16A34A', '#4ADE80', '#BBF7D0',
+  // Teals
+  '#115E59', '#0D9488', '#2DD4BF', '#99F6E4',
+  // Blues
+  '#1E3A8A', '#2563EB', '#60A5FA', '#BFDBFE',
+  // Purples
+  '#581C87', '#9333EA', '#C084FC', '#E9D5FF',
+];
 
 export default function HabitModal({ open, onClose, onSave, onDelete, habit }) {
   const [name, setName] = useState('');
@@ -151,7 +166,7 @@ export default function HabitModal({ open, onClose, onSave, onDelete, habit }) {
         </div>
         <div className={styles.field}>
           <label className={styles.label}>Color</label>
-          <div className={styles.colorRow}>
+          <div className={styles.colorGrid}>
             {COLORS.map((c) => (
               <button
                 key={c}
@@ -159,7 +174,13 @@ export default function HabitModal({ open, onClose, onSave, onDelete, habit }) {
                 className={`${styles.colorBtn} ${color === c ? styles.colorActive : ''}`}
                 style={{ background: c }}
                 onClick={() => setColor(c)}
-              />
+              >
+                {color === c && (
+                  <svg viewBox="0 0 12 12" width="14" height="14">
+                    <path d="M2 6l3 3 5-5" fill="none" stroke="#fff" strokeWidth="2" />
+                  </svg>
+                )}
+              </button>
             ))}
           </div>
         </div>

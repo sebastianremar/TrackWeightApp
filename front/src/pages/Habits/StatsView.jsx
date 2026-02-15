@@ -67,6 +67,17 @@ export default function StatsView({ habits }) {
     { name: 'Remaining', value: Math.max(0, 100 - completionRate) },
   ];
 
+  // Per-habit completions for breakdown bar
+  const habitBreakdown = summary && goodHabits.length > 0
+    ? goodHabits.map((h) => ({
+        habitId: h.habitId,
+        name: h.name,
+        color: h.color,
+        count: (summary.counts || {})[h.habitId] || 0,
+      })).filter((h) => h.count > 0)
+    : [];
+  const breakdownTotal = habitBreakdown.reduce((s, h) => s + h.count, 0);
+
   return (
     <div>
       <div className={styles.toggleRow}>
@@ -95,12 +106,12 @@ export default function StatsView({ habits }) {
           <Card>
             <h3 className={styles.cardTitle}>Overall Completion</h3>
             <div className={styles.donutWrap}>
-              <ResponsiveContainer width={140} height={140}>
+              <ResponsiveContainer width={180} height={180}>
                 <PieChart>
                   <Pie
                     data={donutData}
-                    innerRadius={45}
-                    outerRadius={60}
+                    innerRadius={58}
+                    outerRadius={78}
                     startAngle={90}
                     endAngle={-270}
                     dataKey="value"
@@ -114,6 +125,24 @@ export default function StatsView({ habits }) {
               <span className={styles.donutLabel}>{completionRate}%</span>
             </div>
             <p className={styles.subtext}>{totalCompletions} / {Math.round(totalTarget)} completions</p>
+
+            {habitBreakdown.length > 0 && (
+              <div className={styles.breakdownWrap}>
+                <div className={styles.breakdownBar}>
+                  {habitBreakdown.map((h) => (
+                    <div
+                      key={h.habitId}
+                      className={styles.breakdownSegment}
+                      style={{
+                        flex: h.count / breakdownTotal,
+                        background: h.color,
+                      }}
+                      title={`${h.name}: ${h.count}`}
+                    />
+                  ))}
+                </div>
+              </div>
+            )}
           </Card>
 
           <Card>

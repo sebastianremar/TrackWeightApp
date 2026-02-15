@@ -14,9 +14,16 @@ function getWeekStart(dateStr) {
   return fmt(d);
 }
 
+function todayStr() {
+  return new Date().toISOString().split('T')[0];
+}
+
 export default function WeekView({ habits, entries, refDate, setRefDate, toggleEntry, onEditHabit, onDeleteHabit }) {
   const weekStart = getWeekStart(refDate);
   const [selectedDate, setSelectedDate] = useState(refDate);
+  const today = todayStr();
+  const currentWeekStart = getWeekStart(today);
+  const showTodayBtn = weekStart !== currentWeekStart;
 
   const goWeek = (offset) => {
     const d = new Date(weekStart + 'T00:00:00');
@@ -24,6 +31,11 @@ export default function WeekView({ habits, entries, refDate, setRefDate, toggleE
     const newStart = fmt(d);
     setRefDate(newStart);
     setSelectedDate(newStart);
+  };
+
+  const goToday = () => {
+    setRefDate(today);
+    setSelectedDate(today);
   };
 
   const weekLabel = (() => {
@@ -36,9 +48,20 @@ export default function WeekView({ habits, entries, refDate, setRefDate, toggleE
   return (
     <div>
       <div className={styles.nav}>
-        <button className={styles.arrow} onClick={() => goWeek(-1)}>&larr;</button>
+        <button className={styles.arrow} onClick={() => goWeek(-1)} aria-label="Previous week">
+          <svg viewBox="0 0 18 18" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M11 4L6 9l5 5" />
+          </svg>
+        </button>
         <span className={styles.label}>{weekLabel}</span>
-        <button className={styles.arrow} onClick={() => goWeek(1)}>&rarr;</button>
+        <button className={styles.arrow} onClick={() => goWeek(1)} aria-label="Next week">
+          <svg viewBox="0 0 18 18" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M7 4l5 5-5 5" />
+          </svg>
+        </button>
+        {showTodayBtn && (
+          <button className={styles.todayBtn} onClick={goToday}>Today</button>
+        )}
       </div>
       <WeekStrip
         weekStart={weekStart}
@@ -56,6 +79,7 @@ export default function WeekView({ habits, entries, refDate, setRefDate, toggleE
           onEditHabit={onEditHabit}
           onDeleteHabit={onDeleteHabit}
           weekEntries={entries}
+          onOpenCreate={null}
         />
       </div>
     </div>

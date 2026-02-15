@@ -361,6 +361,122 @@ router.delete('/:email', async (req, res) => {
     }
 });
 
+// GET /api/friends/:email/habits — get friend's habits
+router.get('/:email/habits', async (req, res) => {
+    const userEmail = req.user.email;
+    const friendEmail = decodeURIComponent(req.params.email).trim().toLowerCase();
+
+    // Verify accepted friendship
+    try {
+        const friendship = await docClient.send(
+            new GetCommand({
+                TableName: process.env.FRIENDSHIPS_TABLE,
+                Key: { email: userEmail, friendEmail },
+            }),
+        );
+        if (!friendship.Item || friendship.Item.status !== 'accepted') {
+            return res.status(403).json({ error: 'Not friends with this user' });
+        }
+    } catch (err) {
+        logger.error({ err }, 'DynamoDB GetItem error');
+        return res.status(500).json({ error: 'Internal server error' });
+    }
+
+    try {
+        const result = await docClient.send(
+            new QueryCommand({
+                TableName: process.env.HABITS_TABLE,
+                KeyConditionExpression: 'email = :email',
+                FilterExpression: 'attribute_not_exists(archived) OR archived <> :t',
+                ExpressionAttributeValues: { ':email': friendEmail, ':t': true },
+            }),
+        );
+
+        const habits = (result.Items || []).map((item) => ({
+            habitId: item.habitId,
+            name: item.name,
+            targetFrequency: item.targetFrequency,
+            color: item.color,
+            type: item.type || 'good',
+            limitPeriod: item.limitPeriod,
+            createdAt: item.createdAt,
+        }));
+
+        res.json({ habits });
+    } catch (err) {
+        logger.error({ err }, 'DynamoDB Query error');
+        return res.status(500).json({ error: 'Internal server error' });
+    }
+});
+
+// GET /api/friends/:email/habits/stats — friend's habit completion stats
+router.get('/:email/habits/stats', async (req, res) => {
+    const userEmail = req.user.email;
+    const friendEmail = decodeURIComponent(req.params.email).trim().toLowerCase();
+    const period = req.query.period === 'month' ? 'month' : 'week';
+
+    // Verify accepted friendship
+    try {
+        const friendship = await docClient.send(
+            new GetCommand({
+                TableName: process.env.FRIENDSHIPS_TABLE,
+                Key: { email: userEmail, friendEmail },
+            }),
+        );
+        if (!friendship.Item || friendship.Item.status !== 'accepted') {
+            return res.status(403).json({ error: 'Not friends with this user' });
+        }
+    } catch (err) {
+        logger.error({ err }, 'DynamoDB GetItem error');
+        return res.status(500).json({ error: 'Internal server error' });
+    }
+
+    const now = new Date();
+    let from, to;
+
+    if (period === 'week') {
+        const dow = (now.getDay() + 6) % 7;
+        from = new Date(now);
+        from.setDate(now.getDate() - dow);
+        from.setHours(0, 0, 0, 0);
+        to = new Date(from);
+        to.setDate(from.getDate() + 6);
+    } else {
+        from = new Date(now.getFullYear(), now.getMonth(), 1);
+        to = new Date(now.getFullYear(), now.getMonth() + 1, 0);
+    }
+
+    const fromStr = from.toISOString().split('T')[0];
+    const toStr = to.toISOString().split('T')[0];
+
+    try {
+        const result = await docClient.send(
+            new QueryCommand({
+                TableName: process.env.HABIT_ENTRIES_TABLE,
+                IndexName: 'HabitEntriesByUser',
+                KeyConditionExpression: 'email = :email AND #d BETWEEN :from AND :to',
+                ExpressionAttributeNames: { '#d': 'date' },
+                ExpressionAttributeValues: { ':email': friendEmail, ':from': fromStr, ':to': toStr },
+            }),
+        );
+
+        const counts = {};
+        for (const item of result.Items || []) {
+            if (item.completed) {
+                counts[item.habitId] = (counts[item.habitId] || 0) + 1;
+            }
+        }
+
+        const diffMs = to.getTime() - from.getTime();
+        const totalDays = Math.floor(diffMs / (24 * 60 * 60 * 1000)) + 1;
+
+        res.json({ counts, period, from: fromStr, to: toStr, totalDays });
+    } catch (err) {
+        logger.error({ err }, 'DynamoDB Query error');
+        return res.status(500).json({ error: 'Internal server error' });
+    }
+});
+
 // GET /api/friends/:email/weight — get friend's weight data (if they share)
 router.get('/:email/weight', async (req, res) => {
     const userEmail = req.user.email;

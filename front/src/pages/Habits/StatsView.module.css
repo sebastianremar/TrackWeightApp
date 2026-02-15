@@ -63,7 +63,7 @@
 
 .donutLabel {
   position: absolute;
-  font-size: 1.3rem;
+  font-size: 1.6rem;
   font-weight: 700;
   color: var(--primary);
 }
@@ -73,6 +73,23 @@
   font-size: 0.8rem;
   color: var(--text-muted);
   margin-top: 4px;
+}
+
+.breakdownWrap {
+  margin-top: 12px;
+}
+
+.breakdownBar {
+  display: flex;
+  height: 10px;
+  border-radius: 5px;
+  overflow: hidden;
+  gap: 1px;
+}
+
+.breakdownSegment {
+  min-width: 4px;
+  transition: flex 300ms ease;
 }
 
 .muted {

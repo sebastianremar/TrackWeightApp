@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import { getFriendWeight } from '../../api/friends';
 import { getWeightHistory } from '../../api/weight';
 import FriendChart from './FriendChart';
+import FriendHabitsPanel from './FriendHabitsPanel';
 import ConfirmDialog from '../../components/ConfirmDialog/ConfirmDialog';
 import Spinner from '../../components/Spinner/Spinner';
 import InlineError from '../../components/InlineError/InlineError';
@@ -61,13 +62,21 @@ function StatBox({ label, value, colored }) {
   );
 }
 
+const BODY_TABS = [
+  { key: 'weight', label: 'Weight' },
+  { key: 'habits', label: 'Habits' },
+];
+
 export default function FriendCard({ friend, onRemove, onToggleFavorite, initialExpanded }) {
   const [expanded, setExpanded] = useState(initialExpanded);
+  const [bodyTab, setBodyTab] = useState('weight');
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [confirmOpen, setConfirmOpen] = useState(false);
   const loadedRef = useRef(false);
+
+  const bodyTabIndex = BODY_TABS.findIndex((t) => t.key === bodyTab);
 
   const loadData = async () => {
     if (loadedRef.current) return;
@@ -165,29 +174,53 @@ export default function FriendCard({ friend, onRemove, onToggleFavorite, initial
 
         {expanded && (
           <div className={styles.body}>
-            {loading ? (
-              <div className={styles.center}><Spinner size={24} /></div>
-            ) : error ? (
-              <InlineError message={error} />
-            ) : data ? (
+            <div className={styles.bodyTabs}>
+              <div
+                className={styles.bodyTabIndicator}
+                style={{ transform: `translateX(${bodyTabIndex * 100}%)` }}
+              />
+              {BODY_TABS.map((t) => (
+                <button
+                  key={t.key}
+                  className={`${styles.bodyTab} ${bodyTab === t.key ? styles.bodyTabActive : ''}`}
+                  onClick={() => setBodyTab(t.key)}
+                >
+                  {t.label}
+                </button>
+              ))}
+            </div>
+
+            {bodyTab === 'weight' && (
               <>
-                {data.stats && (
-                  <div className={styles.statsGrid}>
-                    <StatBox label="Current" value={data.stats.current} />
-                    <StatBox label="Weekly" value={data.stats.weeklyChange} colored />
-                    <StatBox label="Monthly" value={data.stats.monthlyChange} colored />
-                    <StatBox label="Average" value={data.stats.avg} />
-                    <StatBox label="Lowest" value={data.stats.lowest} />
-                  </div>
-                )}
+                {loading ? (
+                  <div className={styles.center}><Spinner size={24} /></div>
+                ) : error ? (
+                  <InlineError message={error} />
+                ) : data ? (
+                  <>
+                    {data.stats && (
+                      <div className={styles.statsGrid}>
+                        <StatBox label="Current" value={data.stats.current} />
+                        <StatBox label="Weekly" value={data.stats.weeklyChange} colored />
+                        <StatBox label="Monthly" value={data.stats.monthlyChange} colored />
+                        <StatBox label="Average" value={data.stats.avg} />
+                        <StatBox label="Lowest" value={data.stats.lowest} />
+                      </div>
+                    )}
 
-                <FriendChart friend={friend} data={data} />
+                    <FriendChart friend={friend} data={data} />
 
-                {!data.stats && data.miniData.length === 0 && (
-                  <p className={styles.emptyText}>No weight data yet</p>
-                )}
+                    {!data.stats && data.miniData.length === 0 && (
+                      <p className={styles.emptyText}>No weight data yet</p>
+                    )}
+                  </>
+                ) : null}
               </>
-            ) : null}
+            )}
+
+            {bodyTab === 'habits' && (
+              <FriendHabitsPanel friendEmail={friend.email} />
+            )}
           </div>
         )}
       </div>

@@ -2,35 +2,51 @@ import HabitItem from './HabitItem';
 import EmptyState from '../../components/EmptyState/EmptyState';
 import styles from './DayDetailPanel.module.css';
 
-function CompletionRing({ completed, total }) {
-  const size = 60;
-  const strokeWidth = 6;
+function CompletionRing({ completed, total, pct }) {
+  const size = 80;
+  const strokeWidth = 8;
   const radius = (size - strokeWidth) / 2;
   const circumference = 2 * Math.PI * radius;
-  const pct = total > 0 ? completed / total : 0;
-  const offset = circumference * (1 - pct);
+  const offset = circumference * (1 - (total > 0 ? completed / total : 0));
+  const allDone = total > 0 && completed === total;
 
   return (
-    <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`} className={styles.ring}>
-      <circle
-        cx={size / 2} cy={size / 2} r={radius}
-        fill="none" stroke="var(--neutral)" strokeWidth={strokeWidth}
-      />
-      <circle
-        cx={size / 2} cy={size / 2} r={radius}
-        fill="none" stroke="var(--primary)" strokeWidth={strokeWidth}
-        strokeLinecap="round"
-        strokeDasharray={circumference}
-        strokeDashoffset={offset}
-        transform={`rotate(-90 ${size / 2} ${size / 2})`}
-        style={{ transition: 'stroke-dashoffset 400ms ease' }}
-      />
-    </svg>
+    <div className={styles.ringWrap}>
+      <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`} className={styles.ring}>
+        <circle
+          cx={size / 2} cy={size / 2} r={radius}
+          fill="none" stroke="var(--neutral)" strokeWidth={strokeWidth}
+        />
+        <circle
+          cx={size / 2} cy={size / 2} r={radius}
+          fill="none" stroke={allDone ? 'var(--success)' : 'var(--primary)'} strokeWidth={strokeWidth}
+          strokeLinecap="round"
+          strokeDasharray={circumference}
+          strokeDashoffset={offset}
+          transform={`rotate(-90 ${size / 2} ${size / 2})`}
+          style={{ transition: 'stroke-dashoffset 400ms ease' }}
+        />
+      </svg>
+      <span className={`${styles.ringLabel} ${allDone ? styles.ringLabelDone : ''}`}>{pct}%</span>
+    </div>
   );
 }
 
-export default function DayDetailPanel({ date, habits, entries, onToggle, onEditHabit, onDeleteHabit, weekEntries }) {
-  if (habits.length === 0) return <EmptyState message="Create a habit to get started" />;
+export default function DayDetailPanel({ date, habits, entries, onToggle, onEditHabit, onDeleteHabit, weekEntries, onOpenCreate }) {
+  if (habits.length === 0) {
+    return (
+      <EmptyState
+        message="Create a habit to get started"
+        icon={
+          <svg viewBox="0 0 48 48" width="48" height="48" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+            <circle cx="24" cy="24" r="20" />
+            <path d="M16 24l6 6 10-10" />
+          </svg>
+        }
+        action={onOpenCreate ? { label: 'Create Habit', onClick: onOpenCreate } : undefined}
+      />
+    );
+  }
 
   const dayLabel = new Date(date + 'T00:00:00').toLocaleDateString(undefined, {
     weekday: 'long', month: 'short', day: 'numeric',
@@ -43,32 +59,37 @@ export default function DayDetailPanel({ date, habits, entries, onToggle, onEdit
 
   return (
     <div className={styles.panel}>
-      <div className={styles.summary}>
-        <CompletionRing completed={goodCompletedCount} total={goodHabits.length} />
+      <div className={`${styles.summary} ${allDone ? styles.allDone : ''}`}>
+        <CompletionRing completed={goodCompletedCount} total={goodHabits.length} pct={pct} />
         <div className={styles.summaryText}>
           <h3 className={styles.dayLabel}>{dayLabel}</h3>
-          <span className={styles.summaryLine}>
+          <span className={`${styles.summaryLine} ${allDone ? styles.summaryLineDone : ''}`}>
             {allDone ? 'All done!' : `${pct}% complete`}
           </span>
         </div>
       </div>
       <div className={styles.list}>
-        {habits.map((habit) => {
+        {habits.map((habit, index) => {
           const completed = entries.some((e) => e.habitId === habit.habitId && e.date === date);
           const weekProgress = weekEntries
             ? weekEntries.filter((e) => e.habitId === habit.habitId).length
             : undefined;
 
           return (
-            <HabitItem
+            <div
               key={habit.habitId}
-              habit={habit}
-              completed={completed}
-              onToggle={() => onToggle(habit.habitId, date, completed)}
-              onEdit={() => onEditHabit(habit)}
-              onDelete={onDeleteHabit ? () => onDeleteHabit(habit) : undefined}
-              progress={weekProgress}
-            />
+              className={styles.listItem}
+              style={{ animationDelay: `${index * 50}ms` }}
+            >
+              <HabitItem
+                habit={habit}
+                completed={completed}
+                onToggle={() => onToggle(habit.habitId, date, completed)}
+                onEdit={() => onEditHabit(habit)}
+                onDelete={onDeleteHabit ? () => onDeleteHabit(habit) : undefined}
+                progress={weekProgress}
+              />
+            </div>
           );
         })}
       </div>

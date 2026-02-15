@@ -6,6 +6,13 @@ function fmt(d) {
   return d.toISOString().split('T')[0];
 }
 
+function ratioToColor(ratio) {
+  if (ratio >= 0.8) return 'var(--success)';
+  if (ratio >= 0.4) return 'var(--primary)';
+  if (ratio > 0) return 'var(--neutral-dark)';
+  return 'transparent';
+}
+
 export default function CalendarGrid({ year, month, selectedDate, onSelectDate, habits, entries }) {
   const firstDay = new Date(year, month, 1);
   const lastDay = new Date(year, month + 1, 0);
@@ -44,12 +51,9 @@ export default function CalendarGrid({ year, month, selectedDate, onSelectDate, 
           >
             <span className={styles.num}>{new Date(date + 'T00:00:00').getDate()}</span>
             {totalHabits > 0 && (
-              <div
-                className={styles.bar}
-                style={{
-                  background: ratio > 0 ? `var(--primary)` : 'var(--neutral)',
-                  opacity: ratio > 0 ? 0.3 + ratio * 0.7 : 0.3,
-                }}
+              <span
+                className={styles.completionDot}
+                style={{ background: ratioToColor(ratio) }}
               />
             )}
           </button>

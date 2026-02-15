@@ -8,14 +8,38 @@
   display: flex;
   align-items: center;
   gap: 14px;
-  padding: 16px;
+  padding: 20px;
   background: var(--surface);
   border-radius: var(--radius-md);
   box-shadow: var(--shadow-sm);
+  border-left: 4px solid var(--primary);
+}
+
+.allDone {
+  border-left-color: var(--success);
+}
+
+.ringWrap {
+  position: relative;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .ring {
-  flex-shrink: 0;
+  display: block;
+}
+
+.ringLabel {
+  position: absolute;
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--primary);
+}
+
+.ringLabelDone {
+  color: var(--success);
 }
 
 .summaryText {
@@ -35,8 +59,17 @@
   color: var(--text-muted);
 }
 
+.summaryLineDone {
+  color: var(--success);
+  font-weight: 600;
+}
+
 .list {
   display: flex;
   flex-direction: column;
   gap: 8px;
+}
+
+.listItem {
+  animation: slideUp 300ms ease backwards;
 }
