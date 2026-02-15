@@ -73,3 +73,10 @@
 .listItem {
   animation: slideUp 300ms ease backwards;
 }
+
+@media (max-width: 360px) {
+  .summary {
+    padding: 14px;
+    gap: 10px;
+  }
+}

@@ -51,7 +51,8 @@
 }
 
 .accept {
-  padding: 6px 14px;
+  padding: 10px 16px;
+  min-height: 44px;
   background: var(--primary);
   color: #fff;
   border-radius: var(--radius-sm);
@@ -64,7 +65,8 @@
 }
 
 .reject {
-  padding: 6px 14px;
+  padding: 10px 16px;
+  min-height: 44px;
   background: var(--neutral);
   color: var(--text-secondary);
   border-radius: var(--radius-sm);

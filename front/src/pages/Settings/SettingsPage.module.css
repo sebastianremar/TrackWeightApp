@@ -39,7 +39,8 @@
 }
 
 .editBtn {
-  padding: 5px 12px;
+  padding: 8px 14px;
+  min-height: 44px;
   background: var(--accent-light);
   color: var(--primary);
   border-radius: var(--radius-sm);
@@ -83,6 +84,7 @@
 
 .submitBtn {
   padding: 10px;
+  min-height: 48px;
   background: var(--primary);
   color: #fff;
   border-radius: var(--radius-sm);
@@ -147,4 +149,10 @@
   font-size: 0.7rem;
   color: var(--text-secondary);
   white-space: nowrap;
+}
+
+@media (max-width: 360px) {
+  .paletteGrid {
+    grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+  }
 }

@@ -73,3 +73,10 @@
   color: var(--text-muted);
   line-height: 1;
 }
+
+@media (max-width: 360px) {
+  .day {
+    min-width: 44px;
+    padding: 8px 2px;
+  }
+}

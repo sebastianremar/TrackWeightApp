@@ -88,7 +88,9 @@
 }
 
 .menuBtn {
-  padding: 4px;
+  padding: 8px;
+  min-width: 44px;
+  min-height: 44px;
   color: var(--text-muted);
   border-radius: 4px;
   display: flex;
@@ -112,6 +114,7 @@
   border-radius: var(--radius-sm);
   box-shadow: var(--shadow-md);
   min-width: 120px;
+  max-width: calc(100vw - 32px);
   z-index: 10;
   overflow: hidden;
 }
@@ -142,12 +145,6 @@
   .check {
     width: 32px;
     height: 32px;
-  }
-
-  .menuBtn {
-    padding: 8px;
-    min-width: 36px;
-    min-height: 36px;
   }
 }
 

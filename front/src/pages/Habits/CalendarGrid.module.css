@@ -19,6 +19,8 @@
 
 .cell {
   aspect-ratio: 1;
+  min-width: 36px;
+  min-height: 36px;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -65,9 +67,8 @@
   border-radius: 50%;
 }
 
-@media (max-width: 480px) {
-  .cell {
-    min-width: 36px;
-    min-height: 36px;
+@media (max-width: 360px) {
+  .grid {
+    gap: 1px;
   }
 }

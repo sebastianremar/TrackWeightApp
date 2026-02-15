@@ -36,12 +36,13 @@
   align-items: center;
   gap: 4px;
   flex: 1;
-  min-width: 120px;
+  min-width: 0;
 }
 
 .input {
   flex: 1;
   padding: 10px 12px;
+  min-height: 44px;
   border: 1px solid var(--border);
   border-radius: var(--radius-sm);
   background: var(--surface);
@@ -60,6 +61,7 @@
 
 .dateInput {
   padding: 10px 12px;
+  min-height: 44px;
   border: 1px solid var(--border);
   border-radius: var(--radius-sm);
   background: var(--surface);
@@ -73,6 +75,7 @@
 
 .submit {
   padding: 10px 20px;
+  min-height: 44px;
   background: var(--primary);
   color: #fff;
   border-radius: var(--radius-sm);
@@ -91,8 +94,13 @@
   cursor: not-allowed;
 }
 
-@media (max-width: 480px) {
-  .inputWrap {
-    min-width: 0;
+@media (max-width: 360px) {
+  .row {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .submit {
+    width: 100%;
   }
 }

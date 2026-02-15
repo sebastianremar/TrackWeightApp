@@ -8,6 +8,8 @@
 
 .arrow {
   padding: 8px 14px;
+  min-width: 44px;
+  min-height: 44px;
   border-radius: var(--radius-sm);
   color: var(--text-secondary);
   background: var(--neutral);
@@ -29,6 +31,7 @@
 
 .todayBtn {
   padding: 6px 14px;
+  min-height: 36px;
   background: var(--primary);
   color: #fff;
   border-radius: 999px;
@@ -45,6 +48,12 @@
 @media (max-width: 480px) {
   .label {
     min-width: auto;
+  }
+}
+
+@media (max-width: 360px) {
+  .nav {
+    gap: 8px;
   }
 }
 

@@ -25,6 +25,7 @@
 
 .periodBtn {
   padding: 5px 14px;
+  min-height: 40px;
   border-radius: var(--radius-sm);
   font-size: 0.8rem;
   font-weight: 500;
@@ -143,4 +144,10 @@
 .habitCountDanger {
   color: var(--error);
   font-weight: 600;
+}
+
+@media (max-width: 360px) {
+  .habitBar {
+    width: 40px;
+  }
 }

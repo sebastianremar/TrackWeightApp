@@ -30,7 +30,7 @@
 .weight {
   font-weight: 600;
   font-size: 0.95rem;
-  min-width: 70px;
+  min-width: 50px;
   text-align: right;
 }
 
@@ -42,7 +42,10 @@
 .editBtn,
 .deleteBtn {
   font-size: 0.8rem;
-  padding: 4px 10px;
+  padding: 8px 12px;
+  min-height: 44px;
+  display: flex;
+  align-items: center;
   border-radius: var(--radius-sm);
 }
 
@@ -64,12 +67,13 @@
   opacity: 0.8;
 }
 
-@media (max-width: 480px) {
-  .editBtn,
-  .deleteBtn {
-    padding: 8px 12px;
-    min-height: 44px;
-    display: flex;
-    align-items: center;
+@media (max-width: 360px) {
+  .row {
+    flex-wrap: wrap;
+  }
+
+  .actions {
+    width: 100%;
+    justify-content: flex-end;
   }
 }

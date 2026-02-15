@@ -72,6 +72,8 @@
   align-items: center;
   justify-content: center;
   padding: 4px;
+  min-width: 44px;
+  min-height: 44px;
   background: none;
   color: var(--text-muted);
   border-radius: var(--radius-sm);
@@ -88,6 +90,7 @@
 
 .removeBtn {
   padding: 6px 12px;
+  min-height: 44px;
   background: var(--error-bg);
   color: var(--error);
   border-radius: var(--radius-sm);
@@ -196,6 +199,7 @@
 .bodyTab {
   flex: 1;
   padding: 7px;
+  min-height: 40px;
   font-size: 0.8rem;
   font-weight: 600;
   color: var(--text-secondary);
@@ -218,4 +222,14 @@
   color: var(--text-muted);
   font-size: 0.85rem;
   padding: 8px 0;
+}
+
+@media (max-width: 360px) {
+  .header {
+    padding: 10px 12px;
+  }
+
+  .removeBtn {
+    font-size: 0.7rem;
+  }
 }

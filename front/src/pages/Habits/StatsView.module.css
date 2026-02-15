@@ -7,6 +7,7 @@
 
 .toggleBtn {
   padding: 6px 16px;
+  min-height: 44px;
   border-radius: var(--radius-sm);
   font-size: 0.85rem;
   font-weight: 500;

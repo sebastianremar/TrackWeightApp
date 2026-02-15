@@ -36,6 +36,7 @@
 .segment {
   flex: 1;
   padding: 10px;
+  min-height: 44px;
   font-size: 0.85rem;
   font-weight: 600;
   border-radius: calc(var(--radius-md) - 2px);
@@ -56,7 +57,7 @@
 .fab {
   position: fixed;
   right: 20px;
-  bottom: calc(68px + 20px);
+  bottom: calc(68px + 20px + env(safe-area-inset-bottom));
   width: 56px;
   height: 56px;
   border-radius: 50%;
@@ -82,6 +83,14 @@
 @media (min-width: 769px) {
   .fab {
     bottom: 32px;
+  }
+}
+
+@media (max-width: 360px) {
+  .fab {
+    right: 12px;
+    width: 50px;
+    height: 50px;
   }
 }
 
