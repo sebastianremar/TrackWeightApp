@@ -87,14 +87,14 @@ describe('POST /api/signup', () => {
         expect(res.body.error).toMatch(/uppercase/);
     });
 
-    test('returns 400 for name over 100 chars', async () => {
+    test('returns 400 for firstName over 50 chars', async () => {
         const res = await request(app).post('/api/signup').send({
-            name: 'x'.repeat(101),
+            firstName: 'x'.repeat(51),
             email: 'a@b.com',
             password: 'StrongPass1',
         });
         expect(res.status).toBe(400);
-        expect(res.body.error).toMatch(/100/);
+        expect(res.body.error).toMatch(/50/);
     });
 
     test('returns 409 for duplicate email', async () => {
