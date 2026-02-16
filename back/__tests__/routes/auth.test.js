@@ -126,6 +126,8 @@ describe('POST /api/signin', () => {
         expect(res.status).toBe(200);
         expect(res.body.message).toBe('Signed in successfully');
         expect(res.headers['set-cookie']).toBeDefined();
+        expect(res.body.user.digestEnabled).toBe(false);
+        expect(res.body.user.timezone).toBe('');
     });
 
     test('returns 400 when email or password missing', async () => {
@@ -179,6 +181,19 @@ describe('GET /api/me', () => {
         expect(res.body).not.toHaveProperty('shareWeight');
         expect(res.body).toHaveProperty('darkMode');
         expect(res.body.palette).toBe('ethereal-ivory');
+        expect(res.body.digestEnabled).toBe(false);
+        expect(res.body.timezone).toBe('');
+    });
+
+    test('returns digestEnabled and timezone when set', async () => {
+        ddbMock.on(GetCommand).resolves({
+            Item: { ...testUser, digestEnabled: true, timezone: 'America/Chicago' },
+        });
+
+        const res = await request(app).get('/api/me').set(authHeader('test@example.com'));
+        expect(res.status).toBe(200);
+        expect(res.body.digestEnabled).toBe(true);
+        expect(res.body.timezone).toBe('America/Chicago');
     });
 
     test('returns 404 if user not found in DB', async () => {
@@ -277,6 +292,50 @@ describe('PATCH /api/me', () => {
             .send({ palette: 123 });
         expect(res.status).toBe(400);
         expect(res.body.error).toMatch(/invalid palette/i);
+    });
+
+    test('updates digestEnabled', async () => {
+        ddbMock.on(UpdateCommand).resolves({
+            Attributes: { ...testUser, digestEnabled: true },
+        });
+
+        const res = await request(app)
+            .patch('/api/me')
+            .set(authHeader('test@example.com'))
+            .send({ digestEnabled: true });
+        expect(res.status).toBe(200);
+        expect(res.body.digestEnabled).toBe(true);
+    });
+
+    test('returns 400 for non-boolean digestEnabled', async () => {
+        const res = await request(app)
+            .patch('/api/me')
+            .set(authHeader('test@example.com'))
+            .send({ digestEnabled: 'yes' });
+        expect(res.status).toBe(400);
+        expect(res.body.error).toMatch(/digestEnabled must be a boolean/);
+    });
+
+    test('updates timezone with valid IANA timezone', async () => {
+        ddbMock.on(UpdateCommand).resolves({
+            Attributes: { ...testUser, timezone: 'America/New_York' },
+        });
+
+        const res = await request(app)
+            .patch('/api/me')
+            .set(authHeader('test@example.com'))
+            .send({ timezone: 'America/New_York' });
+        expect(res.status).toBe(200);
+        expect(res.body.timezone).toBe('America/New_York');
+    });
+
+    test('returns 400 for invalid timezone', async () => {
+        const res = await request(app)
+            .patch('/api/me')
+            .set(authHeader('test@example.com'))
+            .send({ timezone: 'Not/A/Timezone' });
+        expect(res.status).toBe(400);
+        expect(res.body.error).toMatch(/invalid timezone/i);
     });
 });
 

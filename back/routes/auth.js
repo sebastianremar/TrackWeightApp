@@ -155,6 +155,8 @@ router.post('/signin', async (req, res) => {
             dashboardStats: user.dashboardStats || DEFAULT_STATS,
             todoCategories: user.todoCategories || [],
             isAdmin: user.isAdmin || false,
+            digestEnabled: user.digestEnabled || false,
+            timezone: user.timezone || '',
         },
     });
 });
@@ -190,6 +192,8 @@ router.get('/me', authenticate, async (req, res) => {
             dashboardStats: user.dashboardStats || DEFAULT_STATS,
             todoCategories: user.todoCategories || [],
             isAdmin: user.isAdmin || false,
+            digestEnabled: user.digestEnabled || false,
+            timezone: user.timezone || '',
             createdAt: user.createdAt,
         });
     } catch (err) {
@@ -200,7 +204,7 @@ router.get('/me', authenticate, async (req, res) => {
 
 // PATCH /api/me — update profile
 router.patch('/me', authenticate, async (req, res) => {
-    const { firstName, lastName, name, darkMode, palette, dashboardStats, todoCategories } = req.body;
+    const { firstName, lastName, name, darkMode, palette, dashboardStats, todoCategories, digestEnabled, timezone } = req.body;
     const updates = [];
     const names = {};
     const values = {};
@@ -275,6 +279,29 @@ router.patch('/me', authenticate, async (req, res) => {
         values[':tc'] = todoCategories.map((c) => c.trim());
     }
 
+    if (digestEnabled !== undefined) {
+        if (typeof digestEnabled !== 'boolean') {
+            return res.status(400).json({ error: 'digestEnabled must be a boolean' });
+        }
+        updates.push('digestEnabled = :de');
+        values[':de'] = digestEnabled;
+    }
+
+    if (timezone !== undefined) {
+        if (typeof timezone !== 'string' || timezone.length > 100) {
+            return res.status(400).json({ error: 'Invalid timezone' });
+        }
+        // Validate IANA timezone
+        try {
+            Intl.DateTimeFormat(undefined, { timeZone: timezone });
+        } catch {
+            return res.status(400).json({ error: 'Invalid timezone' });
+        }
+        updates.push('#tz = :tz');
+        names['#tz'] = 'timezone';
+        values[':tz'] = timezone;
+    }
+
     if (updates.length === 0) {
         return res.status(400).json({ error: 'No valid fields to update' });
     }
@@ -301,6 +328,8 @@ router.patch('/me', authenticate, async (req, res) => {
             palette: user.palette || 'ethereal-ivory',
             dashboardStats: user.dashboardStats || DEFAULT_STATS,
             todoCategories: user.todoCategories || [],
+            digestEnabled: user.digestEnabled || false,
+            timezone: user.timezone || '',
         });
     } catch (err) {
         logger.error({ err }, 'DynamoDB UpdateItem error');

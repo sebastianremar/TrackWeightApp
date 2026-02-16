@@ -22,6 +22,7 @@ const friendRoutes = require('./routes/friends');
 const todoRoutes = require('./routes/todos');
 const calendarRoutes = require('./routes/calendar');
 const adminRoutes = require('./routes/admin');
+const digestRoutes = require('./routes/digest');
 const authenticate = require('./middleware/auth');
 const rateLimit = require('./middleware/rateLimit');
 const metricsMiddleware = require('./middleware/metrics');
@@ -91,7 +92,8 @@ app.get('/health', (req, res) => {
 app.post('/api/signin', rateLimit({ maxHits: 10, windowMs: 15 * 60 * 1000 }));
 app.post('/api/signup', rateLimit({ maxHits: 5, windowMs: 60 * 60 * 1000 }));
 
-// Routes
+// Routes (digest is public — no auth)
+app.use('/api/digest', digestRoutes);
 app.use('/api', authRoutes);
 app.use('/api/weight', authenticate, weightRoutes);
 app.use('/api/habits', authenticate, habitEntryRoutes);
