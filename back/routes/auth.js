@@ -82,6 +82,7 @@ router.post('/signup', async (req, res) => {
         name: fullName,
         password: hashedPassword,
         darkMode: false,
+        hasSeenIntro: false,
         createdAt: new Date().toISOString(),
     };
     // Remove undefined fields
@@ -215,6 +216,7 @@ router.post('/signin', async (req, res) => {
             isAdmin: user.isAdmin || false,
             digestEnabled: user.digestEnabled || false,
             timezone: user.timezone || '',
+            hasSeenIntro: user.hasSeenIntro || false,
         },
     });
 });
@@ -266,6 +268,7 @@ router.get('/me', authenticate, async (req, res) => {
             isAdmin: user.isAdmin || false,
             digestEnabled: user.digestEnabled || false,
             timezone: user.timezone || '',
+            hasSeenIntro: user.hasSeenIntro || false,
             createdAt: user.createdAt,
         });
     } catch (err) {
@@ -276,7 +279,7 @@ router.get('/me', authenticate, async (req, res) => {
 
 // PATCH /api/me — update profile
 router.patch('/me', authenticate, async (req, res) => {
-    const { firstName, lastName, name, darkMode, palette, dashboardStats, todoCategories, digestEnabled, timezone } = req.body;
+    const { firstName, lastName, name, darkMode, palette, dashboardStats, todoCategories, digestEnabled, timezone, hasSeenIntro } = req.body;
     const updates = [];
     const names = {};
     const values = {};
@@ -374,6 +377,14 @@ router.patch('/me', authenticate, async (req, res) => {
         values[':tz'] = timezone;
     }
 
+    if (hasSeenIntro !== undefined) {
+        if (typeof hasSeenIntro !== 'boolean') {
+            return res.status(400).json({ error: 'hasSeenIntro must be a boolean' });
+        }
+        updates.push('hasSeenIntro = :hsi');
+        values[':hsi'] = hasSeenIntro;
+    }
+
     if (updates.length === 0) {
         return res.status(400).json({ error: 'No valid fields to update' });
     }
@@ -402,6 +413,7 @@ router.patch('/me', authenticate, async (req, res) => {
             todoCategories: user.todoCategories || [],
             digestEnabled: user.digestEnabled || false,
             timezone: user.timezone || '',
+            hasSeenIntro: user.hasSeenIntro || false,
         });
     } catch (err) {
         logger.error({ err }, 'DynamoDB UpdateItem error');

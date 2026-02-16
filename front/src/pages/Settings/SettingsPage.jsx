@@ -224,6 +224,20 @@ export default function SettingsPage() {
         <InlineError message={digestError} />
       </Card>
 
+      {/* Help */}
+      <Card>
+        <h3 className={styles.sectionTitle}>Help</h3>
+        <div className={styles.row}>
+          <span className={styles.value}>Introduction Tour</span>
+          <button
+            className={styles.editBtn}
+            onClick={() => window.dispatchEvent(new Event('show-intro'))}
+          >
+            View
+          </button>
+        </div>
+      </Card>
+
       {/* Account (password) */}
       <Card>
         <h3 className={styles.sectionTitle}>Change Password</h3>

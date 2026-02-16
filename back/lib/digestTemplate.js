@@ -2,7 +2,7 @@
  * Build inline-CSS HTML email for the daily digest.
  * Pure function: data in, HTML string out.
  */
-function buildDigestHtml({ firstName, dateLabel, isSunday, appUrl, unsubscribeUrl, data }) {
+function buildDigestHtml({ firstName, dateLabel, isSunday, appUrl, unsubscribeUrl, data, aiInsight }) {
     const {
         todayEvents,
         tomorrowEvents,
@@ -17,6 +17,16 @@ function buildDigestHtml({ firstName, dateLabel, isSunday, appUrl, unsubscribeUr
     } = data;
 
     const sections = [];
+
+    // AI-generated Daily Insight
+    if (aiInsight) {
+        sections.push(`
+            <div style="margin-bottom:20px;padding:14px 16px;border-left:4px solid #19747E;background:#f0fafb;border-radius:0 8px 8px 0;">
+                <h2 style="margin:0 0 8px;font-size:15px;font-weight:600;color:#19747E;">Daily Insight</h2>
+                <p style="margin:0;font-size:14px;color:#1f2937;line-height:1.5;">${esc(aiInsight)}</p>
+            </div>
+        `);
+    }
 
     // Calendar Recap — Today
     sections.push(calendarSection('Today\'s Calendar', todayEvents, 'No events today.'));

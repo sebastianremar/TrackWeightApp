@@ -10,6 +10,7 @@ process.env.TODOS_TABLE = 'TestTodos';
 process.env.METRICS_TABLE = 'TestMetrics';
 process.env.WORKOUT_ROUTINES_TABLE = 'TestWorkoutRoutines';
 process.env.WORKOUT_LOGS_TABLE = 'TestWorkoutLogs';
+process.env.OPENAI_API_KEY = '';
 process.env.NODE_ENV = 'production';
 process.env.CORS_ORIGIN = 'http://localhost:3000';
 process.env.LOG_LEVEL = 'silent';

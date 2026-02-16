@@ -9,6 +9,7 @@ const { docClient } = require('../lib/db');
 const { sesClient } = require('../lib/ses');
 const { gatherDigestData } = require('../lib/digestData');
 const { buildDigestHtml } = require('../lib/digestTemplate');
+const { generateDigestInsight } = require('../lib/llm');
 const logger = require('../lib/logger');
 
 const FROM_EMAIL = process.env.SES_FROM_EMAIL;
@@ -25,6 +26,8 @@ if (!FROM_EMAIL) {
     logger.fatal('SES_FROM_EMAIL must be set');
     process.exit(1);
 }
+
+logger.info({ llmEnabled: !!process.env.OPENAI_API_KEY }, 'LLM digest insight status');
 
 /**
  * Get all IANA timezone strings where local time is currently 19:xx (7 PM hour).
@@ -176,6 +179,7 @@ async function runDigest() {
         try {
             const { todayStr, tomorrowStr, weekStartStr, isSunday } = getDatesForTimezone(user.timezone);
             const data = await gatherDigestData(user.email, todayStr, tomorrowStr, weekStartStr);
+            const aiInsight = await generateDigestInsight(data);
             const firstName = user.firstName || user.name.split(' ')[0] || 'there';
 
             const dateLabel = new Intl.DateTimeFormat('en-US', {
@@ -195,6 +199,7 @@ async function runDigest() {
                 appUrl: APP_URL,
                 unsubscribeUrl,
                 data,
+                aiInsight,
             });
 
             await sendDigestEmail(user, html);
