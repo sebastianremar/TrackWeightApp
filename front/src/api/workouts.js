@@ -1,31 +1,52 @@
 import { api } from './client';
 
-// --- Routines ---
+// --- Exercises ---
 
-export function createRoutine(data) {
-  return api('/api/workouts/routines', {
+export function getExercises() {
+  return api('/api/workouts/exercises');
+}
+
+export function createExercise(data) {
+  return api('/api/workouts/exercises', {
     method: 'POST',
     body: JSON.stringify(data),
   });
 }
 
-export function getRoutines() {
-  return api('/api/workouts/routines');
+export function deleteExercise(id) {
+  return api(`/api/workouts/exercises/${encodeURIComponent(id)}`, { method: 'DELETE' });
 }
 
-export function getRoutine(id) {
-  return api(`/api/workouts/routines/${encodeURIComponent(id)}`);
+// --- Templates ---
+
+export function getTemplates() {
+  return api('/api/workouts/templates');
 }
 
-export function updateRoutine(id, fields) {
-  return api(`/api/workouts/routines/${encodeURIComponent(id)}`, {
+export function createTemplate(data) {
+  return api('/api/workouts/templates', {
+    method: 'POST',
+    body: JSON.stringify(data),
+  });
+}
+
+export function getTemplate(id) {
+  return api(`/api/workouts/templates/${encodeURIComponent(id)}`);
+}
+
+export function updateTemplate(id, fields) {
+  return api(`/api/workouts/templates/${encodeURIComponent(id)}`, {
     method: 'PATCH',
     body: JSON.stringify(fields),
   });
 }
 
-export function deleteRoutine(id) {
-  return api(`/api/workouts/routines/${encodeURIComponent(id)}`, { method: 'DELETE' });
+export function deleteTemplate(id) {
+  return api(`/api/workouts/templates/${encodeURIComponent(id)}`, { method: 'DELETE' });
+}
+
+export function getTemplatePrefill(id) {
+  return api(`/api/workouts/templates/${encodeURIComponent(id)}/prefill`);
 }
 
 // --- Logs ---

@@ -73,6 +73,13 @@
   min-width: 44px;
 }
 
+.volume {
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+  margin-top: 4px;
+  font-weight: 500;
+}
+
 .notes {
   font-size: 0.85rem;
   color: var(--text-secondary);

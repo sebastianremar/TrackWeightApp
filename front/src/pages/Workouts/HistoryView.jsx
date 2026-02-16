@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import Card from '../../components/Card/Card';
 import EmptyState from '../../components/EmptyState/EmptyState';
 import Spinner from '../../components/Spinner/Spinner';
@@ -16,14 +16,20 @@ function todayStr() {
   return new Date().toISOString().split('T')[0];
 }
 
-export default function HistoryView({ activeRoutine, logs, loading, error, nextCursor, fetchLogs, editLog, removeLog }) {
+export default function HistoryView({ templates, logs, loading, error, nextCursor, fetchLogs, editLog, removeLog }) {
   const [from, setFrom] = useState(defaultFrom);
   const [to, setTo] = useState(todayStr);
+  const [templateFilter, setTemplateFilter] = useState('');
   const [selectedLog, setSelectedLog] = useState(null);
 
   useEffect(() => {
     fetchLogs({ from, to, limit: 20 });
   }, [from, to, fetchLogs]);
+
+  const filteredLogs = useMemo(() => {
+    if (!templateFilter) return logs;
+    return logs.filter((l) => l.templateId === templateFilter);
+  }, [logs, templateFilter]);
 
   const handleLoadMore = () => {
     if (nextCursor) {
@@ -33,7 +39,7 @@ export default function HistoryView({ activeRoutine, logs, loading, error, nextC
 
   const handleExport = async () => {
     const { downloadWorkbook } = await import('./exportWorkouts');
-    downloadWorkbook(activeRoutine, logs);
+    downloadWorkbook(filteredLogs);
   };
 
   const handleDeleteLog = async (logId) => {
@@ -44,6 +50,19 @@ export default function HistoryView({ activeRoutine, logs, loading, error, nextC
   return (
     <div className={styles.wrapper}>
       <div className={styles.filters}>
+        <label className={styles.label}>
+          Template
+          <select
+            className={styles.selectInput}
+            value={templateFilter}
+            onChange={(e) => setTemplateFilter(e.target.value)}
+          >
+            <option value="">All</option>
+            {templates.map((t) => (
+              <option key={t.routineId} value={t.routineId}>{t.name}</option>
+            ))}
+          </select>
+        </label>
         <label className={styles.label}>
           From
           <input
@@ -63,7 +82,7 @@ export default function HistoryView({ activeRoutine, logs, loading, error, nextC
             onChange={(e) => setTo(e.target.value)}
           />
         </label>
-        <button className={styles.exportBtn} onClick={handleExport} disabled={logs.length === 0}>
+        <button className={styles.exportBtn} onClick={handleExport} disabled={filteredLogs.length === 0}>
           Export
         </button>
       </div>
@@ -74,17 +93,18 @@ export default function HistoryView({ activeRoutine, logs, loading, error, nextC
         <div className={styles.center}><Spinner size={28} /></div>
       )}
 
-      {!loading && logs.length === 0 && (
-        <EmptyState message="No workout logs in this date range" />
+      {!loading && filteredLogs.length === 0 && (
+        <EmptyState message="No workout logs found" />
       )}
 
       <div className={styles.list}>
-        {logs.map((log) => (
+        {filteredLogs.map((log) => (
           <Card key={log.logId} className={styles.logCard}>
             <button className={styles.logBtn} onClick={() => setSelectedLog(log)}>
               <div className={styles.logTop}>
                 <span className={styles.logDate}>{log.date}</span>
-                {log.dayLabel && <span className={styles.logLabel}>{log.dayLabel}</span>}
+                {log.templateName && <span className={styles.logLabel}>{log.templateName}</span>}
+                {!log.templateName && !log.templateId && <span className={styles.logLabel}>Freestyle</span>}
               </div>
               <span className={styles.logMeta}>
                 {log.exercises?.length || 0} exercise{log.exercises?.length !== 1 ? 's' : ''}
@@ -95,7 +115,7 @@ export default function HistoryView({ activeRoutine, logs, loading, error, nextC
         ))}
       </div>
 
-      {nextCursor && (
+      {nextCursor && !templateFilter && (
         <button className={styles.loadMoreBtn} onClick={handleLoadMore} disabled={loading}>
           {loading ? 'Loading...' : 'Load More'}
         </button>

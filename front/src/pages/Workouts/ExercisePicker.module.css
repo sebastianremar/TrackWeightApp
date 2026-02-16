@@ -1,0 +1,196 @@
+.picker {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.searchRow {
+  display: flex;
+  gap: 8px;
+}
+
+.searchInput {
+  flex: 1;
+  padding: 8px 10px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--text);
+  font-size: 0.85rem;
+}
+
+.searchInput:focus {
+  outline: 2px solid var(--primary);
+  outline-offset: -1px;
+}
+
+.chips {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.chip {
+  padding: 4px 10px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  border-radius: 9999px;
+  border: 1px solid var(--border);
+  color: var(--text-secondary);
+  transition: all var(--transition);
+}
+
+.chip:hover {
+  border-color: var(--primary);
+  color: var(--primary);
+}
+
+.chipActive {
+  background: var(--primary);
+  color: #fff;
+  border-color: var(--primary);
+}
+
+.chipActive:hover {
+  color: #fff;
+}
+
+.list {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  max-height: 240px;
+  overflow-y: auto;
+}
+
+.exerciseBtn {
+  width: 100%;
+  padding: 8px 10px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  text-align: left;
+  border-radius: var(--radius-sm);
+  transition: background var(--transition);
+  font-size: 0.85rem;
+}
+
+.exerciseBtn:hover {
+  background: var(--neutral);
+}
+
+.exName {
+  flex: 1;
+  font-weight: 500;
+  color: var(--text);
+}
+
+.exMeta {
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+}
+
+.customBadge {
+  font-size: 0.65rem;
+  font-weight: 600;
+  padding: 1px 6px;
+  border-radius: 9999px;
+  background: var(--primary-bg, rgba(99, 102, 241, 0.1));
+  color: var(--primary);
+}
+
+.customForm {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 10px;
+  border-radius: var(--radius-sm);
+  background: var(--neutral);
+}
+
+.customRow {
+  display: flex;
+  gap: 8px;
+}
+
+.customInput {
+  flex: 1;
+  padding: 6px 8px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--text);
+  font-size: 0.85rem;
+}
+
+.customInput:focus {
+  outline: 2px solid var(--primary);
+  outline-offset: -1px;
+}
+
+.customSelect {
+  flex: 1;
+  padding: 6px 8px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--text);
+  font-size: 0.85rem;
+}
+
+.customActions {
+  display: flex;
+  gap: 8px;
+  justify-content: flex-end;
+}
+
+.customSaveBtn {
+  padding: 6px 14px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  border-radius: var(--radius-sm);
+  background: var(--primary);
+  color: #fff;
+}
+
+.customSaveBtn:hover:not(:disabled) {
+  background: var(--primary-hover);
+}
+
+.customSaveBtn:disabled {
+  opacity: 0.5;
+}
+
+.customCancelBtn {
+  padding: 6px 14px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  border-radius: var(--radius-sm);
+  color: var(--text-secondary);
+}
+
+.customCancelBtn:hover {
+  color: var(--text);
+}
+
+.createBtn {
+  padding: 6px 10px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--primary);
+  border: 1px dashed var(--border);
+  border-radius: var(--radius-sm);
+  text-align: center;
+}
+
+.createBtn:hover {
+  background: rgba(99, 102, 241, 0.05);
+  border-color: var(--primary);
+}
+
+.noResults {
+  padding: 16px;
+  text-align: center;
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+}

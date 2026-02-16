@@ -8,6 +8,7 @@ const {
 } = require('@aws-sdk/lib-dynamodb');
 const { docClient } = require('../lib/db');
 const logger = require('../lib/logger');
+const { EXERCISE_LIBRARY, MUSCLE_GROUPS } = require('../lib/exercises');
 
 const router = express.Router();
 
@@ -20,56 +21,33 @@ function generateUlid() {
 }
 
 const DATE_REGEX = /^\d{4}-\d{2}-\d{2}$/;
-const VALID_DAY_KEYS = ['0', '1', '2', '3', '4', '5', '6'];
 
-function validateSchedule(schedule) {
-    if (!schedule || typeof schedule !== 'object' || Array.isArray(schedule)) {
-        return 'Schedule must be an object';
+function validateTemplateExercises(exercises) {
+    if (!Array.isArray(exercises) || exercises.length === 0 || exercises.length > 30) {
+        return 'Exercises must be an array (1-30 items)';
     }
-    const keys = Object.keys(schedule);
-    if (keys.length === 0) return 'Schedule must have at least 1 day';
-    for (const key of keys) {
-        if (!VALID_DAY_KEYS.includes(key)) {
-            return `Invalid day key "${key}" (must be 0-6)`;
+    for (let i = 0; i < exercises.length; i++) {
+        const ex = exercises[i];
+        if (!ex.exerciseId || typeof ex.exerciseId !== 'string' || ex.exerciseId.length > 100) {
+            return `Exercise ${i} exerciseId is required (max 100 chars)`;
         }
-        const day = schedule[key];
-        if (!day || typeof day !== 'object') return `Day "${key}" must be an object`;
-        if (!day.label || typeof day.label !== 'string' || day.label.trim().length === 0 || day.label.trim().length > 50) {
-            return `Day "${key}" label is required (max 50 chars)`;
+        if (!ex.name || typeof ex.name !== 'string' || ex.name.trim().length === 0 || ex.name.trim().length > 100) {
+            return `Exercise ${i} name is required (max 100 chars)`;
         }
-        if (day.muscleGroups !== undefined) {
-            if (!Array.isArray(day.muscleGroups) || day.muscleGroups.length > 10) {
-                return `Day "${key}" muscleGroups must be an array (max 10)`;
-            }
-            for (const mg of day.muscleGroups) {
-                if (typeof mg !== 'string' || mg.length > 30) {
-                    return `Day "${key}" muscleGroups items must be strings (max 30 chars)`;
-                }
-            }
+        if (!ex.muscleGroup || typeof ex.muscleGroup !== 'string' || ex.muscleGroup.length > 30) {
+            return `Exercise ${i} muscleGroup is required (max 30 chars)`;
         }
-        if (!Array.isArray(day.exercises) || day.exercises.length === 0 || day.exercises.length > 20) {
-            return `Day "${key}" exercises must be an array (1-20 items)`;
+        const sets = parseInt(ex.sets);
+        if (!Number.isInteger(sets) || sets < 1 || sets > 20) {
+            return `Exercise ${i} sets must be an integer 1-20`;
         }
-        for (let i = 0; i < day.exercises.length; i++) {
-            const ex = day.exercises[i];
-            if (!ex.name || typeof ex.name !== 'string' || ex.name.trim().length === 0 || ex.name.trim().length > 100) {
-                return `Day "${key}" exercise ${i} name is required (max 100 chars)`;
-            }
-            if (ex.muscleGroup !== undefined && (typeof ex.muscleGroup !== 'string' || ex.muscleGroup.length > 30)) {
-                return `Day "${key}" exercise ${i} muscleGroup must be a string (max 30 chars)`;
-            }
-            const sets = parseInt(ex.sets);
-            if (!Number.isInteger(sets) || sets < 1 || sets > 20) {
-                return `Day "${key}" exercise ${i} sets must be an integer 1-20`;
-            }
-            if (!ex.reps || typeof ex.reps !== 'string' || ex.reps.length > 20) {
-                return `Day "${key}" exercise ${i} reps is required (max 20 chars)`;
-            }
-            if (ex.restSec !== undefined) {
-                const rest = parseInt(ex.restSec);
-                if (!Number.isInteger(rest) || rest < 0 || rest > 600) {
-                    return `Day "${key}" exercise ${i} restSec must be 0-600`;
-                }
+        if (!ex.reps || typeof ex.reps !== 'string' || ex.reps.length > 20) {
+            return `Exercise ${i} reps is required (max 20 chars)`;
+        }
+        if (ex.restSec !== undefined) {
+            const rest = parseInt(ex.restSec);
+            if (!Number.isInteger(rest) || rest < 0 || rest > 600) {
+                return `Exercise ${i} restSec must be 0-600`;
             }
         }
     }
@@ -104,76 +82,71 @@ function validateLogExercises(exercises) {
     return null;
 }
 
-// =============
-// ROUTINE ROUTES
-// =============
+// ===================
+// EXERCISE ENDPOINTS
+// ===================
 
-// POST /api/workouts/routines
-router.post('/routines', async (req, res) => {
+// GET /api/workouts/exercises — returns library + user's custom exercises
+router.get('/exercises', async (req, res) => {
     const email = req.user.email;
-    const { name, schedule, isActive } = req.body;
+
+    try {
+        const result = await docClient.send(
+            new QueryCommand({
+                TableName: process.env.WORKOUT_ROUTINES_TABLE,
+                KeyConditionExpression: 'email = :email AND begins_with(routineId, :prefix)',
+                ExpressionAttributeValues: { ':email': email, ':prefix': 'exercise#' },
+            }),
+        );
+        const custom = (result.Items || []).map((item) => ({
+            id: item.routineId,
+            name: item.name,
+            muscleGroup: item.muscleGroup,
+            custom: true,
+        }));
+        res.json({ library: EXERCISE_LIBRARY, custom });
+    } catch (err) {
+        logger.error({ err }, 'DynamoDB Query error');
+        return res.status(500).json({ error: 'Internal server error' });
+    }
+});
+
+// POST /api/workouts/exercises — create custom exercise
+router.post('/exercises', async (req, res) => {
+    const email = req.user.email;
+    const { name, muscleGroup } = req.body;
 
     if (!name || typeof name !== 'string' || name.trim().length === 0 || name.trim().length > 100) {
         return res.status(400).json({ error: 'Name is required (max 100 chars)' });
     }
+    if (!muscleGroup || !MUSCLE_GROUPS.includes(muscleGroup)) {
+        return res.status(400).json({ error: `muscleGroup must be one of: ${MUSCLE_GROUPS.join(', ')}` });
+    }
 
-    const scheduleErr = validateSchedule(schedule);
-    if (scheduleErr) return res.status(400).json({ error: scheduleErr });
-
-    // Check max 10 routines
+    // Check max 50 custom exercises
     try {
         const existing = await docClient.send(
             new QueryCommand({
                 TableName: process.env.WORKOUT_ROUTINES_TABLE,
-                KeyConditionExpression: 'email = :email',
-                ExpressionAttributeValues: { ':email': email },
+                KeyConditionExpression: 'email = :email AND begins_with(routineId, :prefix)',
+                ExpressionAttributeValues: { ':email': email, ':prefix': 'exercise#' },
                 Select: 'COUNT',
             }),
         );
-        if (existing.Count >= 10) {
-            return res.status(400).json({ error: 'Maximum 10 routines allowed' });
+        if (existing.Count >= 50) {
+            return res.status(400).json({ error: 'Maximum 50 custom exercises allowed' });
         }
     } catch (err) {
         logger.error({ err }, 'DynamoDB Query error');
         return res.status(500).json({ error: 'Internal server error' });
     }
 
-    const active = isActive === true;
-
-    // If setting active, deactivate others
-    if (active) {
-        try {
-            const others = await docClient.send(
-                new QueryCommand({
-                    TableName: process.env.WORKOUT_ROUTINES_TABLE,
-                    KeyConditionExpression: 'email = :email',
-                    FilterExpression: 'isActive = :true',
-                    ExpressionAttributeValues: { ':email': email, ':true': true },
-                }),
-            );
-            for (const item of others.Items || []) {
-                await docClient.send(
-                    new UpdateCommand({
-                        TableName: process.env.WORKOUT_ROUTINES_TABLE,
-                        Key: { email, routineId: item.routineId },
-                        UpdateExpression: 'SET isActive = :false',
-                        ExpressionAttributeValues: { ':false': false },
-                    }),
-                );
-            }
-        } catch (err) {
-            logger.error({ err }, 'DynamoDB deactivate error');
-            return res.status(500).json({ error: 'Internal server error' });
-        }
-    }
-
-    const routineId = 'routine#' + generateUlid();
+    const exerciseId = 'exercise#' + generateUlid();
     const item = {
         email,
-        routineId,
+        routineId: exerciseId,
         name: name.trim(),
-        schedule,
-        isActive: active,
+        muscleGroup,
         createdAt: new Date().toISOString(),
     };
 
@@ -184,34 +157,125 @@ router.post('/routines', async (req, res) => {
                 Item: item,
             }),
         );
-        res.status(201).json({ routine: item });
+        res.status(201).json({
+            exercise: {
+                id: exerciseId,
+                name: item.name,
+                muscleGroup: item.muscleGroup,
+                custom: true,
+            },
+        });
     } catch (err) {
         logger.error({ err }, 'DynamoDB PutItem error');
         return res.status(500).json({ error: 'Internal server error' });
     }
 });
 
-// GET /api/workouts/routines
-router.get('/routines', async (req, res) => {
+// DELETE /api/workouts/exercises/:id
+router.delete('/exercises/:id', async (req, res) => {
+    const email = req.user.email;
+    const routineId = req.params.id;
+
+    if (!routineId.startsWith('exercise#')) {
+        return res.status(400).json({ error: 'Invalid exercise ID' });
+    }
+
+    try {
+        await docClient.send(
+            new DeleteCommand({
+                TableName: process.env.WORKOUT_ROUTINES_TABLE,
+                Key: { email, routineId },
+                ConditionExpression: 'attribute_exists(email)',
+            }),
+        );
+        res.json({ message: 'Exercise deleted' });
+    } catch (err) {
+        if (err.name === 'ConditionalCheckFailedException') {
+            return res.status(404).json({ error: 'Exercise not found' });
+        }
+        logger.error({ err }, 'DynamoDB DeleteItem error');
+        return res.status(500).json({ error: 'Internal server error' });
+    }
+});
+
+// ====================
+// TEMPLATE ENDPOINTS
+// ====================
+
+// GET /api/workouts/templates
+router.get('/templates', async (req, res) => {
     const email = req.user.email;
 
     try {
         const result = await docClient.send(
             new QueryCommand({
                 TableName: process.env.WORKOUT_ROUTINES_TABLE,
-                KeyConditionExpression: 'email = :email',
-                ExpressionAttributeValues: { ':email': email },
+                KeyConditionExpression: 'email = :email AND begins_with(routineId, :prefix)',
+                ExpressionAttributeValues: { ':email': email, ':prefix': 'tmpl#' },
             }),
         );
-        res.json({ routines: result.Items || [] });
+        res.json({ templates: result.Items || [] });
     } catch (err) {
         logger.error({ err }, 'DynamoDB Query error');
         return res.status(500).json({ error: 'Internal server error' });
     }
 });
 
-// GET /api/workouts/routines/:id
-router.get('/routines/:id', async (req, res) => {
+// POST /api/workouts/templates
+router.post('/templates', async (req, res) => {
+    const email = req.user.email;
+    const { name, exercises } = req.body;
+
+    if (!name || typeof name !== 'string' || name.trim().length === 0 || name.trim().length > 100) {
+        return res.status(400).json({ error: 'Name is required (max 100 chars)' });
+    }
+
+    const exErr = validateTemplateExercises(exercises);
+    if (exErr) return res.status(400).json({ error: exErr });
+
+    // Check max 20 templates
+    try {
+        const existing = await docClient.send(
+            new QueryCommand({
+                TableName: process.env.WORKOUT_ROUTINES_TABLE,
+                KeyConditionExpression: 'email = :email AND begins_with(routineId, :prefix)',
+                ExpressionAttributeValues: { ':email': email, ':prefix': 'tmpl#' },
+                Select: 'COUNT',
+            }),
+        );
+        if (existing.Count >= 20) {
+            return res.status(400).json({ error: 'Maximum 20 templates allowed' });
+        }
+    } catch (err) {
+        logger.error({ err }, 'DynamoDB Query error');
+        return res.status(500).json({ error: 'Internal server error' });
+    }
+
+    const routineId = 'tmpl#' + generateUlid();
+    const item = {
+        email,
+        routineId,
+        name: name.trim(),
+        exercises,
+        createdAt: new Date().toISOString(),
+    };
+
+    try {
+        await docClient.send(
+            new PutCommand({
+                TableName: process.env.WORKOUT_ROUTINES_TABLE,
+                Item: item,
+            }),
+        );
+        res.status(201).json({ template: item });
+    } catch (err) {
+        logger.error({ err }, 'DynamoDB PutItem error');
+        return res.status(500).json({ error: 'Internal server error' });
+    }
+});
+
+// GET /api/workouts/templates/:id
+router.get('/templates/:id', async (req, res) => {
     const email = req.user.email;
     const routineId = req.params.id;
 
@@ -222,21 +286,21 @@ router.get('/routines/:id', async (req, res) => {
                 Key: { email, routineId },
             }),
         );
-        if (!result.Item) {
-            return res.status(404).json({ error: 'Routine not found' });
+        if (!result.Item || !result.Item.routineId.startsWith('tmpl#')) {
+            return res.status(404).json({ error: 'Template not found' });
         }
-        res.json({ routine: result.Item });
+        res.json({ template: result.Item });
     } catch (err) {
         logger.error({ err }, 'DynamoDB GetItem error');
         return res.status(500).json({ error: 'Internal server error' });
     }
 });
 
-// PATCH /api/workouts/routines/:id
-router.patch('/routines/:id', async (req, res) => {
+// PATCH /api/workouts/templates/:id
+router.patch('/templates/:id', async (req, res) => {
     const email = req.user.email;
     const routineId = req.params.id;
-    const { name, schedule, isActive } = req.body;
+    const { name, exercises } = req.body;
 
     const updates = [];
     const values = {};
@@ -251,51 +315,18 @@ router.patch('/routines/:id', async (req, res) => {
         values[':name'] = name.trim();
     }
 
-    if (schedule !== undefined) {
-        const scheduleErr = validateSchedule(schedule);
-        if (scheduleErr) return res.status(400).json({ error: scheduleErr });
-        updates.push('schedule = :schedule');
-        values[':schedule'] = schedule;
-    }
-
-    if (isActive !== undefined) {
-        if (typeof isActive !== 'boolean') {
-            return res.status(400).json({ error: 'isActive must be a boolean' });
-        }
-        updates.push('isActive = :isActive');
-        values[':isActive'] = isActive;
-
-        // Deactivate others if setting to active
-        if (isActive) {
-            try {
-                const others = await docClient.send(
-                    new QueryCommand({
-                        TableName: process.env.WORKOUT_ROUTINES_TABLE,
-                        KeyConditionExpression: 'email = :email',
-                        FilterExpression: 'isActive = :true AND routineId <> :rid',
-                        ExpressionAttributeValues: { ':email': email, ':true': true, ':rid': routineId },
-                    }),
-                );
-                for (const item of others.Items || []) {
-                    await docClient.send(
-                        new UpdateCommand({
-                            TableName: process.env.WORKOUT_ROUTINES_TABLE,
-                            Key: { email, routineId: item.routineId },
-                            UpdateExpression: 'SET isActive = :false',
-                            ExpressionAttributeValues: { ':false': false },
-                        }),
-                    );
-                }
-            } catch (err) {
-                logger.error({ err }, 'DynamoDB deactivate error');
-                return res.status(500).json({ error: 'Internal server error' });
-            }
-        }
+    if (exercises !== undefined) {
+        const exErr = validateTemplateExercises(exercises);
+        if (exErr) return res.status(400).json({ error: exErr });
+        updates.push('exercises = :exercises');
+        values[':exercises'] = exercises;
     }
 
     if (updates.length === 0) {
         return res.status(400).json({ error: 'No valid fields to update' });
     }
+
+    values[':tmplPrefix'] = 'tmpl#';
 
     try {
         const result = await docClient.send(
@@ -305,24 +336,28 @@ router.patch('/routines/:id', async (req, res) => {
                 UpdateExpression: 'SET ' + updates.join(', '),
                 ExpressionAttributeNames: Object.keys(names).length > 0 ? names : undefined,
                 ExpressionAttributeValues: values,
-                ConditionExpression: 'attribute_exists(email)',
+                ConditionExpression: 'attribute_exists(email) AND begins_with(routineId, :tmplPrefix)',
                 ReturnValues: 'ALL_NEW',
             }),
         );
-        res.json({ routine: result.Attributes });
+        res.json({ template: result.Attributes });
     } catch (err) {
         if (err.name === 'ConditionalCheckFailedException') {
-            return res.status(404).json({ error: 'Routine not found' });
+            return res.status(404).json({ error: 'Template not found' });
         }
         logger.error({ err }, 'DynamoDB UpdateItem error');
         return res.status(500).json({ error: 'Internal server error' });
     }
 });
 
-// DELETE /api/workouts/routines/:id
-router.delete('/routines/:id', async (req, res) => {
+// DELETE /api/workouts/templates/:id
+router.delete('/templates/:id', async (req, res) => {
     const email = req.user.email;
     const routineId = req.params.id;
+
+    if (!routineId.startsWith('tmpl#')) {
+        return res.status(400).json({ error: 'Invalid template ID' });
+    }
 
     try {
         await docClient.send(
@@ -332,24 +367,60 @@ router.delete('/routines/:id', async (req, res) => {
                 ConditionExpression: 'attribute_exists(email)',
             }),
         );
-        res.json({ message: 'Routine deleted' });
+        res.json({ message: 'Template deleted' });
     } catch (err) {
         if (err.name === 'ConditionalCheckFailedException') {
-            return res.status(404).json({ error: 'Routine not found' });
+            return res.status(404).json({ error: 'Template not found' });
         }
         logger.error({ err }, 'DynamoDB DeleteItem error');
         return res.status(500).json({ error: 'Internal server error' });
     }
 });
 
-// =============
-// LOG ROUTES
-// =============
+// GET /api/workouts/templates/:id/prefill — last session's weights for a template
+router.get('/templates/:id/prefill', async (req, res) => {
+    const email = req.user.email;
+    const templateId = req.params.id;
+
+    try {
+        const result = await docClient.send(
+            new QueryCommand({
+                TableName: process.env.WORKOUT_LOGS_TABLE,
+                IndexName: 'LogsByDate',
+                KeyConditionExpression: 'email = :email',
+                FilterExpression: 'templateId = :tid',
+                ExpressionAttributeValues: { ':email': email, ':tid': templateId },
+                ScanIndexForward: false,
+                Limit: 50,
+            }),
+        );
+        const items = result.Items || [];
+        if (items.length === 0) {
+            return res.json({ exercises: [], date: null });
+        }
+        const latest = items[0];
+        res.json({
+            exercises: (latest.exercises || []).map((ex) => ({
+                exerciseId: ex.exerciseId || null,
+                name: ex.name,
+                sets: ex.sets,
+            })),
+            date: latest.date,
+        });
+    } catch (err) {
+        logger.error({ err }, 'DynamoDB Query error');
+        return res.status(500).json({ error: 'Internal server error' });
+    }
+});
+
+// ===============
+// LOG ENDPOINTS
+// ===============
 
 // POST /api/workouts/logs
 router.post('/logs', async (req, res) => {
     const email = req.user.email;
-    const { date, exercises, durationMin, notes, routineId, dayLabel } = req.body;
+    const { date, exercises, durationMin, notes, templateId, templateName } = req.body;
 
     if (!date || typeof date !== 'string' || !DATE_REGEX.test(date)) {
         return res.status(400).json({ error: 'Date is required (YYYY-MM-DD)' });
@@ -404,8 +475,8 @@ router.post('/logs', async (req, res) => {
     };
     if (durationMin !== undefined) item.durationMin = parseInt(durationMin);
     if (notes) item.notes = notes;
-    if (routineId) item.routineId = routineId;
-    if (dayLabel) item.dayLabel = dayLabel;
+    if (templateId) item.templateId = templateId;
+    if (templateName) item.templateName = templateName;
 
     try {
         await docClient.send(
@@ -506,7 +577,7 @@ router.get('/logs/:id', async (req, res) => {
 router.patch('/logs/:id', async (req, res) => {
     const email = req.user.email;
     const logId = req.params.id;
-    const { date, exercises, durationMin, notes, routineId, dayLabel } = req.body;
+    const { date, exercises, durationMin, notes, templateId, templateName } = req.body;
 
     const updates = [];
     const values = {};
@@ -559,14 +630,14 @@ router.patch('/logs/:id', async (req, res) => {
         }
     }
 
-    if (routineId !== undefined) {
-        updates.push('routineId = :routineId');
-        values[':routineId'] = routineId || null;
+    if (templateId !== undefined) {
+        updates.push('templateId = :templateId');
+        values[':templateId'] = templateId || null;
     }
 
-    if (dayLabel !== undefined) {
-        updates.push('dayLabel = :dayLabel');
-        values[':dayLabel'] = dayLabel || null;
+    if (templateName !== undefined) {
+        updates.push('templateName = :templateName');
+        values[':templateName'] = templateName || null;
     }
 
     if (updates.length === 0) {

@@ -29,6 +29,16 @@
   font-size: 0.85rem;
 }
 
+.selectInput {
+  padding: 8px 10px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--text);
+  font-size: 0.85rem;
+  min-width: 120px;
+}
+
 .exportBtn {
   padding: 8px 16px;
   font-size: 0.85rem;

@@ -3,6 +3,10 @@ import Modal from '../../components/Modal/Modal';
 import ConfirmDialog from '../../components/ConfirmDialog/ConfirmDialog';
 import styles from './LogDetailModal.module.css';
 
+function calcVolume(sets) {
+  return (sets || []).reduce((sum, s) => sum + (s.weight || 0) * (s.reps || 0), 0);
+}
+
 export default function LogDetailModal({ open, onClose, log, onDelete }) {
   const [confirmOpen, setConfirmOpen] = useState(false);
 
@@ -16,9 +20,11 @@ export default function LogDetailModal({ open, onClose, log, onDelete }) {
     await onDelete(log.logId);
   };
 
+  const title = log.templateName || 'Freestyle';
+
   return (
     <>
-      <Modal open={open} onClose={onClose} title={log.dayLabel || log.date}>
+      <Modal open={open} onClose={onClose} title={title}>
         <div className={styles.content}>
           <div className={styles.meta}>
             <span className={styles.date}>{log.date}</span>
@@ -26,22 +32,26 @@ export default function LogDetailModal({ open, onClose, log, onDelete }) {
           </div>
 
           <div className={styles.exerciseList}>
-            {log.exercises?.map((ex, i) => (
-              <div key={i} className={styles.exercise}>
-                <div className={styles.exName}>
-                  {ex.name}
-                  {ex.muscleGroup && <span className={styles.exMuscle}>{ex.muscleGroup}</span>}
+            {log.exercises?.map((ex, i) => {
+              const vol = calcVolume(ex.sets);
+              return (
+                <div key={i} className={styles.exercise}>
+                  <div className={styles.exName}>
+                    {ex.name}
+                    {ex.muscleGroup && <span className={styles.exMuscle}>{ex.muscleGroup}</span>}
+                  </div>
+                  <div className={styles.sets}>
+                    {ex.sets?.map((s, j) => (
+                      <div key={j} className={styles.set}>
+                        <span className={styles.setNum}>Set {j + 1}:</span>
+                        <span>{s.weight} lbs x {s.reps}</span>
+                      </div>
+                    ))}
+                  </div>
+                  {vol > 0 && <div className={styles.volume}>Volume: {vol.toLocaleString()} lbs</div>}
                 </div>
-                <div className={styles.sets}>
-                  {ex.sets?.map((s, j) => (
-                    <div key={j} className={styles.set}>
-                      <span className={styles.setNum}>Set {j + 1}:</span>
-                      <span>{s.weight} lbs x {s.reps}</span>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
 
           {log.notes && <p className={styles.notes}>{log.notes}</p>}

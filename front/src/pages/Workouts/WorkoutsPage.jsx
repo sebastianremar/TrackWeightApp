@@ -1,7 +1,8 @@
-import { useState } from 'react';
-import { useWorkoutRoutines } from '../../hooks/useWorkoutRoutines';
+import { useState, useEffect } from 'react';
+import { useTemplates } from '../../hooks/useTemplates';
+import { useExercises } from '../../hooks/useExercises';
 import { useWorkoutLogs } from '../../hooks/useWorkoutLogs';
-import ScheduleView from './ScheduleView';
+import TemplatesView from './TemplatesView';
 import LogView from './LogView';
 import HistoryView from './HistoryView';
 import Spinner from '../../components/Spinner/Spinner';
@@ -9,21 +10,34 @@ import InlineError from '../../components/InlineError/InlineError';
 import styles from './WorkoutsPage.module.css';
 
 const TABS = [
-  { key: 'schedule', label: 'Schedule' },
+  { key: 'templates', label: 'Templates' },
   { key: 'log', label: 'Log' },
   { key: 'history', label: 'History' },
 ];
 
 export default function WorkoutsPage() {
-  const [tab, setTab] = useState('schedule');
+  const [tab, setTab] = useState('templates');
   const tabIndex = TABS.findIndex((t) => t.key === tab);
 
   const {
-    routines, activeRoutine, loading: routinesLoading, error: routinesError,
-    addRoutine, editRoutine, removeRoutine, refetch: refetchRoutines,
-  } = useWorkoutRoutines();
+    templates, loading: templatesLoading, error: templatesError,
+    fetchTemplates, addTemplate, editTemplate, removeTemplate,
+  } = useTemplates();
+
+  const {
+    library, custom, loading: exercisesLoading, error: exercisesError,
+    fetchExercises, addCustom,
+  } = useExercises();
 
   const logState = useWorkoutLogs();
+
+  useEffect(() => {
+    fetchTemplates();
+    fetchExercises();
+  }, [fetchTemplates, fetchExercises]);
+
+  const loading = templatesLoading || exercisesLoading;
+  const error = templatesError || exercisesError;
 
   return (
     <div className={styles.page}>
@@ -47,31 +61,35 @@ export default function WorkoutsPage() {
         </div>
       </div>
 
-      {routinesError && <InlineError message={routinesError} />}
+      {error && <InlineError message={error} />}
 
-      {routinesLoading ? (
+      {loading ? (
         <div className={styles.center}><Spinner size={32} /></div>
       ) : (
         <>
-          {tab === 'schedule' && (
-            <ScheduleView
-              routines={routines}
-              activeRoutine={activeRoutine}
-              addRoutine={addRoutine}
-              editRoutine={editRoutine}
-              removeRoutine={removeRoutine}
-              refetchRoutines={refetchRoutines}
+          {tab === 'templates' && (
+            <TemplatesView
+              templates={templates}
+              library={library}
+              custom={custom}
+              onAddTemplate={addTemplate}
+              onEditTemplate={editTemplate}
+              onDeleteTemplate={removeTemplate}
+              onCreateCustom={addCustom}
             />
           )}
           {tab === 'log' && (
             <LogView
-              activeRoutine={activeRoutine}
+              templates={templates}
+              library={library}
+              custom={custom}
               addLog={logState.addLog}
+              onCreateCustom={addCustom}
             />
           )}
           {tab === 'history' && (
             <HistoryView
-              activeRoutine={activeRoutine}
+              templates={templates}
               {...logState}
             />
           )}

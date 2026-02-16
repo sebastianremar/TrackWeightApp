@@ -2,7 +2,7 @@ const request = require('supertest');
 const app = require('../../server');
 const { ddbMock } = require('../helpers/dynamoMock');
 const { authHeader } = require('../helpers/auth');
-const { workoutRoutine, workoutLog } = require('../helpers/fixtures');
+const { workoutTemplate, customExercise, workoutLog } = require('../helpers/fixtures');
 const {
     PutCommand,
     QueryCommand,
@@ -16,214 +16,316 @@ beforeEach(() => {
 });
 
 // ===================
-// ROUTINE ENDPOINTS
+// EXERCISE ENDPOINTS
 // ===================
 
-describe('POST /api/workouts/routines', () => {
-    const validRoutine = {
-        name: 'Push Pull Legs',
-        schedule: {
-            '1': {
-                label: 'Push Day',
-                exercises: [{ name: 'Bench Press', sets: 4, reps: '8-10' }],
-            },
-        },
-        isActive: true,
-    };
-
-    test('creates a routine with valid data', async () => {
-        // Count query (max check) + deactivate query + put
-        ddbMock.on(QueryCommand).resolves({ Count: 0, Items: [] });
-        ddbMock.on(UpdateCommand).resolves({});
-        ddbMock.on(PutCommand).resolves({});
+describe('GET /api/workouts/exercises', () => {
+    test('returns library and custom exercises', async () => {
+        ddbMock.on(QueryCommand).resolves({ Items: [customExercise] });
 
         const res = await request(app)
-            .post('/api/workouts/routines')
-            .set(authHeader('test@example.com'))
-            .send(validRoutine);
-        expect(res.status).toBe(201);
-        expect(res.body.routine.name).toBe('Push Pull Legs');
-        expect(res.body.routine.routineId).toMatch(/^routine#/);
-        expect(res.body.routine.isActive).toBe(true);
+            .get('/api/workouts/exercises')
+            .set(authHeader('test@example.com'));
+        expect(res.status).toBe(200);
+        expect(res.body.library).toBeDefined();
+        expect(res.body.library.length).toBeGreaterThan(40);
+        expect(res.body.custom).toHaveLength(1);
+        expect(res.body.custom[0].name).toBe('Landmine Press');
+        expect(res.body.custom[0].custom).toBe(true);
     });
 
-    test('returns 400 when name missing', async () => {
-        const res = await request(app)
-            .post('/api/workouts/routines')
-            .set(authHeader('test@example.com'))
-            .send({ schedule: validRoutine.schedule });
-        expect(res.status).toBe(400);
-    });
-
-    test('returns 400 for name over 100 chars', async () => {
-        const res = await request(app)
-            .post('/api/workouts/routines')
-            .set(authHeader('test@example.com'))
-            .send({ ...validRoutine, name: 'x'.repeat(101) });
-        expect(res.status).toBe(400);
-    });
-
-    test('returns 400 for invalid schedule day key', async () => {
-        const res = await request(app)
-            .post('/api/workouts/routines')
-            .set(authHeader('test@example.com'))
-            .send({
-                name: 'Test',
-                schedule: {
-                    '9': {
-                        label: 'Bad Day',
-                        exercises: [{ name: 'Press', sets: 3, reps: '10' }],
-                    },
-                },
-            });
-        expect(res.status).toBe(400);
-        expect(res.body.error).toMatch(/Invalid day key/);
-    });
-
-    test('returns 400 for empty schedule', async () => {
-        const res = await request(app)
-            .post('/api/workouts/routines')
-            .set(authHeader('test@example.com'))
-            .send({ name: 'Test', schedule: {} });
-        expect(res.status).toBe(400);
-        expect(res.body.error).toMatch(/at least 1 day/);
-    });
-
-    test('returns 400 when exercise name is missing', async () => {
-        const res = await request(app)
-            .post('/api/workouts/routines')
-            .set(authHeader('test@example.com'))
-            .send({
-                name: 'Test',
-                schedule: {
-                    '0': {
-                        label: 'Leg Day',
-                        exercises: [{ sets: 3, reps: '10' }],
-                    },
-                },
-            });
-        expect(res.status).toBe(400);
-        expect(res.body.error).toMatch(/exercise.*name/i);
-    });
-
-    test('returns 400 when max 10 routines reached', async () => {
-        ddbMock.on(QueryCommand).resolves({ Count: 10 });
+    test('returns empty custom array when none exist', async () => {
+        ddbMock.on(QueryCommand).resolves({ Items: [] });
 
         const res = await request(app)
-            .post('/api/workouts/routines')
-            .set(authHeader('test@example.com'))
-            .send(validRoutine);
-        expect(res.status).toBe(400);
-        expect(res.body.error).toMatch(/10/);
+            .get('/api/workouts/exercises')
+            .set(authHeader('test@example.com'));
+        expect(res.status).toBe(200);
+        expect(res.body.custom).toHaveLength(0);
+        expect(res.body.library.length).toBeGreaterThan(0);
     });
 
     test('returns 401 without auth', async () => {
-        const res = await request(app)
-            .post('/api/workouts/routines')
-            .send(validRoutine);
+        const res = await request(app).get('/api/workouts/exercises');
         expect(res.status).toBe(401);
     });
 });
 
-describe('GET /api/workouts/routines', () => {
-    test('returns list of routines', async () => {
-        ddbMock.on(QueryCommand).resolves({ Items: [workoutRoutine] });
+describe('POST /api/workouts/exercises', () => {
+    const validExercise = {
+        name: 'Landmine Press',
+        muscleGroup: 'Shoulders',
+    };
+
+    test('creates a custom exercise', async () => {
+        ddbMock.on(QueryCommand).resolves({ Count: 0 });
+        ddbMock.on(PutCommand).resolves({});
 
         const res = await request(app)
-            .get('/api/workouts/routines')
-            .set(authHeader('test@example.com'));
-        expect(res.status).toBe(200);
-        expect(res.body.routines).toHaveLength(1);
-        expect(res.body.routines[0].name).toBe('Push Pull Legs');
+            .post('/api/workouts/exercises')
+            .set(authHeader('test@example.com'))
+            .send(validExercise);
+        expect(res.status).toBe(201);
+        expect(res.body.exercise.name).toBe('Landmine Press');
+        expect(res.body.exercise.id).toMatch(/^exercise#/);
+        expect(res.body.exercise.custom).toBe(true);
     });
 
-    test('returns empty array when no routines', async () => {
-        ddbMock.on(QueryCommand).resolves({ Items: [] });
+    test('returns 400 for missing name', async () => {
+        const res = await request(app)
+            .post('/api/workouts/exercises')
+            .set(authHeader('test@example.com'))
+            .send({ muscleGroup: 'Chest' });
+        expect(res.status).toBe(400);
+    });
+
+    test('returns 400 for invalid muscleGroup', async () => {
+        const res = await request(app)
+            .post('/api/workouts/exercises')
+            .set(authHeader('test@example.com'))
+            .send({ name: 'Test', muscleGroup: 'InvalidGroup' });
+        expect(res.status).toBe(400);
+        expect(res.body.error).toMatch(/muscleGroup/);
+    });
+
+    test('returns 400 when max 50 custom exercises reached', async () => {
+        ddbMock.on(QueryCommand).resolves({ Count: 50 });
 
         const res = await request(app)
-            .get('/api/workouts/routines')
-            .set(authHeader('test@example.com'));
-        expect(res.status).toBe(200);
-        expect(res.body.routines).toHaveLength(0);
+            .post('/api/workouts/exercises')
+            .set(authHeader('test@example.com'))
+            .send(validExercise);
+        expect(res.status).toBe(400);
+        expect(res.body.error).toMatch(/50/);
     });
 });
 
-describe('GET /api/workouts/routines/:id', () => {
-    test('returns a single routine', async () => {
-        ddbMock.on(GetCommand).resolves({ Item: workoutRoutine });
+describe('DELETE /api/workouts/exercises/:id', () => {
+    test('deletes a custom exercise', async () => {
+        ddbMock.on(DeleteCommand).resolves({});
 
         const res = await request(app)
-            .get('/api/workouts/routines/routine%23test123')
+            .delete('/api/workouts/exercises/exercise%23test123')
             .set(authHeader('test@example.com'));
         expect(res.status).toBe(200);
-        expect(res.body.routine.name).toBe('Push Pull Legs');
+        expect(res.body.message).toMatch(/deleted/i);
     });
 
-    test('returns 404 for non-existent routine', async () => {
-        ddbMock.on(GetCommand).resolves({ Item: undefined });
+    test('returns 400 for invalid exercise ID prefix', async () => {
+        const res = await request(app)
+            .delete('/api/workouts/exercises/bad-id')
+            .set(authHeader('test@example.com'));
+        expect(res.status).toBe(400);
+    });
+
+    test('returns 404 when exercise not found', async () => {
+        const err = new Error('Condition not met');
+        err.name = 'ConditionalCheckFailedException';
+        ddbMock.on(DeleteCommand).rejects(err);
 
         const res = await request(app)
-            .get('/api/workouts/routines/routine%23nope')
+            .delete('/api/workouts/exercises/exercise%23nope')
             .set(authHeader('test@example.com'));
         expect(res.status).toBe(404);
     });
 });
 
-describe('PATCH /api/workouts/routines/:id', () => {
-    test('updates routine name', async () => {
+// ===================
+// TEMPLATE ENDPOINTS
+// ===================
+
+describe('GET /api/workouts/templates', () => {
+    test('returns list of templates', async () => {
+        ddbMock.on(QueryCommand).resolves({ Items: [workoutTemplate] });
+
+        const res = await request(app)
+            .get('/api/workouts/templates')
+            .set(authHeader('test@example.com'));
+        expect(res.status).toBe(200);
+        expect(res.body.templates).toHaveLength(1);
+        expect(res.body.templates[0].name).toBe('Push Day');
+    });
+
+    test('returns empty array when no templates', async () => {
+        ddbMock.on(QueryCommand).resolves({ Items: [] });
+
+        const res = await request(app)
+            .get('/api/workouts/templates')
+            .set(authHeader('test@example.com'));
+        expect(res.status).toBe(200);
+        expect(res.body.templates).toHaveLength(0);
+    });
+});
+
+describe('POST /api/workouts/templates', () => {
+    const validTemplate = {
+        name: 'Push Day',
+        exercises: [
+            { exerciseId: 'bench-press', name: 'Bench Press', muscleGroup: 'Chest', sets: 4, reps: '8-10' },
+        ],
+    };
+
+    test('creates a template with valid data', async () => {
+        ddbMock.on(QueryCommand).resolves({ Count: 0 });
+        ddbMock.on(PutCommand).resolves({});
+
+        const res = await request(app)
+            .post('/api/workouts/templates')
+            .set(authHeader('test@example.com'))
+            .send(validTemplate);
+        expect(res.status).toBe(201);
+        expect(res.body.template.name).toBe('Push Day');
+        expect(res.body.template.routineId).toMatch(/^tmpl#/);
+    });
+
+    test('returns 400 when name missing', async () => {
+        const res = await request(app)
+            .post('/api/workouts/templates')
+            .set(authHeader('test@example.com'))
+            .send({ exercises: validTemplate.exercises });
+        expect(res.status).toBe(400);
+    });
+
+    test('returns 400 for missing exerciseId', async () => {
+        const res = await request(app)
+            .post('/api/workouts/templates')
+            .set(authHeader('test@example.com'))
+            .send({
+                name: 'Test',
+                exercises: [{ name: 'Bench', muscleGroup: 'Chest', sets: 3, reps: '10' }],
+            });
+        expect(res.status).toBe(400);
+        expect(res.body.error).toMatch(/exerciseId/);
+    });
+
+    test('returns 400 when max 20 templates reached', async () => {
+        ddbMock.on(QueryCommand).resolves({ Count: 20 });
+
+        const res = await request(app)
+            .post('/api/workouts/templates')
+            .set(authHeader('test@example.com'))
+            .send(validTemplate);
+        expect(res.status).toBe(400);
+        expect(res.body.error).toMatch(/20/);
+    });
+
+    test('returns 401 without auth', async () => {
+        const res = await request(app)
+            .post('/api/workouts/templates')
+            .send(validTemplate);
+        expect(res.status).toBe(401);
+    });
+});
+
+describe('GET /api/workouts/templates/:id', () => {
+    test('returns a single template', async () => {
+        ddbMock.on(GetCommand).resolves({ Item: workoutTemplate });
+
+        const res = await request(app)
+            .get('/api/workouts/templates/tmpl%23test123')
+            .set(authHeader('test@example.com'));
+        expect(res.status).toBe(200);
+        expect(res.body.template.name).toBe('Push Day');
+    });
+
+    test('returns 404 for non-existent template', async () => {
+        ddbMock.on(GetCommand).resolves({ Item: undefined });
+
+        const res = await request(app)
+            .get('/api/workouts/templates/tmpl%23nope')
+            .set(authHeader('test@example.com'));
+        expect(res.status).toBe(404);
+    });
+});
+
+describe('PATCH /api/workouts/templates/:id', () => {
+    test('updates template name', async () => {
         ddbMock.on(UpdateCommand).resolves({
-            Attributes: { ...workoutRoutine, name: 'Upper Lower' },
+            Attributes: { ...workoutTemplate, name: 'Pull Day' },
         });
 
         const res = await request(app)
-            .patch('/api/workouts/routines/routine%23test123')
+            .patch('/api/workouts/templates/tmpl%23test123')
             .set(authHeader('test@example.com'))
-            .send({ name: 'Upper Lower' });
+            .send({ name: 'Pull Day' });
         expect(res.status).toBe(200);
-        expect(res.body.routine.name).toBe('Upper Lower');
+        expect(res.body.template.name).toBe('Pull Day');
     });
 
     test('returns 400 for empty update', async () => {
         const res = await request(app)
-            .patch('/api/workouts/routines/routine%23test123')
+            .patch('/api/workouts/templates/tmpl%23test123')
             .set(authHeader('test@example.com'))
             .send({});
         expect(res.status).toBe(400);
     });
 
-    test('returns 404 when routine not found', async () => {
+    test('returns 404 when template not found', async () => {
         const err = new Error('Condition not met');
         err.name = 'ConditionalCheckFailedException';
         ddbMock.on(UpdateCommand).rejects(err);
 
         const res = await request(app)
-            .patch('/api/workouts/routines/routine%23nope')
+            .patch('/api/workouts/templates/tmpl%23nope')
             .set(authHeader('test@example.com'))
             .send({ name: 'Nope' });
         expect(res.status).toBe(404);
     });
 });
 
-describe('DELETE /api/workouts/routines/:id', () => {
-    test('deletes a routine', async () => {
+describe('DELETE /api/workouts/templates/:id', () => {
+    test('deletes a template', async () => {
         ddbMock.on(DeleteCommand).resolves({});
 
         const res = await request(app)
-            .delete('/api/workouts/routines/routine%23test123')
+            .delete('/api/workouts/templates/tmpl%23test123')
             .set(authHeader('test@example.com'));
         expect(res.status).toBe(200);
         expect(res.body.message).toMatch(/deleted/i);
     });
 
-    test('returns 404 when routine not found', async () => {
+    test('returns 400 for invalid template ID prefix', async () => {
+        const res = await request(app)
+            .delete('/api/workouts/templates/bad-id')
+            .set(authHeader('test@example.com'));
+        expect(res.status).toBe(400);
+    });
+
+    test('returns 404 when template not found', async () => {
         const err = new Error('Condition not met');
         err.name = 'ConditionalCheckFailedException';
         ddbMock.on(DeleteCommand).rejects(err);
 
         const res = await request(app)
-            .delete('/api/workouts/routines/routine%23nope')
+            .delete('/api/workouts/templates/tmpl%23nope')
             .set(authHeader('test@example.com'));
         expect(res.status).toBe(404);
+    });
+});
+
+describe('GET /api/workouts/templates/:id/prefill', () => {
+    test('returns last session weights', async () => {
+        ddbMock.on(QueryCommand).resolves({ Items: [workoutLog] });
+
+        const res = await request(app)
+            .get('/api/workouts/templates/tmpl%23test123/prefill')
+            .set(authHeader('test@example.com'));
+        expect(res.status).toBe(200);
+        expect(res.body.exercises).toHaveLength(1);
+        expect(res.body.exercises[0].name).toBe('Bench Press');
+        expect(res.body.exercises[0].sets).toHaveLength(2);
+        expect(res.body.date).toBe('2024-06-15');
+    });
+
+    test('returns empty exercises when no history', async () => {
+        ddbMock.on(QueryCommand).resolves({ Items: [] });
+
+        const res = await request(app)
+            .get('/api/workouts/templates/tmpl%23test123/prefill')
+            .set(authHeader('test@example.com'));
+        expect(res.status).toBe(200);
+        expect(res.body.exercises).toHaveLength(0);
+        expect(res.body.date).toBeNull();
     });
 });
 
@@ -257,6 +359,19 @@ describe('POST /api/workouts/logs', () => {
         expect(res.body.log.logId).toMatch(/^log#/);
         expect(res.body.log.date).toBe('2024-06-15');
         expect(res.body.log.exercises).toHaveLength(1);
+    });
+
+    test('creates a log with template info', async () => {
+        ddbMock.on(QueryCommand).resolves({ Count: 0 });
+        ddbMock.on(PutCommand).resolves({});
+
+        const res = await request(app)
+            .post('/api/workouts/logs')
+            .set(authHeader('test@example.com'))
+            .send({ ...validLog, templateId: 'tmpl#test123', templateName: 'Push Day' });
+        expect(res.status).toBe(201);
+        expect(res.body.log.templateId).toBe('tmpl#test123');
+        expect(res.body.log.templateName).toBe('Push Day');
     });
 
     test('returns 400 for missing date', async () => {

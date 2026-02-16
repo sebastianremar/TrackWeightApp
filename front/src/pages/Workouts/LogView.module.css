@@ -4,10 +4,11 @@
   gap: 16px;
 }
 
-.dateRow {
+.topRow {
   display: flex;
-  align-items: center;
+  align-items: flex-end;
   gap: 12px;
+  flex-wrap: wrap;
 }
 
 .label {
@@ -28,24 +29,20 @@
   font-size: 0.85rem;
 }
 
-.dayInfo {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 8px 12px;
+.selectInput {
+  padding: 8px 10px;
   border-radius: var(--radius-sm);
-  background: var(--neutral);
-}
-
-.dayLabel {
-  font-weight: 600;
-  font-size: 0.9rem;
+  border: 1px solid var(--border);
+  background: var(--surface);
   color: var(--text);
+  font-size: 0.85rem;
+  min-width: 140px;
 }
 
-.dayMuscles {
+.prefillNote {
   font-size: 0.8rem;
   color: var(--text-secondary);
+  font-style: italic;
 }
 
 .exerciseList {
@@ -65,20 +62,20 @@
   margin-bottom: 8px;
 }
 
-.exNameInput {
+.exName {
   flex: 1;
-  padding: 6px 8px;
-  border-radius: var(--radius-sm);
-  border: 1px solid var(--border);
-  background: var(--surface);
-  color: var(--text);
   font-size: 0.9rem;
   font-weight: 600;
+  color: var(--text);
 }
 
-.exNameInput:focus {
-  outline: 2px solid var(--primary);
-  outline-offset: -1px;
+.exMuscle {
+  font-size: 0.7rem;
+  font-weight: 500;
+  padding: 2px 8px;
+  border-radius: 9999px;
+  background: var(--primary-bg, rgba(99, 102, 241, 0.1));
+  color: var(--primary);
 }
 
 .exRemoveBtn {
@@ -102,14 +99,6 @@
   color: var(--text-secondary);
   text-transform: uppercase;
   letter-spacing: 0.05em;
-}
-
-.setLabel {
-  padding: 0 4px;
-}
-
-.setAction {
-  /* placeholder for alignment */
 }
 
 .setRow {
@@ -186,6 +175,12 @@
   border-color: var(--primary);
 }
 
+.pickerWrapper {
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 10px;
+}
+
 .extras {
   display: flex;
   flex-direction: column;
@@ -222,6 +217,11 @@
   color: var(--success, #22c55e);
   font-size: 0.85rem;
   font-weight: 600;
+}
+
+.error {
+  color: var(--danger);
+  font-size: 0.8rem;
 }
 
 .saveBtn {

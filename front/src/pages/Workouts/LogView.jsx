@@ -1,7 +1,8 @@
-import { useState, useMemo } from 'react';
+import { useState, useCallback } from 'react';
 import Card from '../../components/Card/Card';
-import EmptyState from '../../components/EmptyState/EmptyState';
 import InlineError from '../../components/InlineError/InlineError';
+import ExercisePicker from './ExercisePicker';
+import { getTemplatePrefill } from '../../api/workouts';
 import styles from './LogView.module.css';
 
 function todayStr() {
@@ -12,39 +13,64 @@ function emptySet() {
   return { weight: 0, reps: 0 };
 }
 
-export default function LogView({ activeRoutine, addLog }) {
+export default function LogView({ templates, library, custom, addLog, onCreateCustom }) {
   const [date, setDate] = useState(todayStr());
+  const [selectedTemplate, setSelectedTemplate] = useState('');
+  const [exercises, setExercises] = useState([]);
+  const [durationMin, setDurationMin] = useState('');
+  const [notes, setNotes] = useState('');
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState(null);
   const [success, setSuccess] = useState(false);
-  const [notes, setNotes] = useState('');
-  const [durationMin, setDurationMin] = useState('');
+  const [prefillDate, setPrefillDate] = useState(null);
+  const [showPicker, setShowPicker] = useState(false);
 
-  const dayOfWeek = useMemo(() => {
-    const d = new Date(date + 'T00:00:00');
-    return d.getDay();
-  }, [date]);
+  const handleTemplateChange = useCallback(async (tmplId) => {
+    setSelectedTemplate(tmplId);
+    setSuccess(false);
+    setError(null);
+    setPrefillDate(null);
 
-  const templateDay = activeRoutine?.schedule?.[String(dayOfWeek)];
+    if (!tmplId) {
+      setExercises([]);
+      return;
+    }
 
-  const [exercises, setExercises] = useState(() => initExercises(templateDay));
+    const tmpl = templates.find((t) => t.routineId === tmplId);
+    if (!tmpl) return;
 
-  function initExercises(day) {
-    if (!day?.exercises?.length) return [];
-    return day.exercises.map((ex) => ({
+    // Start with template structure
+    const baseExercises = tmpl.exercises.map((ex) => ({
+      exerciseId: ex.exerciseId,
       name: ex.name,
-      muscleGroup: ex.muscleGroup || '',
+      muscleGroup: ex.muscleGroup,
       sets: Array.from({ length: ex.sets || 3 }, () => emptySet()),
     }));
-  }
 
-  const handleDateChange = (newDate) => {
-    setDate(newDate);
-    setSuccess(false);
-    const dow = new Date(newDate + 'T00:00:00').getDay();
-    const day = activeRoutine?.schedule?.[String(dow)];
-    setExercises(initExercises(day));
-  };
+    setExercises(baseExercises);
+
+    // Try to prefill from last session
+    try {
+      const prefill = await getTemplatePrefill(tmplId);
+      if (prefill.exercises?.length > 0) {
+        setPrefillDate(prefill.date);
+        setExercises((prev) =>
+          prev.map((ex) => {
+            const match = prefill.exercises.find((p) => p.exerciseId === ex.exerciseId || p.name === ex.name);
+            if (match?.sets?.length > 0) {
+              return {
+                ...ex,
+                sets: match.sets.map((s) => ({ weight: s.weight || 0, reps: s.reps || 0 })),
+              };
+            }
+            return ex;
+          }),
+        );
+      }
+    } catch {
+      // prefill is optional, ignore errors
+    }
+  }, [templates]);
 
   const updateSet = (exIdx, setIdx, field, value) => {
     setExercises((prev) =>
@@ -81,16 +107,19 @@ export default function LogView({ activeRoutine, addLog }) {
     );
   };
 
-  const addExercise = () => {
+  const handleAddExercise = (ex) => {
     if (exercises.length < 30) {
-      setExercises((prev) => [...prev, { name: '', muscleGroup: '', sets: [emptySet()] }]);
+      setExercises((prev) => [
+        ...prev,
+        {
+          exerciseId: ex.id,
+          name: ex.name,
+          muscleGroup: ex.muscleGroup,
+          sets: [emptySet()],
+        },
+      ]);
     }
-  };
-
-  const updateExerciseName = (exIdx, field, value) => {
-    setExercises((prev) =>
-      prev.map((ex, i) => (i === exIdx ? { ...ex, [field]: value } : ex)),
-    );
+    setShowPicker(false);
   };
 
   const removeExercise = (exIdx) => {
@@ -98,7 +127,9 @@ export default function LogView({ activeRoutine, addLog }) {
   };
 
   const handleSave = async () => {
-    const validExercises = exercises.filter((ex) => ex.name.trim() && ex.sets.some((s) => s.weight > 0 || s.reps > 0));
+    const validExercises = exercises.filter(
+      (ex) => ex.name.trim() && ex.sets.some((s) => s.weight > 0 || s.reps > 0),
+    );
     if (validExercises.length === 0) {
       setError('Log at least one exercise with weight or reps');
       return;
@@ -107,22 +138,30 @@ export default function LogView({ activeRoutine, addLog }) {
     setError(null);
     setSuccess(false);
     try {
+      const tmpl = templates.find((t) => t.routineId === selectedTemplate);
       const payload = {
         date,
         exercises: validExercises.map((ex) => ({
+          exerciseId: ex.exerciseId || undefined,
           name: ex.name.trim(),
-          muscleGroup: ex.muscleGroup?.trim() || undefined,
+          muscleGroup: ex.muscleGroup || undefined,
           sets: ex.sets.filter((s) => s.weight > 0 || s.reps > 0),
         })),
       };
       if (durationMin) payload.durationMin = parseInt(durationMin);
       if (notes.trim()) payload.notes = notes.trim();
-      if (activeRoutine) {
-        payload.routineId = activeRoutine.routineId;
-        if (templateDay) payload.dayLabel = templateDay.label;
+      if (tmpl) {
+        payload.templateId = tmpl.routineId;
+        payload.templateName = tmpl.name;
       }
       await addLog(payload);
       setSuccess(true);
+      // Reset form
+      setExercises([]);
+      setSelectedTemplate('');
+      setDurationMin('');
+      setNotes('');
+      setPrefillDate(null);
     } catch (err) {
       setError(err.message);
     } finally {
@@ -130,42 +169,36 @@ export default function LogView({ activeRoutine, addLog }) {
     }
   };
 
-  const isRestDay = activeRoutine && !templateDay;
-
   return (
     <div className={styles.wrapper}>
-      <div className={styles.dateRow}>
-        <label className={styles.label}>Date</label>
-        <input
-          className={styles.dateInput}
-          type="date"
-          value={date}
-          max={todayStr()}
-          onChange={(e) => handleDateChange(e.target.value)}
-        />
+      <div className={styles.topRow}>
+        <label className={styles.label}>
+          Template
+          <select
+            className={styles.selectInput}
+            value={selectedTemplate}
+            onChange={(e) => handleTemplateChange(e.target.value)}
+          >
+            <option value="">Freestyle</option>
+            {templates.map((t) => (
+              <option key={t.routineId} value={t.routineId}>{t.name}</option>
+            ))}
+          </select>
+        </label>
+        <label className={styles.label}>
+          Date
+          <input
+            className={styles.dateInput}
+            type="date"
+            value={date}
+            max={todayStr()}
+            onChange={(e) => { setDate(e.target.value); setSuccess(false); }}
+          />
+        </label>
       </div>
 
-      {templateDay && (
-        <div className={styles.dayInfo}>
-          <span className={styles.dayLabel}>{templateDay.label}</span>
-          {templateDay.muscleGroups?.length > 0 && (
-            <span className={styles.dayMuscles}>{templateDay.muscleGroups.join(', ')}</span>
-          )}
-        </div>
-      )}
-
-      {isRestDay && exercises.length === 0 && (
-        <EmptyState
-          message="Rest day - no exercises scheduled"
-          action={{ label: 'Add Exercise Anyway', onClick: addExercise }}
-        />
-      )}
-
-      {!activeRoutine && exercises.length === 0 && (
-        <EmptyState
-          message="No active routine. Add exercises manually."
-          action={{ label: 'Add Exercise', onClick: addExercise }}
-        />
+      {prefillDate && (
+        <p className={styles.prefillNote}>Pre-filled from session on {prefillDate}</p>
       )}
 
       {exercises.length > 0 && (
@@ -173,23 +206,20 @@ export default function LogView({ activeRoutine, addLog }) {
           {exercises.map((ex, exIdx) => (
             <Card key={exIdx} className={styles.exCard}>
               <div className={styles.exHeader}>
-                <input
-                  className={styles.exNameInput}
-                  value={ex.name}
-                  onChange={(e) => updateExerciseName(exIdx, 'name', e.target.value)}
-                  placeholder="Exercise name"
-                  maxLength={100}
-                />
+                <span className={styles.exName}>{ex.name}</span>
+                {ex.muscleGroup && (
+                  <span className={styles.exMuscle}>{ex.muscleGroup}</span>
+                )}
                 <button className={styles.exRemoveBtn} onClick={() => removeExercise(exIdx)} aria-label="Remove exercise">
                   &times;
                 </button>
               </div>
 
               <div className={styles.setsHeader}>
-                <span className={styles.setLabel}>Set</span>
-                <span className={styles.setLabel}>Weight (lbs)</span>
-                <span className={styles.setLabel}>Reps</span>
-                <span className={styles.setAction} />
+                <span>Set</span>
+                <span>Weight (lbs)</span>
+                <span>Reps</span>
+                <span />
               </div>
 
               {ex.sets.map((s, sIdx) => (
@@ -232,8 +262,21 @@ export default function LogView({ activeRoutine, addLog }) {
         </div>
       )}
 
-      {exercises.length > 0 && exercises.length < 30 && (
-        <button className={styles.addExBtn} onClick={addExercise}>+ Add Exercise</button>
+      {exercises.length < 30 && (
+        showPicker ? (
+          <div className={styles.pickerWrapper}>
+            <ExercisePicker
+              library={library}
+              custom={custom}
+              onSelect={handleAddExercise}
+              onCreateCustom={onCreateCustom}
+            />
+          </div>
+        ) : (
+          <button className={styles.addExBtn} onClick={() => setShowPicker(true)}>
+            + Add Exercise
+          </button>
+        )
       )}
 
       <div className={styles.extras}>
