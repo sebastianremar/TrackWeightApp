@@ -51,7 +51,9 @@ jobs:
             git reset --hard origin/main
             cd front
             npm ci
-            npm run build
+            npm run build -- --outDir dist-tmp
+            rm -rf dist
+            mv dist-tmp dist
             cd ../back
             npm ci --omit=dev
             mkdir -p logs
@@ -96,7 +98,9 @@ jobs:
             git reset --hard "$PREV_SHA"
             cd front
             npm ci
-            npm run build
+            npm run build -- --outDir dist-tmp
+            rm -rf dist
+            mv dist-tmp dist
             cd ../back
             npm ci --omit=dev
             pm2 restart ecosystem.config.js --env production
