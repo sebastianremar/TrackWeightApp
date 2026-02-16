@@ -1,0 +1,125 @@
+.wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.filters {
+  display: flex;
+  align-items: flex-end;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.label {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+}
+
+.dateInput {
+  padding: 8px 10px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--text);
+  font-size: 0.85rem;
+}
+
+.exportBtn {
+  padding: 8px 16px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  border-radius: var(--radius-sm);
+  background: var(--primary);
+  color: #fff;
+  margin-left: auto;
+  transition: background var(--transition);
+}
+
+.exportBtn:hover:not(:disabled) {
+  background: var(--primary-hover);
+}
+
+.exportBtn:disabled {
+  opacity: 0.5;
+}
+
+.center {
+  display: flex;
+  justify-content: center;
+  padding: 40px 0;
+}
+
+.list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.logCard {
+  padding: 0 !important;
+  overflow: hidden;
+}
+
+.logBtn {
+  width: 100%;
+  padding: 12px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  text-align: left;
+  transition: background var(--transition);
+}
+
+.logBtn:hover {
+  background: var(--neutral);
+}
+
+.logTop {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.logDate {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--text);
+}
+
+.logLabel {
+  font-size: 0.8rem;
+  padding: 2px 8px;
+  border-radius: 9999px;
+  background: var(--primary-bg, rgba(99, 102, 241, 0.1));
+  color: var(--primary);
+  font-weight: 500;
+}
+
+.logMeta {
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+}
+
+.loadMoreBtn {
+  padding: 10px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--primary);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  text-align: center;
+  transition: background var(--transition);
+}
+
+.loadMoreBtn:hover:not(:disabled) {
+  background: rgba(99, 102, 241, 0.05);
+}
+
+.loadMoreBtn:disabled {
+  opacity: 0.5;
+}

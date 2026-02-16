@@ -72,4 +72,42 @@ const todoItem = {
     createdAt: '2024-06-15T12:00:00.000Z',
 };
 
-module.exports = { testUser, friendUser, weightEntry, habit, habitEntry, calendarEvent, adminUser, todoItem };
+const workoutRoutine = {
+    email: testUser.email,
+    routineId: 'routine#test123',
+    name: 'Push Pull Legs',
+    schedule: {
+        '1': {
+            label: 'Push Day',
+            muscleGroups: ['Chest', 'Shoulders', 'Triceps'],
+            exercises: [
+                { name: 'Bench Press', muscleGroup: 'Chest', sets: 4, reps: '8-10', restSec: 90 },
+            ],
+        },
+    },
+    isActive: true,
+    createdAt: '2024-06-15T12:00:00.000Z',
+};
+
+const workoutLog = {
+    email: testUser.email,
+    logId: 'log#test123',
+    date: '2024-06-15',
+    routineId: 'routine#test123',
+    dayLabel: 'Push Day',
+    exercises: [
+        {
+            name: 'Bench Press',
+            muscleGroup: 'Chest',
+            sets: [
+                { weight: 135, reps: 10 },
+                { weight: 155, reps: 8 },
+            ],
+        },
+    ],
+    durationMin: 65,
+    notes: 'Felt strong',
+    createdAt: '2024-06-15T12:00:00.000Z',
+};
+
+module.exports = { testUser, friendUser, weightEntry, habit, habitEntry, calendarEvent, adminUser, todoItem, workoutRoutine, workoutLog };

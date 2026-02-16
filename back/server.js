@@ -23,6 +23,7 @@ const todoRoutes = require('./routes/todos');
 const calendarRoutes = require('./routes/calendar');
 const adminRoutes = require('./routes/admin');
 const digestRoutes = require('./routes/digest');
+const workoutRoutes = require('./routes/workouts');
 const authenticate = require('./middleware/auth');
 const rateLimit = require('./middleware/rateLimit');
 const metricsMiddleware = require('./middleware/metrics');
@@ -101,6 +102,7 @@ app.use('/api/habits', authenticate, habitRoutes);
 app.use('/api/todos', authenticate, todoRoutes);
 app.use('/api/calendar', authenticate, calendarRoutes);
 app.use('/api/friends', authenticate, friendRoutes);
+app.use('/api/workouts', authenticate, workoutRoutes);
 app.use('/api/admin', authenticate, requireAdmin, adminRoutes);
 
 // SPA fallback — serve index.html for non-API routes

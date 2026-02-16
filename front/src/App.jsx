@@ -9,6 +9,7 @@ import DashboardPage from './pages/Dashboard/DashboardPage';
 import HabitsPage from './pages/Habits/HabitsPage';
 import TodosPage from './pages/Todos/TodosPage';
 import CalendarPage from './pages/Calendar/CalendarPage';
+import WorkoutsPage from './pages/Workouts/WorkoutsPage';
 import FriendsPage from './pages/Friends/FriendsPage';
 import SettingsPage from './pages/Settings/SettingsPage';
 import Spinner from './components/Spinner/Spinner';
@@ -49,6 +50,7 @@ function AppRoutes() {
         <Route path="/habits" element={<HabitsPage />} />
         <Route path="/todos" element={<TodosPage />} />
         <Route path="/calendar" element={<CalendarPage />} />
+        <Route path="/workouts" element={<WorkoutsPage />} />
         <Route path="/friends" element={<FriendsPage />} />
         <Route path="/settings" element={<SettingsPage />} />
         {user.isAdmin && (
