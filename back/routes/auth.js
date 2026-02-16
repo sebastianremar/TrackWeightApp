@@ -215,6 +215,7 @@ router.post('/signin', async (req, res) => {
             todoCategories: user.todoCategories || [],
             isAdmin: user.isAdmin || false,
             digestEnabled: user.digestEnabled || false,
+            digestHour: user.digestHour ?? 19,
             timezone: user.timezone || '',
             hasSeenIntro: user.hasSeenIntro || false,
         },
@@ -267,6 +268,7 @@ router.get('/me', authenticate, async (req, res) => {
             todoCategories: user.todoCategories || [],
             isAdmin: user.isAdmin || false,
             digestEnabled: user.digestEnabled || false,
+            digestHour: user.digestHour ?? 19,
             timezone: user.timezone || '',
             hasSeenIntro: user.hasSeenIntro || false,
             createdAt: user.createdAt,
@@ -279,7 +281,7 @@ router.get('/me', authenticate, async (req, res) => {
 
 // PATCH /api/me — update profile
 router.patch('/me', authenticate, async (req, res) => {
-    const { firstName, lastName, name, darkMode, palette, dashboardStats, todoCategories, digestEnabled, timezone, hasSeenIntro } = req.body;
+    const { firstName, lastName, name, darkMode, palette, dashboardStats, todoCategories, digestEnabled, digestHour, timezone, hasSeenIntro } = req.body;
     const updates = [];
     const names = {};
     const values = {};
@@ -362,6 +364,14 @@ router.patch('/me', authenticate, async (req, res) => {
         values[':de'] = digestEnabled;
     }
 
+    if (digestHour !== undefined) {
+        if (!Number.isInteger(digestHour) || digestHour < 0 || digestHour > 23) {
+            return res.status(400).json({ error: 'digestHour must be an integer between 0 and 23' });
+        }
+        updates.push('digestHour = :dh');
+        values[':dh'] = digestHour;
+    }
+
     if (timezone !== undefined) {
         if (typeof timezone !== 'string' || timezone.length > 100) {
             return res.status(400).json({ error: 'Invalid timezone' });
@@ -412,6 +422,7 @@ router.patch('/me', authenticate, async (req, res) => {
             dashboardStats: user.dashboardStats || DEFAULT_STATS,
             todoCategories: user.todoCategories || [],
             digestEnabled: user.digestEnabled || false,
+            digestHour: user.digestHour ?? 19,
             timezone: user.timezone || '',
             hasSeenIntro: user.hasSeenIntro || false,
         });

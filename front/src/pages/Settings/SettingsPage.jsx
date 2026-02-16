@@ -140,8 +140,22 @@ export default function SettingsPage() {
     }
   };
 
+  const handleDigestHourChange = async (e) => {
+    setDigestError('');
+    const hour = Number(e.target.value);
+    const prevHour = user?.digestHour ?? 19;
+    updateUser({ digestHour: hour });
+    try {
+      await updateProfile({ digestHour: hour });
+    } catch (err) {
+      updateUser({ digestHour: prevHour });
+      setDigestError(err.message);
+    }
+  };
+
   const digestEnabled = user?.digestEnabled || false;
   const userTimezone = user?.timezone || getDetectedTimezone();
+  const digestHour = user?.digestHour ?? 19;
 
   return (
     <div className={styles.page}>
@@ -200,26 +214,44 @@ export default function SettingsPage() {
         <div className={styles.row}>
           <div>
             <span className={styles.value}>Daily Digest Email</span>
-            <span className={styles.label}>Receive a summary of your day at 7 PM</span>
+            <span className={styles.label}>Receive a daily summary in your timezone</span>
           </div>
           <Toggle checked={digestEnabled} onChange={handleDigestToggle} />
         </div>
         {digestEnabled && (
-          <div className={styles.field} style={{ paddingTop: 8 }}>
-            <label className={styles.label}>Timezone</label>
-            <select
-              className={styles.input}
-              value={userTimezone}
-              onChange={handleTimezoneChange}
-            >
-              {TIMEZONES.map((tz) => (
-                <option key={tz} value={tz}>{formatTzLabel(tz)}</option>
-              ))}
-              {!TIMEZONES.includes(userTimezone) && (
-                <option value={userTimezone}>{formatTzLabel(userTimezone)}</option>
-              )}
-            </select>
-          </div>
+          <>
+            <div className={styles.field} style={{ paddingTop: 8 }}>
+              <label className={styles.label}>Timezone</label>
+              <select
+                className={styles.input}
+                value={userTimezone}
+                onChange={handleTimezoneChange}
+              >
+                {TIMEZONES.map((tz) => (
+                  <option key={tz} value={tz}>{formatTzLabel(tz)}</option>
+                ))}
+                {!TIMEZONES.includes(userTimezone) && (
+                  <option value={userTimezone}>{formatTzLabel(userTimezone)}</option>
+                )}
+              </select>
+            </div>
+            <div className={styles.field} style={{ paddingTop: 8 }}>
+              <label className={styles.label}>Delivery Time</label>
+              <select
+                className={styles.input}
+                value={digestHour}
+                onChange={handleDigestHourChange}
+              >
+                {Array.from({ length: 24 }, (_, h) => {
+                  const period = h < 12 ? 'AM' : 'PM';
+                  const display = h === 0 ? 12 : h > 12 ? h - 12 : h;
+                  return (
+                    <option key={h} value={h}>{`${display}:00 ${period}`}</option>
+                  );
+                })}
+              </select>
+            </div>
+          </>
         )}
         <InlineError message={digestError} />
       </Card>

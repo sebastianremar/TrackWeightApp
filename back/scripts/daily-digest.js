@@ -30,12 +30,12 @@ if (!FROM_EMAIL) {
 logger.info({ llmEnabled: !!process.env.OPENAI_API_KEY }, 'LLM digest insight status');
 
 /**
- * Get all IANA timezone strings where local time is currently 19:xx (7 PM hour).
+ * Build a map of timezone → current hour for all IANA timezones.
  */
-function getTimezonesAt19() {
+function buildTimezoneHourMap() {
     const now = new Date();
     const zones = Intl.supportedValuesOf('timeZone');
-    const matching = [];
+    const map = new Map();
 
     for (const tz of zones) {
         try {
@@ -46,14 +46,12 @@ function getTimezonesAt19() {
                     hour12: false,
                 }).format(now),
             );
-            if (hour === 19) {
-                matching.push(tz);
-            }
+            map.set(tz, hour);
         } catch {
             // Skip invalid timezone
         }
     }
-    return matching;
+    return map;
 }
 
 /**
@@ -138,16 +136,11 @@ async function processInBatches(items, fn, limit) {
  * Main digest job: find users in matching timezones, gather data, send emails.
  */
 async function runDigest() {
-    const matchingTimezones = getTimezonesAt19();
-    if (matchingTimezones.length === 0) {
-        logger.info('No timezones at 19:00 right now, skipping');
-        return;
-    }
+    const timezoneHourMap = buildTimezoneHourMap();
 
-    logger.info({ timezoneCount: matchingTimezones.length }, 'Running digest for timezones at 19:00');
+    logger.info('Running digest — checking all digest-enabled users');
 
-    // Scan for users with digestEnabled=true in matching timezones
-    // We need to scan because we filter by timezone which isn't a key
+    // Scan for users with digestEnabled=true and a timezone set
     let users = [];
     let lastKey;
 
@@ -161,9 +154,11 @@ async function runDigest() {
         if (lastKey) scanParams.ExclusiveStartKey = lastKey;
 
         const result = await docClient.send(new ScanCommand(scanParams));
-        const filtered = (result.Items || []).filter((u) =>
-            matchingTimezones.includes(u.timezone),
-        );
+        const filtered = (result.Items || []).filter((u) => {
+            const currentHour = timezoneHourMap.get(u.timezone);
+            const preferredHour = u.digestHour ?? 19;
+            return currentHour === preferredHour;
+        });
         users.push(...filtered);
         lastKey = result.LastEvaluatedKey;
     } while (lastKey);
