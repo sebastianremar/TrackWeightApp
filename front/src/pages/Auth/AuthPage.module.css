@@ -3,6 +3,13 @@
   margin-bottom: 24px;
 }
 
+.logo {
+  width: 64px;
+  height: 64px;
+  object-fit: contain;
+  margin-bottom: 8px;
+}
+
 .title {
   font-size: 1.6rem;
   font-weight: 700;

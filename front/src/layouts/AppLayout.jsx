@@ -1,5 +1,6 @@
 import { Outlet, NavLink, useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
+import logo from '../assets/logo.png';
 import styles from './AppLayout.module.css';
 
 const NAV_ITEMS = [
@@ -35,7 +36,10 @@ export default function AppLayout() {
     <div className={styles.layout}>
       {/* Desktop sidebar */}
       <aside className={styles.sidebar}>
-        <div className={styles.logo}>TrackMyWeight</div>
+        <div className={styles.logo}>
+          <img src={logo} alt="" className={styles.logoImg} />
+          <span>TrackMyWeight</span>
+        </div>
         <nav className={styles.sideNav}>
           {navItems.map((item) => (
             <NavLink
@@ -56,7 +60,10 @@ export default function AppLayout() {
 
       {/* Top nav (mobile) */}
       <header className={styles.topNav}>
-        <span className={styles.topLogo}>TrackMyWeight</span>
+        <span className={styles.topLogo}>
+          <img src={logo} alt="" className={styles.logoImg} />
+          TrackMyWeight
+        </span>
         <div className={styles.topRight}>
           <span className={styles.topUser}>{user?.firstName || user?.name?.split(' ')[0]}</span>
           <button className={styles.logoutBtn} onClick={handleLogout}>Sign Out</button>

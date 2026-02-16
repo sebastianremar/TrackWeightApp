@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import SignInForm from './SignInForm';
 import SignUpForm from './SignUpForm';
+import logo from '../../assets/logo.png';
 import styles from './AuthPage.module.css';
 
 export default function AuthPage() {
@@ -9,6 +10,7 @@ export default function AuthPage() {
   return (
     <>
       <div className={styles.header}>
+        <img src={logo} alt="TrackMyWeight" className={styles.logo} />
         <h1 className={styles.title}>TrackMyWeight</h1>
         <p className={styles.subtitle}>Weight & habit tracking</p>
       </div>
