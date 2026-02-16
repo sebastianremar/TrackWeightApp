@@ -5,11 +5,8 @@ import { ThemeProvider, useTheme } from './contexts/ThemeContext';
 import AppLayout from './layouts/AppLayout';
 import AuthLayout from './layouts/AuthLayout';
 import AuthPage from './pages/Auth/AuthPage';
-import DashboardPage from './pages/Dashboard/DashboardPage';
-import HabitsPage from './pages/Habits/HabitsPage';
-import TodosPage from './pages/Todos/TodosPage';
-import CalendarPage from './pages/Calendar/CalendarPage';
-import WorkoutsPage from './pages/Workouts/WorkoutsPage';
+import WellnessPage from './pages/Wellness/WellnessPage';
+import PlannerPage from './pages/Planner/PlannerPage';
 import FriendsPage from './pages/Friends/FriendsPage';
 import SettingsPage from './pages/Settings/SettingsPage';
 import Spinner from './components/Spinner/Spinner';
@@ -46,18 +43,21 @@ function AppRoutes() {
   return (
     <Routes>
       <Route element={<AppLayout />}>
-        <Route path="/weight" element={<DashboardPage />} />
-        <Route path="/habits" element={<HabitsPage />} />
-        <Route path="/todos" element={<TodosPage />} />
-        <Route path="/calendar" element={<CalendarPage />} />
-        <Route path="/workouts" element={<WorkoutsPage />} />
+        <Route path="/wellness" element={<WellnessPage />} />
+        <Route path="/planner" element={<PlannerPage />} />
         <Route path="/friends" element={<FriendsPage />} />
         <Route path="/settings" element={<SettingsPage />} />
         {user.isAdmin && (
           <Route path="/admin" element={<Suspense fallback={<Spinner size={32} />}><AdminPage /></Suspense>} />
         )}
       </Route>
-      <Route path="*" element={<Navigate to="/weight" replace />} />
+      {/* Redirects from old routes */}
+      <Route path="/weight" element={<Navigate to="/wellness" replace />} />
+      <Route path="/workouts" element={<Navigate to="/wellness" replace />} />
+      <Route path="/habits" element={<Navigate to="/planner" replace />} />
+      <Route path="/calendar" element={<Navigate to="/planner" replace />} />
+      <Route path="/todos" element={<Navigate to="/planner" replace />} />
+      <Route path="*" element={<Navigate to="/wellness" replace />} />
     </Routes>
   );
 }
