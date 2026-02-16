@@ -54,4 +54,22 @@ const calendarEvent = {
     createdAt: '2024-06-15T08:00:00.000Z',
 };
 
-module.exports = { testUser, friendUser, weightEntry, habit, habitEntry, calendarEvent };
+const adminUser = {
+    email: 'admin@example.com',
+    name: 'Admin User',
+    password: '$2b$10$hashedpasswordplaceholdervalue1234567890adm',
+    darkMode: false,
+    isAdmin: true,
+    createdAt: '2024-01-01T00:00:00.000Z',
+};
+
+const todoItem = {
+    email: testUser.email,
+    todoId: 'todo#test123',
+    title: 'Buy groceries',
+    priority: 'medium',
+    completed: false,
+    createdAt: '2024-06-15T12:00:00.000Z',
+};
+
+module.exports = { testUser, friendUser, weightEntry, habit, habitEntry, calendarEvent, adminUser, todoItem };
