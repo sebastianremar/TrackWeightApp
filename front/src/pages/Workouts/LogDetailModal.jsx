@@ -28,7 +28,6 @@ export default function LogDetailModal({ open, onClose, log, onDelete }) {
         <div className={styles.content}>
           <div className={styles.meta}>
             <span className={styles.date}>{log.date}</span>
-            {log.durationMin && <span className={styles.duration}>{log.durationMin} min</span>}
           </div>
 
           <div className={styles.exerciseList}>

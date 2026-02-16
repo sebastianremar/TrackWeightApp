@@ -108,7 +108,6 @@ export default function HistoryView({ templates, logs, loading, error, nextCurso
               </div>
               <span className={styles.logMeta}>
                 {log.exercises?.length || 0} exercise{log.exercises?.length !== 1 ? 's' : ''}
-                {log.durationMin ? ` \u00B7 ${log.durationMin} min` : ''}
               </span>
             </button>
           </Card>

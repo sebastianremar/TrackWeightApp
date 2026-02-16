@@ -17,7 +17,6 @@ export default function LogView({ templates, library, custom, addLog, onCreateCu
   const [date, setDate] = useState(todayStr());
   const [selectedTemplate, setSelectedTemplate] = useState('');
   const [exercises, setExercises] = useState([]);
-  const [durationMin, setDurationMin] = useState('');
   const [notes, setNotes] = useState('');
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState(null);
@@ -148,7 +147,6 @@ export default function LogView({ templates, library, custom, addLog, onCreateCu
           sets: ex.sets.filter((s) => s.weight > 0 || s.reps > 0),
         })),
       };
-      if (durationMin) payload.durationMin = parseInt(durationMin);
       if (notes.trim()) payload.notes = notes.trim();
       if (tmpl) {
         payload.templateId = tmpl.routineId;
@@ -159,7 +157,6 @@ export default function LogView({ templates, library, custom, addLog, onCreateCu
       // Reset form
       setExercises([]);
       setSelectedTemplate('');
-      setDurationMin('');
       setNotes('');
       setPrefillDate(null);
     } catch (err) {
@@ -280,18 +277,6 @@ export default function LogView({ templates, library, custom, addLog, onCreateCu
       )}
 
       <div className={styles.extras}>
-        <label className={styles.label}>
-          Duration (min)
-          <input
-            className={styles.smallInput}
-            type="number"
-            value={durationMin}
-            onChange={(e) => setDurationMin(e.target.value)}
-            min={1}
-            max={600}
-            placeholder="Optional"
-          />
-        </label>
         <label className={styles.label}>
           Notes
           <textarea

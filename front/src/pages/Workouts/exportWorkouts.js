@@ -14,7 +14,6 @@ export function exportHistoryRows(logs) {
           'Set #': i + 1,
           'Weight (lbs)': s.weight,
           Reps: s.reps,
-          Duration: log.durationMin || '',
           Notes: log.notes || '',
         });
       }
