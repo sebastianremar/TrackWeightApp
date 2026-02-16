@@ -90,7 +90,7 @@ export default function TemplateModal({
   }
 
   return (
-    <Modal title={isEdit ? 'Edit Template' : 'New Template'} onClose={onClose}>
+    <Modal open onClose={onClose} title={isEdit ? 'Edit Template' : 'New Template'}>
       <div className={styles.form}>
         <input
           className={styles.nameInput}
