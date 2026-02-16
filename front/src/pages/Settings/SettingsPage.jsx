@@ -16,6 +16,59 @@ const PALETTES = [
   { id: 'ocean-breeze', name: 'Ocean Breeze', colors: ['#dce8f0', '#a8c8e0', '#2563a0', '#14202e'] },
 ];
 
+const TIMEZONES = [
+  'America/New_York',
+  'America/Chicago',
+  'America/Denver',
+  'America/Los_Angeles',
+  'America/Anchorage',
+  'Pacific/Honolulu',
+  'America/Phoenix',
+  'America/Toronto',
+  'America/Vancouver',
+  'America/Mexico_City',
+  'America/Bogota',
+  'America/Sao_Paulo',
+  'America/Argentina/Buenos_Aires',
+  'Europe/London',
+  'Europe/Paris',
+  'Europe/Berlin',
+  'Europe/Madrid',
+  'Europe/Rome',
+  'Europe/Amsterdam',
+  'Europe/Moscow',
+  'Europe/Istanbul',
+  'Asia/Dubai',
+  'Asia/Kolkata',
+  'Asia/Bangkok',
+  'Asia/Singapore',
+  'Asia/Shanghai',
+  'Asia/Tokyo',
+  'Asia/Seoul',
+  'Australia/Sydney',
+  'Pacific/Auckland',
+];
+
+function formatTzLabel(tz) {
+  try {
+    const now = new Date();
+    const offset = new Intl.DateTimeFormat('en-US', { timeZone: tz, timeZoneName: 'shortOffset' })
+      .formatToParts(now)
+      .find((p) => p.type === 'timeZoneName')?.value || '';
+    return `${tz.replace(/_/g, ' ')} (${offset})`;
+  } catch {
+    return tz;
+  }
+}
+
+function getDetectedTimezone() {
+  try {
+    return Intl.DateTimeFormat().resolvedOptions().timeZone;
+  } catch {
+    return 'America/New_York';
+  }
+}
+
 export default function SettingsPage() {
   const { user, updateUser } = useAuth();
   const { dark, toggleDark, palette, setPalette } = useTheme();
@@ -26,6 +79,8 @@ export default function SettingsPage() {
   const [pwError, setPwError] = useState('');
   const [pwSuccess, setPwSuccess] = useState('');
   const [pwSubmitting, setPwSubmitting] = useState(false);
+
+  const [digestError, setDigestError] = useState('');
 
   const handlePasswordChange = async (e) => {
     e.preventDefault();
@@ -51,6 +106,42 @@ export default function SettingsPage() {
     updateUser({ firstName, lastName, name: `${firstName} ${lastName}`.trim() });
     setNameModalOpen(false);
   };
+
+  const handleDigestToggle = async (checked) => {
+    setDigestError('');
+    const prev = user?.digestEnabled || false;
+    const prevTz = user?.timezone || '';
+
+    // If enabling and no timezone set, auto-detect
+    const tz = checked && !prevTz ? getDetectedTimezone() : undefined;
+
+    // Optimistic update
+    updateUser({ digestEnabled: checked, ...(tz ? { timezone: tz } : {}) });
+
+    try {
+      await updateProfile({ digestEnabled: checked, ...(tz ? { timezone: tz } : {}) });
+    } catch (err) {
+      // Revert on error
+      updateUser({ digestEnabled: prev, timezone: prevTz });
+      setDigestError(err.message);
+    }
+  };
+
+  const handleTimezoneChange = async (e) => {
+    setDigestError('');
+    const tz = e.target.value;
+    const prevTz = user?.timezone || '';
+    updateUser({ timezone: tz });
+    try {
+      await updateProfile({ timezone: tz });
+    } catch (err) {
+      updateUser({ timezone: prevTz });
+      setDigestError(err.message);
+    }
+  };
+
+  const digestEnabled = user?.digestEnabled || false;
+  const userTimezone = user?.timezone || getDetectedTimezone();
 
   return (
     <div className={styles.page}>
@@ -101,6 +192,36 @@ export default function SettingsPage() {
             ))}
           </div>
         </div>
+      </Card>
+
+      {/* Notifications */}
+      <Card>
+        <h3 className={styles.sectionTitle}>Notifications</h3>
+        <div className={styles.row}>
+          <div>
+            <span className={styles.value}>Daily Digest Email</span>
+            <span className={styles.label}>Receive a summary of your day at 7 PM</span>
+          </div>
+          <Toggle checked={digestEnabled} onChange={handleDigestToggle} />
+        </div>
+        {digestEnabled && (
+          <div className={styles.field} style={{ paddingTop: 8 }}>
+            <label className={styles.label}>Timezone</label>
+            <select
+              className={styles.input}
+              value={userTimezone}
+              onChange={handleTimezoneChange}
+            >
+              {TIMEZONES.map((tz) => (
+                <option key={tz} value={tz}>{formatTzLabel(tz)}</option>
+              ))}
+              {!TIMEZONES.includes(userTimezone) && (
+                <option value={userTimezone}>{formatTzLabel(userTimezone)}</option>
+              )}
+            </select>
+          </div>
+        )}
+        <InlineError message={digestError} />
       </Card>
 
       {/* Account (password) */}
