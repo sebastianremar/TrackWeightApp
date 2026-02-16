@@ -1,6 +1,7 @@
 const buckets = new Map();
+const MAX_BUCKETS = 10000;
 
-// Clean up expired entries every 10 minutes
+// Clean up expired entries every 5 minutes
 setInterval(
     () => {
         const now = Date.now();
@@ -9,7 +10,7 @@ setInterval(
             if (bucket.hits.length === 0) buckets.delete(key);
         }
     },
-    10 * 60 * 1000,
+    5 * 60 * 1000,
 );
 
 function rateLimit({ maxHits, windowMs }) {
@@ -19,6 +20,11 @@ function rateLimit({ maxHits, windowMs }) {
         const now = Date.now();
 
         if (!buckets.has(key)) {
+            if (buckets.size >= MAX_BUCKETS) {
+                // Evict oldest bucket to prevent unbounded growth
+                const oldest = buckets.keys().next().value;
+                buckets.delete(oldest);
+            }
             buckets.set(key, { hits: [], windowMs });
         }
 

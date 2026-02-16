@@ -2,19 +2,13 @@ const express = require('express');
 const { PutCommand, QueryCommand, UpdateCommand, DeleteCommand } = require('@aws-sdk/lib-dynamodb');
 const { docClient } = require('../lib/db');
 const logger = require('../lib/logger');
+const { generateId } = require('../lib/id');
 
 const router = express.Router();
 
 const DATE_REGEX = /^\d{4}-\d{2}-\d{2}$/;
 const TIME_REGEX = /^([01]\d|2[0-3]):[0-5]\d$/;
 const HEX_COLOR_REGEX = /^#[0-9a-fA-F]{6}$/;
-
-function generateUlid() {
-    // Simple ULID-like ID: timestamp + random
-    var t = Date.now().toString(36);
-    var r = Math.random().toString(36).substring(2, 10);
-    return t + r;
-}
 
 // POST /api/calendar — create an event
 router.post('/', async (req, res) => {
@@ -78,7 +72,7 @@ router.post('/', async (req, res) => {
         return res.status(500).json({ error: 'Internal server error' });
     }
 
-    const eventId = 'event#' + generateUlid();
+    const eventId = 'event#' + generateId();
     const item = {
         email,
         eventId,

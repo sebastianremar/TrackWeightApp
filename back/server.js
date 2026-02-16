@@ -1,5 +1,16 @@
 require('dotenv').config();
+const Sentry = require('@sentry/node');
 const logger = require('./lib/logger');
+
+// Initialize Sentry early (before other imports) if DSN is configured
+if (process.env.SENTRY_DSN) {
+    Sentry.init({
+        dsn: process.env.SENTRY_DSN,
+        environment: process.env.NODE_ENV || 'development',
+        tracesSampleRate: process.env.NODE_ENV === 'production' ? 0.1 : 1.0,
+    });
+    logger.info('Sentry initialized');
+}
 
 // --- Validate required env vars early ---
 if (!process.env.JWT_SECRET || process.env.JWT_SECRET.length < 32) {
@@ -110,6 +121,11 @@ app.get('/*path', (req, res) => {
     res.sendFile(path.join(__dirname, '..', 'front', 'dist', 'index.html'));
 });
 
+// Sentry error handler (must be before global error handler)
+if (process.env.SENTRY_DSN) {
+    Sentry.setupExpressErrorHandler(app);
+}
+
 // Global error handler
 app.use((err, req, res, next) => {
     logger.error({ err, reqId: req.id }, 'Unhandled error');
@@ -144,4 +160,14 @@ if (require.main === module) {
 
     process.on('SIGTERM', () => shutdown('SIGTERM'));
     process.on('SIGINT', () => shutdown('SIGINT'));
+
+    process.on('uncaughtException', (err) => {
+        logger.fatal({ err }, 'Uncaught exception — shutting down');
+        shutdown('uncaughtException');
+    });
+
+    process.on('unhandledRejection', (reason) => {
+        logger.fatal({ err: reason }, 'Unhandled rejection — shutting down');
+        shutdown('unhandledRejection');
+    });
 }

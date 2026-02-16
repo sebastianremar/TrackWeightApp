@@ -25,6 +25,7 @@
         "@aws-sdk/client-dynamodb": "^3.750.0",
         "@aws-sdk/client-ses": "^3.990.0",
         "@aws-sdk/lib-dynamodb": "^3.750.0",
+        "@sentry/node": "^10.39.0",
         "bcrypt": "^6.0.0",
         "cookie-parser": "^1.4.7",
         "cors": "^2.8.6",

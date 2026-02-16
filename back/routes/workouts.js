@@ -9,16 +9,9 @@ const {
 const { docClient } = require('../lib/db');
 const logger = require('../lib/logger');
 const { EXERCISE_LIBRARY, MUSCLE_GROUPS } = require('../lib/exercises');
+const { generateId } = require('../lib/id');
 
 const router = express.Router();
-
-// --- Helpers ---
-
-function generateUlid() {
-    const t = Date.now().toString(36);
-    const r = Math.random().toString(36).substring(2, 10);
-    return t + r;
-}
 
 const DATE_REGEX = /^\d{4}-\d{2}-\d{2}$/;
 
@@ -141,7 +134,7 @@ router.post('/exercises', async (req, res) => {
         return res.status(500).json({ error: 'Internal server error' });
     }
 
-    const exerciseId = 'exercise#' + generateUlid();
+    const exerciseId = 'exercise#' + generateId();
     const item = {
         email,
         routineId: exerciseId,
@@ -251,7 +244,7 @@ router.post('/templates', async (req, res) => {
         return res.status(500).json({ error: 'Internal server error' });
     }
 
-    const routineId = 'tmpl#' + generateUlid();
+    const routineId = 'tmpl#' + generateId();
     const item = {
         email,
         routineId,
@@ -465,7 +458,7 @@ router.post('/logs', async (req, res) => {
         return res.status(500).json({ error: 'Internal server error' });
     }
 
-    const logId = 'log#' + generateUlid();
+    const logId = 'log#' + generateId();
     const item = {
         email,
         logId,

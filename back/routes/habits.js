@@ -2,19 +2,13 @@ const express = require('express');
 const { PutCommand, QueryCommand, UpdateCommand, GetCommand } = require('@aws-sdk/lib-dynamodb');
 const { docClient } = require('../lib/db');
 const logger = require('../lib/logger');
+const { generateId } = require('../lib/id');
 
 const router = express.Router();
 
 const COLOR_REGEX = /^#[0-9a-fA-F]{6}$/;
 const VALID_TYPES = ['good', 'bad'];
 const VALID_LIMIT_PERIODS = ['week', 'month'];
-
-function generateUlid() {
-    // Simple ULID-like ID: timestamp + random
-    var t = Date.now().toString(36);
-    var r = Math.random().toString(36).substring(2, 10);
-    return t + r;
-}
 
 // POST /api/habits — create a habit
 router.post('/', async (req, res) => {
@@ -63,7 +57,7 @@ router.post('/', async (req, res) => {
         return res.status(500).json({ error: 'Internal server error' });
     }
 
-    const habitId = 'habit#' + generateUlid();
+    const habitId = 'habit#' + generateId();
     const item = {
         email,
         habitId,
