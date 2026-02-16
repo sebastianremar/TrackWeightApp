@@ -3,7 +3,7 @@ const jwt = require('jsonwebtoken');
 const SECRET = process.env.JWT_SECRET;
 
 function makeToken(email, opts = {}) {
-    return jwt.sign({ email }, SECRET, { expiresIn: '24h', ...opts });
+    return jwt.sign({ email, tokenVersion: 0 }, SECRET, { expiresIn: '24h', ...opts });
 }
 
 function authHeader(email) {

@@ -109,7 +109,7 @@ describe('POST /api/signup', () => {
             password: 'StrongPass1',
         });
         expect(res.status).toBe(409);
-        expect(res.body.error).toMatch(/already exists/);
+        expect(res.body.error).toMatch(/try a different email/i);
     });
 });
 
@@ -160,12 +160,21 @@ describe('POST /api/signin', () => {
 // --- SIGNOUT ---
 describe('POST /api/signout', () => {
     test('clears the token cookie', async () => {
-        const res = await request(app).post('/api/signout');
+        ddbMock.on(UpdateCommand).resolves({});
+
+        const res = await request(app)
+            .post('/api/signout')
+            .set(authHeader('test@example.com'));
         expect(res.status).toBe(200);
         expect(res.body.message).toBe('Signed out');
         // Set-Cookie header should clear the token
         const cookie = res.headers['set-cookie'];
         expect(cookie).toBeDefined();
+    });
+
+    test('returns 401 without auth', async () => {
+        const res = await request(app).post('/api/signout');
+        expect(res.status).toBe(401);
     });
 });
 
@@ -343,7 +352,7 @@ describe('PATCH /api/me', () => {
 describe('PATCH /api/me/password', () => {
     test('changes password with valid current password', async () => {
         ddbMock.on(GetCommand).resolves({ Item: testUser });
-        ddbMock.on(UpdateCommand).resolves({});
+        ddbMock.on(UpdateCommand).resolves({ Attributes: { ...testUser, tokenVersion: 1 } });
         bcrypt.compare.mockResolvedValue(true);
         bcrypt.hash.mockResolvedValue('new-hashed');
 

@@ -8,6 +8,9 @@ const authenticate = require('../middleware/auth');
 
 const router = express.Router();
 
+// Pre-computed bcrypt hash used to prevent timing attacks when user doesn't exist
+const DUMMY_HASH = '$2b$10$x0lG0rQ8kz6hGZZDqGSYkOYpC0kOKz3GkGnqKxQkdYWFqkz8QLqHC';
+
 const ALLOWED_PALETTES = ['ethereal-ivory', 'serene-coastline', 'midnight-bloom', 'warm-sand', 'ocean-breeze'];
 
 const VALID_STAT_KEYS = ['current', 'avgWeeklyChange', 'weekOverWeek', 'lowest', 'highest', 'average'];
@@ -94,13 +97,13 @@ router.post('/signup', async (req, res) => {
         );
     } catch (err) {
         if (err.name === 'ConditionalCheckFailedException') {
-            return res.status(409).json({ error: 'A user with this email already exists' });
+            return res.status(409).json({ error: 'Unable to create account. Please try a different email.' });
         }
         logger.error({ err }, 'DynamoDB PutItem error');
         return res.status(500).json({ error: 'Internal server error' });
     }
 
-    const token = jwt.sign({ email: user.email }, process.env.JWT_SECRET, { expiresIn: '24h' });
+    const token = jwt.sign({ email: user.email, tokenVersion: 0 }, process.env.JWT_SECRET, { expiresIn: '24h' });
     res.cookie('token', token, COOKIE_OPTIONS);
 
     res.status(201).json({
@@ -108,6 +111,10 @@ router.post('/signup', async (req, res) => {
         user: { firstName: user.firstName, lastName: user.lastName || '', name: user.name, email: user.email },
     });
 });
+
+// Account lockout constants
+const MAX_FAILED_ATTEMPTS = 5;
+const LOCKOUT_DURATION_MS = 15 * 60 * 1000; // 15 minutes
 
 // POST /api/signin
 router.post('/signin', async (req, res) => {
@@ -117,12 +124,14 @@ router.post('/signin', async (req, res) => {
         return res.status(400).json({ error: 'Email and password are required' });
     }
 
+    const normalizedEmail = email.trim().toLowerCase();
+
     let result;
     try {
         result = await docClient.send(
             new GetCommand({
                 TableName: process.env.USERS_TABLE,
-                Key: { email: email.trim().toLowerCase() },
+                Key: { email: normalizedEmail },
             }),
         );
     } catch (err) {
@@ -131,16 +140,65 @@ router.post('/signin', async (req, res) => {
     }
 
     const user = result.Item;
+
+    // Always run bcrypt to prevent timing-based user enumeration
+    const validPassword = await bcrypt.compare(password, user ? user.password : DUMMY_HASH);
+
     if (!user) {
         return res.status(401).json({ error: 'Invalid email or password' });
     }
 
-    const validPassword = await bcrypt.compare(password, user.password);
+    // Check account lockout
+    if (user.lockoutUntil && Date.now() < user.lockoutUntil) {
+        const retryAfter = Math.ceil((user.lockoutUntil - Date.now()) / 1000);
+        res.set('Retry-After', String(retryAfter));
+        return res.status(429).json({ error: 'Account temporarily locked. Try again later.' });
+    }
+
     if (!validPassword) {
+        // Increment failed attempts in DynamoDB (shared across cluster workers)
+        const attempts = (user.failedLoginAttempts || 0) + 1;
+        const updateValues = { ':attempts': attempts };
+        let updateExpr = 'SET failedLoginAttempts = :attempts';
+
+        if (attempts >= MAX_FAILED_ATTEMPTS) {
+            updateExpr += ', lockoutUntil = :lockout';
+            updateValues[':lockout'] = Date.now() + LOCKOUT_DURATION_MS;
+            logger.warn({ email: normalizedEmail }, 'Account locked after repeated failed logins');
+        }
+
+        try {
+            await docClient.send(
+                new UpdateCommand({
+                    TableName: process.env.USERS_TABLE,
+                    Key: { email: normalizedEmail },
+                    UpdateExpression: updateExpr,
+                    ExpressionAttributeValues: updateValues,
+                }),
+            );
+        } catch (err) {
+            logger.error({ err }, 'Failed to update login attempts');
+        }
+
         return res.status(401).json({ error: 'Invalid email or password' });
     }
 
-    const token = jwt.sign({ email: user.email }, process.env.JWT_SECRET, { expiresIn: '24h' });
+    // Successful login — clear lockout state
+    if (user.failedLoginAttempts) {
+        try {
+            await docClient.send(
+                new UpdateCommand({
+                    TableName: process.env.USERS_TABLE,
+                    Key: { email: normalizedEmail },
+                    UpdateExpression: 'REMOVE failedLoginAttempts, lockoutUntil',
+                }),
+            );
+        } catch (err) {
+            logger.error({ err }, 'Failed to clear login attempts');
+        }
+    }
+
+    const token = jwt.sign({ email: user.email, tokenVersion: user.tokenVersion ?? 0 }, process.env.JWT_SECRET, { expiresIn: '24h' });
     res.cookie('token', token, COOKIE_OPTIONS);
 
     res.json({
@@ -162,7 +220,21 @@ router.post('/signin', async (req, res) => {
 });
 
 // POST /api/signout
-router.post('/signout', (req, res) => {
+router.post('/signout', authenticate, async (req, res) => {
+    // Increment tokenVersion to invalidate all existing tokens
+    try {
+        await docClient.send(
+            new UpdateCommand({
+                TableName: process.env.USERS_TABLE,
+                Key: { email: req.user.email },
+                UpdateExpression: 'SET tokenVersion = if_not_exists(tokenVersion, :zero) + :one',
+                ExpressionAttributeValues: { ':zero': 0, ':one': 1 },
+            }),
+        );
+    } catch (err) {
+        logger.error({ err }, 'Failed to increment tokenVersion on signout');
+    }
+
     res.clearCookie('token', COOKIE_OPTIONS);
     res.json({ message: 'Signed out' });
 });
@@ -383,25 +455,28 @@ router.patch('/me/password', authenticate, async (req, res) => {
         return res.status(401).json({ error: 'Current password is incorrect' });
     }
 
-    // Hash and save new password
+    // Hash and save new password, increment tokenVersion to invalidate old tokens
     const hashedPassword = await bcrypt.hash(newPassword, 10);
+    let newVersion;
     try {
-        await docClient.send(
+        const result = await docClient.send(
             new UpdateCommand({
                 TableName: process.env.USERS_TABLE,
                 Key: { email: req.user.email },
-                UpdateExpression: 'SET #p = :password',
+                UpdateExpression: 'SET #p = :password, tokenVersion = if_not_exists(tokenVersion, :zero) + :one',
                 ExpressionAttributeNames: { '#p': 'password' },
-                ExpressionAttributeValues: { ':password': hashedPassword },
+                ExpressionAttributeValues: { ':password': hashedPassword, ':zero': 0, ':one': 1 },
+                ReturnValues: 'ALL_NEW',
             }),
         );
+        newVersion = result.Attributes.tokenVersion;
     } catch (err) {
         logger.error({ err }, 'DynamoDB UpdateItem error');
         return res.status(500).json({ error: 'Internal server error' });
     }
 
-    // Issue fresh token
-    const token = jwt.sign({ email: req.user.email }, process.env.JWT_SECRET, {
+    // Issue fresh token with updated tokenVersion
+    const token = jwt.sign({ email: req.user.email, tokenVersion: newVersion }, process.env.JWT_SECRET, {
         expiresIn: '24h',
     });
     res.cookie('token', token, COOKIE_OPTIONS);
