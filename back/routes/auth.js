@@ -108,6 +108,7 @@ router.post('/signup', async (req, res) => {
     res.cookie('token', token, COOKIE_OPTIONS);
 
     res.status(201).json({
+        token,
         message: 'Account created successfully',
         user: { firstName: user.firstName, lastName: user.lastName || '', name: user.name, email: user.email },
     });
@@ -203,6 +204,7 @@ router.post('/signin', async (req, res) => {
     res.cookie('token', token, COOKIE_OPTIONS);
 
     res.json({
+        token,
         message: 'Signed in successfully',
         user: {
             firstName: user.firstName || user.name.split(' ')[0],
