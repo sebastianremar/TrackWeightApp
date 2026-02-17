@@ -1,5 +1,5 @@
 import { Tabs, Redirect } from 'expo-router';
-import { Text } from 'react-native';
+import { Text, Image } from 'react-native';
 import { useAuth } from '../../src/contexts/AuthContext';
 import { useTheme } from '../../src/contexts/ThemeContext';
 
@@ -26,6 +26,12 @@ export default function TabLayout() {
         headerStyle: { backgroundColor: colors.surface },
         headerTintColor: colors.text,
         headerTitleStyle: { fontWeight: '600' },
+        headerLeft: () => (
+          <Image
+            source={require('../../assets/logo.png')}
+            style={{ width: 32, height: 32, borderRadius: 16, marginLeft: 16 }}
+          />
+        ),
         tabBarStyle: {
           backgroundColor: colors.surface,
           borderTopColor: colors.border,

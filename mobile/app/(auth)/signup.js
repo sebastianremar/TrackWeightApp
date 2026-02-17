@@ -4,6 +4,7 @@ import {
   Text,
   TextInput,
   TouchableOpacity,
+  Image,
   StyleSheet,
   KeyboardAvoidingView,
   Platform,
@@ -56,6 +57,10 @@ export default function SignUpScreen() {
         contentContainerStyle={s.container}
         keyboardShouldPersistTaps="handled"
       >
+        <Image
+          source={require('../../assets/logo.png')}
+          style={s.logo}
+        />
         <Text style={s.title}>SaraPeso</Text>
         <Text style={s.subtitle}>Create your account</Text>
 
@@ -125,6 +130,13 @@ function makeStyles(colors) {
       flexGrow: 1,
       justifyContent: 'center',
       padding: 24,
+    },
+    logo: {
+      width: 100,
+      height: 100,
+      borderRadius: 50,
+      alignSelf: 'center',
+      marginBottom: 16,
     },
     title: {
       fontSize: 32,

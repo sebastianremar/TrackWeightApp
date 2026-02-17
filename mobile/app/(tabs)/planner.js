@@ -11,6 +11,7 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useTheme } from '../../src/contexts/ThemeContext';
 import HabitsDashboard from '../../src/screens/planner/HabitsDashboard';
+import CalendarDashboard from '../../src/screens/planner/CalendarDashboard';
 
 const TABS = ['Habits', 'Calendar', 'Todos'];
 
@@ -45,20 +46,7 @@ export default function PlannerScreen() {
           keyboardShouldPersistTaps="handled"
         >
           {activeTab === 'Habits' && <HabitsDashboard />}
-          {activeTab === 'Calendar' && (
-            <View style={s.placeholder}>
-              <Text style={s.placeholderEmoji}>📅</Text>
-              <Text style={s.placeholderTitle}>Calendar</Text>
-              <Text style={s.placeholderText}>
-                Day/week/month calendar with events.{'\n'}
-                Coming soon:{'\n\n'}
-                • Day view with events + todos + habits{'\n'}
-                • Week view{'\n'}
-                • Month view{'\n'}
-                • Create/edit events
-              </Text>
-            </View>
-          )}
+          {activeTab === 'Calendar' && <CalendarDashboard />}
           {activeTab === 'Todos' && (
             <View style={s.placeholder}>
               <Text style={s.placeholderEmoji}>📝</Text>
