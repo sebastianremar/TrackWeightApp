@@ -37,7 +37,7 @@ export default function EntriesList({ entries, onEdit, onDeleted }) {
           <View key={entry.date} style={s.row}>
             <View style={s.entryInfo}>
               <Text style={s.date}>{entry.date}</Text>
-              <Text style={s.weight}>{entry.weight} {weightUnit}</Text>
+              <Text style={s.weight} numberOfLines={1}>{entry.weight} {weightUnit}</Text>
             </View>
             <View style={s.actions}>
               <TouchableOpacity
@@ -97,7 +97,7 @@ function makeStyles(colors) {
     entryInfo: {
       flexDirection: 'row',
       alignItems: 'center',
-      gap: 16,
+      gap: 10,
       flex: 1,
     },
     date: {
@@ -109,15 +109,16 @@ function makeStyles(colors) {
       fontSize: 16,
       fontWeight: '600',
       color: colors.text,
+      flexShrink: 1,
     },
     actions: {
       flexDirection: 'row',
-      gap: 12,
+      gap: 8,
       flexShrink: 0,
     },
     editBtn: {
       paddingVertical: 6,
-      paddingHorizontal: 12,
+      paddingHorizontal: 10,
       borderRadius: 6,
       backgroundColor: colors.background,
     },
@@ -128,7 +129,7 @@ function makeStyles(colors) {
     },
     deleteBtn: {
       paddingVertical: 6,
-      paddingHorizontal: 12,
+      paddingHorizontal: 10,
       borderRadius: 6,
       backgroundColor: colors.errorBg,
     },

@@ -26,7 +26,7 @@ export default function WeightChart({ entries, range, onRangeChange }) {
     const showLabel = i === 0 || i === sorted.length - 1 || i % Math.max(1, Math.floor(sorted.length / 4)) === 0;
     return {
       value: e.weight,
-      label: showLabel ? e.date.slice(5) : '', // MM-DD format
+      label: showLabel ? String(parseInt(e.date.slice(8), 10)) : '', // day number
       dataPointText: undefined,
     };
   });
@@ -34,7 +34,7 @@ export default function WeightChart({ entries, range, onRangeChange }) {
   return (
     <View style={s.container}>
       <View style={s.header}>
-        <Text style={s.title}>Weight Over Time</Text>
+        <Text style={s.title} numberOfLines={1}>Weight Over Time</Text>
         <View style={s.rangePicker}>
           {RANGES.map((r) => (
             <TouchableOpacity
@@ -125,19 +125,21 @@ function makeStyles(colors) {
       marginBottom: 12,
     },
     title: {
-      fontSize: 17,
+      fontSize: 15,
       fontWeight: '700',
       color: colors.text,
+      flexShrink: 1,
     },
     rangePicker: {
       flexDirection: 'row',
       backgroundColor: colors.background,
       borderRadius: 8,
       padding: 2,
+      flexShrink: 0,
     },
     rangeBtn: {
       paddingVertical: 6,
-      paddingHorizontal: 10,
+      paddingHorizontal: 8,
       borderRadius: 6,
     },
     rangeBtnActive: {
