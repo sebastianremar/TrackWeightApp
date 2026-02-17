@@ -12,6 +12,7 @@ const router = express.Router();
 const DUMMY_HASH = '$2b$10$x0lG0rQ8kz6hGZZDqGSYkOYpC0kOKz3GkGnqKxQkdYWFqkz8QLqHC';
 
 const ALLOWED_PALETTES = ['ethereal-ivory', 'serene-coastline', 'midnight-bloom', 'warm-sand', 'ocean-breeze'];
+const ALLOWED_WEIGHT_UNITS = ['kg', 'lbs'];
 
 const VALID_STAT_KEYS = ['current', 'avgWeeklyChange', 'weekOverWeek', 'lowest', 'highest', 'average'];
 const DEFAULT_STATS = ['current', 'avgWeeklyChange', 'lowest'];
@@ -220,6 +221,7 @@ router.post('/signin', async (req, res) => {
             digestHour: user.digestHour ?? 19,
             timezone: user.timezone || '',
             hasSeenIntro: user.hasSeenIntro || false,
+            weightUnit: user.weightUnit || 'kg',
         },
     });
 });
@@ -273,6 +275,7 @@ router.get('/me', authenticate, async (req, res) => {
             digestHour: user.digestHour ?? 19,
             timezone: user.timezone || '',
             hasSeenIntro: user.hasSeenIntro || false,
+            weightUnit: user.weightUnit || 'kg',
             createdAt: user.createdAt,
         });
     } catch (err) {
@@ -283,7 +286,7 @@ router.get('/me', authenticate, async (req, res) => {
 
 // PATCH /api/me — update profile
 router.patch('/me', authenticate, async (req, res) => {
-    const { firstName, lastName, name, darkMode, palette, dashboardStats, todoCategories, digestEnabled, digestHour, timezone, hasSeenIntro } = req.body;
+    const { firstName, lastName, name, darkMode, palette, dashboardStats, todoCategories, digestEnabled, digestHour, timezone, hasSeenIntro, weightUnit } = req.body;
     const updates = [];
     const names = {};
     const values = {};
@@ -397,6 +400,14 @@ router.patch('/me', authenticate, async (req, res) => {
         values[':hsi'] = hasSeenIntro;
     }
 
+    if (weightUnit !== undefined) {
+        if (!ALLOWED_WEIGHT_UNITS.includes(weightUnit)) {
+            return res.status(400).json({ error: 'weightUnit must be "kg" or "lbs"' });
+        }
+        updates.push('weightUnit = :wu');
+        values[':wu'] = weightUnit;
+    }
+
     if (updates.length === 0) {
         return res.status(400).json({ error: 'No valid fields to update' });
     }
@@ -427,6 +438,7 @@ router.patch('/me', authenticate, async (req, res) => {
             digestHour: user.digestHour ?? 19,
             timezone: user.timezone || '',
             hasSeenIntro: user.hasSeenIntro || false,
+            weightUnit: user.weightUnit || 'kg',
         });
     } catch (err) {
         logger.error({ err }, 'DynamoDB UpdateItem error');
