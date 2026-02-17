@@ -9,6 +9,7 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useAuth } from '../../src/contexts/AuthContext';
 import { useTheme } from '../../src/contexts/ThemeContext';
+import NotificationSettings from '../../src/components/NotificationSettings';
 
 const PALETTES = [
   { id: 'ethereal-ivory', label: 'Ethereal Ivory' },
@@ -91,6 +92,12 @@ export default function SettingsScreen() {
               </TouchableOpacity>
             ))}
           </View>
+        </View>
+
+        {/* Notifications Section */}
+        <Text style={s.sectionTitle}>Notifications</Text>
+        <View style={s.card}>
+          <NotificationSettings />
         </View>
 
         {/* Security Section */}

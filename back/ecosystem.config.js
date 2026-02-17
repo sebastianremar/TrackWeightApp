@@ -38,5 +38,22 @@ module.exports = {
             min_uptime: '10s',
             kill_timeout: 5000,
         },
+        {
+            name: 'sara-peso-notifications',
+            script: './scripts/push-notifications.js',
+            instances: 1,
+            exec_mode: 'fork',
+            env: {
+                NODE_ENV: 'production',
+            },
+            error_file: './logs/notifications-err.log',
+            out_file: './logs/notifications-out.log',
+            log_date_format: 'YYYY-MM-DD HH:mm:ss Z',
+            merge_logs: true,
+            max_memory_restart: '150M',
+            max_restarts: 10,
+            min_uptime: '10s',
+            kill_timeout: 5000,
+        },
     ],
 };

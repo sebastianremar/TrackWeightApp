@@ -222,6 +222,9 @@ router.post('/signin', async (req, res) => {
             timezone: user.timezone || '',
             hasSeenIntro: user.hasSeenIntro || false,
             weightUnit: user.weightUnit || 'kg',
+            notificationsEnabled: user.notificationsEnabled || false,
+            notificationSettings: user.notificationSettings || null,
+            pushToken: user.pushToken || null,
         },
     });
 });
@@ -276,6 +279,9 @@ router.get('/me', authenticate, async (req, res) => {
             timezone: user.timezone || '',
             hasSeenIntro: user.hasSeenIntro || false,
             weightUnit: user.weightUnit || 'kg',
+            notificationsEnabled: user.notificationsEnabled || false,
+            notificationSettings: user.notificationSettings || null,
+            pushToken: user.pushToken || null,
             createdAt: user.createdAt,
         });
     } catch (err) {
@@ -286,7 +292,7 @@ router.get('/me', authenticate, async (req, res) => {
 
 // PATCH /api/me — update profile
 router.patch('/me', authenticate, async (req, res) => {
-    const { firstName, lastName, name, darkMode, palette, dashboardStats, todoCategories, digestEnabled, digestHour, timezone, hasSeenIntro, weightUnit } = req.body;
+    const { firstName, lastName, name, darkMode, palette, dashboardStats, todoCategories, digestEnabled, digestHour, timezone, hasSeenIntro, weightUnit, pushToken, notificationsEnabled, notificationSettings } = req.body;
     const updates = [];
     const names = {};
     const values = {};
@@ -408,18 +414,74 @@ router.patch('/me', authenticate, async (req, res) => {
         values[':wu'] = weightUnit;
     }
 
+    if (pushToken !== undefined) {
+        if (pushToken !== null && (typeof pushToken !== 'string' || !pushToken.startsWith('ExponentPushToken[') || pushToken.length > 100)) {
+            return res.status(400).json({ error: 'Invalid push token' });
+        }
+        if (pushToken === null) {
+            updates.push('REMOVE pushToken');
+        } else {
+            updates.push('pushToken = :pt');
+            values[':pt'] = pushToken;
+        }
+    }
+
+    if (notificationsEnabled !== undefined) {
+        if (typeof notificationsEnabled !== 'boolean') {
+            return res.status(400).json({ error: 'notificationsEnabled must be a boolean' });
+        }
+        updates.push('notificationsEnabled = :ne');
+        values[':ne'] = notificationsEnabled;
+        if (notificationsEnabled) {
+            updates.push('lastNotified = if_not_exists(lastNotified, :emptyMap)');
+            values[':emptyMap'] = {};
+        }
+    }
+
+    if (notificationSettings !== undefined) {
+        if (typeof notificationSettings !== 'object' || notificationSettings === null || Array.isArray(notificationSettings)) {
+            return res.status(400).json({ error: 'notificationSettings must be an object' });
+        }
+        const validTypes = ['weight', 'habits', 'calendar'];
+        const keys = Object.keys(notificationSettings);
+        if (!keys.every((k) => validTypes.includes(k))) {
+            return res.status(400).json({ error: 'notificationSettings keys must be weight, habits, or calendar' });
+        }
+        for (const key of keys) {
+            const rule = notificationSettings[key];
+            if (typeof rule !== 'object' || rule === null) {
+                return res.status(400).json({ error: `notificationSettings.${key} must be an object` });
+            }
+            if (typeof rule.enabled !== 'boolean') {
+                return res.status(400).json({ error: `notificationSettings.${key}.enabled must be a boolean` });
+            }
+            if (!Number.isInteger(rule.hour) || rule.hour < 0 || rule.hour > 23) {
+                return res.status(400).json({ error: `notificationSettings.${key}.hour must be 0-23` });
+            }
+        }
+        updates.push('notificationSettings = :ns');
+        values[':ns'] = notificationSettings;
+    }
+
     if (updates.length === 0) {
         return res.status(400).json({ error: 'No valid fields to update' });
     }
 
     try {
+        const setUpdates = updates.filter((u) => !u.startsWith('REMOVE '));
+        const removeUpdates = updates.filter((u) => u.startsWith('REMOVE ')).map((u) => u.replace('REMOVE ', ''));
+        const parts = [];
+        if (setUpdates.length > 0) parts.push('SET ' + setUpdates.join(', '));
+        if (removeUpdates.length > 0) parts.push('REMOVE ' + removeUpdates.join(', '));
+        const updateExpression = parts.join(' ');
+
         const result = await docClient.send(
             new UpdateCommand({
                 TableName: process.env.USERS_TABLE,
                 Key: { email: req.user.email },
-                UpdateExpression: 'SET ' + updates.join(', '),
+                UpdateExpression: updateExpression,
                 ExpressionAttributeNames: Object.keys(names).length > 0 ? names : undefined,
-                ExpressionAttributeValues: values,
+                ExpressionAttributeValues: Object.keys(values).length > 0 ? values : undefined,
                 ReturnValues: 'ALL_NEW',
             }),
         );
@@ -439,6 +501,9 @@ router.patch('/me', authenticate, async (req, res) => {
             timezone: user.timezone || '',
             hasSeenIntro: user.hasSeenIntro || false,
             weightUnit: user.weightUnit || 'kg',
+            notificationsEnabled: user.notificationsEnabled || false,
+            notificationSettings: user.notificationSettings || null,
+            pushToken: user.pushToken || null,
         });
     } catch (err) {
         logger.error({ err }, 'DynamoDB UpdateItem error');

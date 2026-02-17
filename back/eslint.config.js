@@ -19,6 +19,7 @@ module.exports = [
                 setTimeout: 'readonly',
                 setInterval: 'readonly',
                 clearInterval: 'readonly',
+                fetch: 'readonly',
             },
         },
         rules: {
