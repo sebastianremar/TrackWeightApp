@@ -3,6 +3,7 @@ import {
   View,
   Text,
   TouchableOpacity,
+  ActivityIndicator,
   StyleSheet,
 } from 'react-native';
 import { useTheme } from '../../contexts/ThemeContext';
@@ -18,11 +19,13 @@ export default function TemplatesView({
   onEditTemplate,
   onDeleteTemplate,
   onCreateCustom,
+  onQuickLog,
 }) {
   const { colors } = useTheme();
   const s = makeStyles(colors);
   const [modalTemplate, setModalTemplate] = useState(null);
   const [showModal, setShowModal] = useState(false);
+  const [quickLogId, setQuickLogId] = useState(null);
 
   function openCreate() {
     setModalTemplate(null);
@@ -39,6 +42,16 @@ export default function TemplatesView({
       await onEditTemplate(routineId, payload);
     } else {
       await onAddTemplate(payload);
+    }
+  }
+
+  async function handleQuickLog(tmpl) {
+    if (!onQuickLog) return;
+    setQuickLogId(tmpl.routineId);
+    try {
+      await onQuickLog(tmpl);
+    } finally {
+      setQuickLogId(null);
     }
   }
 
@@ -70,6 +83,19 @@ export default function TemplatesView({
                     </View>
                   ))}
                 </View>
+                {onQuickLog && (
+                  <TouchableOpacity
+                    style={s.quickLogBtn}
+                    onPress={() => handleQuickLog(tmpl)}
+                    disabled={quickLogId === tmpl.routineId}
+                  >
+                    {quickLogId === tmpl.routineId ? (
+                      <ActivityIndicator size="small" color={colors.success} />
+                    ) : (
+                      <Text style={s.quickLogText}>Log Workout</Text>
+                    )}
+                  </TouchableOpacity>
+                )}
               </Card>
             </TouchableOpacity>
           ))}
@@ -128,6 +154,19 @@ function makeStyles(colors) {
       fontSize: 11,
       color: colors.primary,
       fontWeight: '600',
+    },
+    quickLogBtn: {
+      marginTop: 10,
+      paddingVertical: 8,
+      alignItems: 'center',
+      borderRadius: 8,
+      borderWidth: 1,
+      borderColor: colors.success,
+    },
+    quickLogText: {
+      fontSize: 13,
+      fontWeight: '600',
+      color: colors.success,
     },
     createBtn: {
       marginTop: 14,

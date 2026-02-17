@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import {
   View,
   Text,
@@ -22,7 +22,7 @@ function emptySet() {
   return { weight: 0, reps: 0 };
 }
 
-export default function LogView({ templates, library, custom, addLog, onCreateCustom }) {
+export default function LogView({ templates, library, custom, addLog, onCreateCustom, initialTemplate, onTemplateConsumed }) {
   const { colors } = useTheme();
   const s = makeStyles(colors);
   const [date, setDate] = useState(todayStr());
@@ -79,6 +79,13 @@ export default function LogView({ templates, library, custom, addLog, onCreateCu
       // prefill is optional
     }
   }, [templates]);
+
+  useEffect(() => {
+    if (initialTemplate?.routineId) {
+      handleTemplateChange(initialTemplate.routineId);
+      onTemplateConsumed?.();
+    }
+  }, [initialTemplate]);
 
   const updateSet = (exIdx, setIdx, field, value) => {
     setExercises((prev) =>

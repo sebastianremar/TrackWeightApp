@@ -1,9 +1,10 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import {
   View,
   Text,
   TouchableOpacity,
   ActivityIndicator,
+  Alert,
   StyleSheet,
 } from 'react-native';
 import { useTheme } from '../../contexts/ThemeContext';
@@ -11,13 +12,14 @@ import InlineError from '../../components/InlineError';
 import { useTemplates } from '../../hooks/useTemplates';
 import { useExercises } from '../../hooks/useExercises';
 import { useWorkoutLogs } from '../../hooks/useWorkoutLogs';
+import { getTemplatePrefill } from '../../api/workouts';
 import TemplatesView from './TemplatesView';
 import LogView from './LogView';
 import HistoryView from './HistoryView';
 
 const TABS = [
   { key: 'templates', label: 'Templates' },
-  { key: 'log', label: 'Log' },
+  { key: 'log', label: 'Workout' },
   { key: 'history', label: 'History' },
 ];
 
@@ -25,6 +27,7 @@ export default function WorkoutDashboard() {
   const { colors } = useTheme();
   const s = makeStyles(colors);
   const [tab, setTab] = useState('templates');
+  const [selectedTemplate, setSelectedTemplate] = useState(null);
 
   const {
     templates, loading: templatesLoading, error: templatesError,
@@ -42,6 +45,25 @@ export default function WorkoutDashboard() {
     fetchTemplates();
     fetchExercises();
   }, [fetchTemplates, fetchExercises]);
+
+  const handleQuickLog = useCallback(async (template) => {
+    const prefill = await getTemplatePrefill(template.routineId);
+    const exercises = prefill?.exercises || [];
+    const hasSets = exercises.some((ex) => ex.sets && ex.sets.length > 0);
+    if (hasSets) {
+      const today = new Date().toISOString().split('T')[0];
+      await logState.addLog({
+        date: today,
+        exercises,
+        templateId: template.routineId,
+        templateName: template.name,
+      });
+      Alert.alert('Workout logged!', `${template.name} logged successfully.`);
+    } else {
+      setSelectedTemplate(template);
+      setTab('log');
+    }
+  }, [logState]);
 
   const loading = templatesLoading || exercisesLoading;
   const error = templatesError || exercisesError;
@@ -80,6 +102,7 @@ export default function WorkoutDashboard() {
               onEditTemplate={editTemplate}
               onDeleteTemplate={removeTemplate}
               onCreateCustom={addCustom}
+              onQuickLog={handleQuickLog}
             />
           )}
           {tab === 'log' && (
@@ -89,6 +112,8 @@ export default function WorkoutDashboard() {
               custom={custom}
               addLog={logState.addLog}
               onCreateCustom={addCustom}
+              initialTemplate={selectedTemplate}
+              onTemplateConsumed={() => setSelectedTemplate(null)}
             />
           )}
           {tab === 'history' && (
