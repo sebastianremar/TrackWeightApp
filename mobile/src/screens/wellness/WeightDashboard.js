@@ -17,25 +17,13 @@ export default function WeightDashboard({ scrollRef }) {
   const { colors } = useTheme();
   const { user, updateUser } = useAuth();
   const { entries, loading, error, range, setRange, refetch, stats } = useWeightData();
-  const [editingEntry, setEditingEntry] = useState(null);
   const s = makeStyles(colors);
 
   const visibleStats = user?.dashboardStats || DEFAULT_STATS;
 
   const handleSaved = useCallback(() => {
-    setEditingEntry(null);
     refetch();
   }, [refetch]);
-
-  const handleEdit = useCallback((entry) => {
-    setEditingEntry(entry);
-    // Scroll to top so the form is visible
-    scrollRef?.current?.scrollTo?.({ y: 0, animated: true });
-  }, [scrollRef]);
-
-  const handleCancelEdit = useCallback(() => {
-    setEditingEntry(null);
-  }, []);
 
   const handleUpdateVisibleStats = useCallback(async (newStats) => {
     updateUser({ dashboardStats: newStats });
@@ -58,8 +46,6 @@ export default function WeightDashboard({ scrollRef }) {
   return (
     <View style={s.container}>
       <WeightForm
-        editingEntry={editingEntry}
-        onCancelEdit={handleCancelEdit}
         onSaved={handleSaved}
       />
 
@@ -87,7 +73,6 @@ export default function WeightDashboard({ scrollRef }) {
 
           <EntriesList
             entries={entries}
-            onEdit={handleEdit}
             onDeleted={refetch}
           />
         </>

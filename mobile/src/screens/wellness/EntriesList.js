@@ -1,15 +1,49 @@
 import { useRef, useState } from 'react';
-import { View, Text, Pressable, Animated, StyleSheet } from 'react-native';
+import { View, Text, TextInput, Pressable, Animated, Keyboard, StyleSheet } from 'react-native';
 import { Swipeable } from 'react-native-gesture-handler';
 import { useTheme } from '../../contexts/ThemeContext';
-import { deleteWeight } from '../../api/weight';
+import { logWeight, deleteWeight } from '../../api/weight';
 import ConfirmDialog from '../../components/ConfirmDialog';
 
 const MAX_ENTRIES = 20;
 
-function SwipeableRow({ entry, onEdit, onRequestDelete, colors }) {
+function SwipeableRow({ entry, onRequestDelete, onSaved, colors }) {
   const s = makeStyles(colors);
   const swipeableRef = useRef(null);
+  const inputRef = useRef(null);
+  const [editing, setEditing] = useState(false);
+  const [draft, setDraft] = useState('');
+  const [saving, setSaving] = useState(false);
+
+  const startEdit = () => {
+    setDraft(String(entry.weight));
+    setEditing(true);
+    setTimeout(() => inputRef.current?.focus(), 50);
+  };
+
+  const cancelEdit = () => {
+    setEditing(false);
+    Keyboard.dismiss();
+  };
+
+  const saveEdit = async () => {
+    const w = parseFloat(draft);
+    if (isNaN(w) || w <= 0 || w === entry.weight) {
+      cancelEdit();
+      return;
+    }
+    setSaving(true);
+    try {
+      await logWeight(w, entry.date);
+      onSaved?.();
+    } catch {
+      // silently fail
+    } finally {
+      setSaving(false);
+      setEditing(false);
+      Keyboard.dismiss();
+    }
+  };
 
   const renderRightActions = (_progress, dragX) => {
     const scale = dragX.interpolate({
@@ -38,21 +72,41 @@ function SwipeableRow({ entry, onEdit, onRequestDelete, colors }) {
       ref={swipeableRef}
       renderRightActions={renderRightActions}
       overshootRight={false}
+      enabled={!editing}
       friction={2}
     >
       <Pressable
         style={s.row}
-        onLongPress={() => onEdit(entry)}
+        onLongPress={startEdit}
+        disabled={editing}
         android_ripple={{ color: colors.border }}
       >
         <Text style={s.date}>{entry.date}</Text>
-        <Text style={s.weight} numberOfLines={1}>{entry.weight} {entry._unit}</Text>
+        {editing ? (
+          <View style={s.editRow}>
+            <TextInput
+              ref={inputRef}
+              style={s.editInput}
+              value={draft}
+              onChangeText={setDraft}
+              keyboardType="decimal-pad"
+              returnKeyType="done"
+              onSubmitEditing={saveEdit}
+              onBlur={cancelEdit}
+              selectTextOnFocus
+              editable={!saving}
+            />
+            <Text style={s.editUnit}>{entry._unit}</Text>
+          </View>
+        ) : (
+          <Text style={s.weight} numberOfLines={1}>{entry.weight} {entry._unit}</Text>
+        )}
       </Pressable>
     </Swipeable>
   );
 }
 
-export default function EntriesList({ entries, onEdit, onDeleted }) {
+export default function EntriesList({ entries, onDeleted }) {
   const { colors, weightUnit } = useTheme();
   const s = makeStyles(colors);
   const [deleting, setDeleting] = useState(null);
@@ -84,8 +138,8 @@ export default function EntriesList({ entries, onEdit, onDeleted }) {
           <SwipeableRow
             key={entry.date}
             entry={{ ...entry, _unit: weightUnit }}
-            onEdit={onEdit}
             onRequestDelete={setDeleting}
+            onSaved={onDeleted}
             colors={colors}
           />
         ))}
@@ -143,6 +197,26 @@ function makeStyles(colors) {
       fontSize: 16,
       fontWeight: '600',
       color: colors.text,
+    },
+    editRow: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 4,
+    },
+    editInput: {
+      fontSize: 16,
+      fontWeight: '600',
+      color: colors.text,
+      borderBottomWidth: 2,
+      borderBottomColor: colors.primary,
+      paddingVertical: 2,
+      paddingHorizontal: 4,
+      minWidth: 60,
+      textAlign: 'right',
+    },
+    editUnit: {
+      fontSize: 14,
+      color: colors.textSecondary,
     },
     deleteAction: {
       backgroundColor: colors.error,

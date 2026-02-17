@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import {
   View,
   Text,
@@ -15,24 +15,13 @@ function todayStr() {
   return new Date().toISOString().split('T')[0];
 }
 
-export default function WeightForm({ editingEntry, onCancelEdit, onSaved }) {
+export default function WeightForm({ onSaved }) {
   const { colors, weightUnit } = useTheme();
   const s = makeStyles(colors);
   const [weight, setWeight] = useState('');
   const [date, setDate] = useState(todayStr());
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState(null);
-
-  useEffect(() => {
-    if (editingEntry) {
-      setWeight(String(editingEntry.weight));
-      setDate(editingEntry.date);
-    } else {
-      setWeight('');
-      setDate(todayStr());
-    }
-    setError(null);
-  }, [editingEntry]);
 
   const handleSubmit = async () => {
     setError(null);
@@ -65,11 +54,9 @@ export default function WeightForm({ editingEntry, onCancelEdit, onSaved }) {
     }
   };
 
-  const isEditing = !!editingEntry;
-
   return (
     <View style={s.container}>
-      <Text style={s.title}>{isEditing ? 'Edit Entry' : 'Log Weight'}</Text>
+      <Text style={s.title}>Log Weight</Text>
 
       <InlineError message={error} />
 
@@ -101,11 +88,6 @@ export default function WeightForm({ editingEntry, onCancelEdit, onSaved }) {
       </View>
 
       <View style={s.actions}>
-        {isEditing && (
-          <TouchableOpacity style={s.cancelBtn} onPress={onCancelEdit}>
-            <Text style={s.cancelText}>Cancel</Text>
-          </TouchableOpacity>
-        )}
         <TouchableOpacity
           style={[s.submitBtn, saving && s.submitBtnDisabled]}
           onPress={handleSubmit}
@@ -114,7 +96,7 @@ export default function WeightForm({ editingEntry, onCancelEdit, onSaved }) {
           {saving ? (
             <ActivityIndicator size="small" color="#fff" />
           ) : (
-            <Text style={s.submitText}>{isEditing ? 'Update' : 'Log'}</Text>
+            <Text style={s.submitText}>Log</Text>
           )}
         </TouchableOpacity>
       </View>
@@ -161,17 +143,6 @@ function makeStyles(colors) {
       flexDirection: 'row',
       justifyContent: 'flex-end',
       gap: 10,
-    },
-    cancelBtn: {
-      paddingVertical: 12,
-      paddingHorizontal: 20,
-      borderRadius: 8,
-      backgroundColor: colors.background,
-    },
-    cancelText: {
-      fontSize: 15,
-      fontWeight: '600',
-      color: colors.textSecondary,
     },
     submitBtn: {
       paddingVertical: 12,
