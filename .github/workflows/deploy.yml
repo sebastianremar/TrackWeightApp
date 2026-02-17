@@ -43,21 +43,24 @@ jobs:
           host: ${{ secrets.EC2_HOST }}
           username: ec2-user
           key: ${{ secrets.EC2_SSH_KEY }}
+          command_timeout: 5m
           script: |
             cd /home/ec2-user/SaraPesoApp
             PREV_SHA=$(git rev-parse HEAD)
             echo "$PREV_SHA" > /tmp/deploy-prev-sha
             git fetch origin main
             git reset --hard origin/main
+            # Stop PM2 to free memory for the build
+            pm2 stop all || true
             cd front
             npm ci
-            npm run build -- --outDir dist-tmp
+            NODE_OPTIONS="--max-old-space-size=512" npm run build -- --outDir dist-tmp
             rm -rf dist
             mv dist-tmp dist
             cd ../back
             npm ci --omit=dev
             mkdir -p logs
-            pm2 restart ecosystem.config.js --env production || pm2 start ecosystem.config.js --env production
+            pm2 start ecosystem.config.js --env production
 
       - name: Health check
         id: healthcheck
@@ -96,12 +99,13 @@ jobs:
             fi
             echo "Rolling back to $PREV_SHA"
             git reset --hard "$PREV_SHA"
+            pm2 stop all || true
             cd front
             npm ci
-            npm run build -- --outDir dist-tmp
+            NODE_OPTIONS="--max-old-space-size=512" npm run build -- --outDir dist-tmp
             rm -rf dist
             mv dist-tmp dist
             cd ../back
             npm ci --omit=dev
-            pm2 restart ecosystem.config.js --env production
+            pm2 start ecosystem.config.js --env production
             echo "Rollback complete"

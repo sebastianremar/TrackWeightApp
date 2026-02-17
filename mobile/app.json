@@ -11,7 +11,7 @@
     "splash": {
       "image": "./assets/splash-icon.png",
       "resizeMode": "contain",
-      "backgroundColor": "#E4E4DE"
+      "backgroundColor": "#FFFFFF"
     },
     "ios": {
       "supportsTablet": true,
@@ -29,7 +29,12 @@
       "expo-router",
       "expo-secure-store",
       "@react-native-community/datetimepicker",
-      ["expo-notifications", { "icon": "./assets/icon.png", "color": "#E4E4DE" }]
+      ["expo-notifications", { "icon": "./assets/icon.png", "color": "#E4E4DE" }],
+      ["expo-splash-screen", {
+        "image": "./assets/splash-icon.png",
+        "imageWidth": 200,
+        "backgroundColor": "#FFFFFF"
+      }]
     ]
   }
 }
