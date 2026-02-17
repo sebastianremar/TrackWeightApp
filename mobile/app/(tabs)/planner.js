@@ -12,6 +12,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { useTheme } from '../../src/contexts/ThemeContext';
 import HabitsDashboard from '../../src/screens/planner/HabitsDashboard';
 import CalendarDashboard from '../../src/screens/planner/CalendarDashboard';
+import TodosDashboard from '../../src/screens/planner/TodosDashboard';
 
 const TABS = ['Habits', 'Calendar', 'Todos'];
 
@@ -47,20 +48,7 @@ export default function PlannerScreen() {
         >
           {activeTab === 'Habits' && <HabitsDashboard />}
           {activeTab === 'Calendar' && <CalendarDashboard />}
-          {activeTab === 'Todos' && (
-            <View style={s.placeholder}>
-              <Text style={s.placeholderEmoji}>📝</Text>
-              <Text style={s.placeholderTitle}>Todos</Text>
-              <Text style={s.placeholderText}>
-                Task management with priorities.{'\n'}
-                Coming soon:{'\n\n'}
-                • Active/completed filters{'\n'}
-                • Category chips{'\n'}
-                • Sort by due date, priority, newest{'\n'}
-                • Priority color indicators
-              </Text>
-            </View>
-          )}
+          {activeTab === 'Todos' && <TodosDashboard />}
         </ScrollView>
       </KeyboardAvoidingView>
     </SafeAreaView>
@@ -90,27 +78,5 @@ function makeStyles(colors) {
     tabTextActive: { color: colors.primary, fontWeight: '600' },
     content: { flex: 1 },
     contentInner: { padding: 16, paddingBottom: 80 },
-    placeholder: {
-      backgroundColor: colors.surface,
-      borderRadius: 12,
-      padding: 24,
-      alignItems: 'center',
-      borderWidth: 1,
-      borderColor: colors.border,
-      marginTop: 24,
-    },
-    placeholderEmoji: { fontSize: 48, marginBottom: 12 },
-    placeholderTitle: {
-      fontSize: 20,
-      fontWeight: '700',
-      color: colors.text,
-      marginBottom: 12,
-    },
-    placeholderText: {
-      fontSize: 14,
-      color: colors.textSecondary,
-      lineHeight: 22,
-      textAlign: 'center',
-    },
   });
 }
