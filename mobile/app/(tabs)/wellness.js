@@ -11,6 +11,7 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useTheme } from '../../src/contexts/ThemeContext';
 import WeightDashboard from '../../src/screens/wellness/WeightDashboard';
+import WorkoutDashboard from '../../src/screens/wellness/WorkoutDashboard';
 
 const TABS = ['Weight', 'Workouts'];
 
@@ -50,18 +51,7 @@ export default function WellnessScreen() {
           {activeTab === 'Weight' ? (
             <WeightDashboard scrollRef={scrollRef} />
           ) : (
-            <View style={s.placeholder}>
-              <Text style={s.placeholderEmoji}>🏋️</Text>
-              <Text style={s.placeholderTitle}>Workouts</Text>
-              <Text style={s.placeholderText}>
-                Log workouts, manage templates, view history.{'\n'}
-                Coming soon — this screen will include:{'\n\n'}
-                • Workout templates{'\n'}
-                • Log workout (exercises + sets/reps){'\n'}
-                • Auto-prefill from last session{'\n'}
-                • History with infinite scroll
-              </Text>
-            </View>
+            <WorkoutDashboard />
           )}
         </ScrollView>
       </KeyboardAvoidingView>
@@ -92,27 +82,5 @@ function makeStyles(colors) {
     tabTextActive: { color: colors.primary, fontWeight: '600' },
     content: { flex: 1 },
     contentInner: { padding: 16, paddingBottom: 32 },
-    placeholder: {
-      backgroundColor: colors.surface,
-      borderRadius: 12,
-      padding: 24,
-      alignItems: 'center',
-      borderWidth: 1,
-      borderColor: colors.border,
-      marginTop: 24,
-    },
-    placeholderEmoji: { fontSize: 48, marginBottom: 12 },
-    placeholderTitle: {
-      fontSize: 20,
-      fontWeight: '700',
-      color: colors.text,
-      marginBottom: 12,
-    },
-    placeholderText: {
-      fontSize: 14,
-      color: colors.textSecondary,
-      lineHeight: 22,
-      textAlign: 'center',
-    },
   });
 }
