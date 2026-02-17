@@ -108,9 +108,10 @@ export default function TodosDashboard() {
     refetch(showCompleted, activeCategory || undefined);
   };
 
-  const handleDeletePress = () => {
-    if (editingTodo) {
-      setDeleteTarget(editingTodo);
+  const handleDeletePress = (todo) => {
+    const target = todo || editingTodo;
+    if (target) {
+      setDeleteTarget(target);
       setModalOpen(false);
     }
   };
@@ -127,6 +128,7 @@ export default function TodosDashboard() {
       todo={item}
       onToggle={handleToggle}
       onEdit={handleOpenEdit}
+      onDelete={handleDeletePress}
     />
   );
 

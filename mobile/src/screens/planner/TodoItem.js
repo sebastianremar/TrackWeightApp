@@ -1,4 +1,6 @@
-import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
+import { useRef } from 'react';
+import { View, Text, TouchableOpacity, Pressable, Animated, StyleSheet } from 'react-native';
+import { Swipeable } from 'react-native-gesture-handler';
 import { useTheme } from '../../contexts/ThemeContext';
 
 const PRIORITY_COLORS = {
@@ -17,58 +19,92 @@ function formatDate(dateStr) {
   return date.toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
 }
 
-export default function TodoItem({ todo, onToggle, onEdit }) {
+export default function TodoItem({ todo, onToggle, onEdit, onDelete }) {
   const { colors } = useTheme();
   const s = makeStyles(colors);
+  const swipeableRef = useRef(null);
 
   const isOverdue = todo.dueDate && todo.dueDate < todayStr() && !todo.completed;
   const priorityColor = PRIORITY_COLORS[todo.priority] || colors.textMuted;
 
-  return (
-    <View style={s.card}>
-      {/* Checkbox */}
-      <TouchableOpacity
-        style={[s.checkbox, todo.completed && s.checkboxChecked]}
-        onPress={() => onToggle(todo.todoId, !todo.completed)}
-        hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+  const renderRightActions = (_progress, dragX) => {
+    const scale = dragX.interpolate({
+      inputRange: [-80, 0],
+      outputRange: [1, 0.5],
+      extrapolate: 'clamp',
+    });
+
+    return (
+      <Pressable
+        style={s.deleteAction}
+        onPress={() => {
+          swipeableRef.current?.close();
+          onDelete?.(todo);
+        }}
       >
-        {todo.completed && <Text style={s.checkmark}>✓</Text>}
-      </TouchableOpacity>
+        <Animated.Text style={[s.deleteActionText, { transform: [{ scale }] }]}>
+          Delete
+        </Animated.Text>
+      </Pressable>
+    );
+  };
 
-      {/* Content */}
-      <TouchableOpacity style={s.content} onPress={() => onEdit(todo)} activeOpacity={0.7}>
-        <Text
-          style={[s.title, todo.completed && s.titleCompleted]}
-          numberOfLines={1}
+  return (
+    <Swipeable
+      ref={swipeableRef}
+      renderRightActions={renderRightActions}
+      overshootRight={false}
+      friction={2}
+    >
+      <View style={s.card}>
+        {/* Checkbox */}
+        <TouchableOpacity
+          style={[s.checkbox, todo.completed && s.checkboxChecked]}
+          onPress={() => onToggle(todo.todoId, !todo.completed)}
+          hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
         >
-          {todo.title}
-        </Text>
+          {todo.completed && <Text style={s.checkmark}>✓</Text>}
+        </TouchableOpacity>
 
-        {todo.description ? (
-          <Text style={s.description} numberOfLines={1}>
-            {todo.description}
+        {/* Content — long press to edit */}
+        <Pressable
+          style={s.content}
+          onLongPress={() => onEdit(todo)}
+          android_ripple={{ color: colors.border }}
+        >
+          <Text
+            style={[s.title, todo.completed && s.titleCompleted]}
+            numberOfLines={1}
+          >
+            {todo.title}
           </Text>
-        ) : null}
 
-        <View style={s.meta}>
-          {todo.category ? (
-            <View style={[s.categoryTag, { backgroundColor: colors.primary + '20' }]}>
-              <Text style={[s.categoryText, { color: colors.primary }]}>
-                {todo.category}
-              </Text>
-            </View>
-          ) : null}
-
-          {todo.dueDate ? (
-            <Text style={[s.dueDate, isOverdue && s.overdue]}>
-              {formatDate(todo.dueDate)}
+          {todo.description ? (
+            <Text style={s.description} numberOfLines={1}>
+              {todo.description}
             </Text>
           ) : null}
 
-          <View style={[s.priorityDot, { backgroundColor: priorityColor }]} />
-        </View>
-      </TouchableOpacity>
-    </View>
+          <View style={s.meta}>
+            {todo.category ? (
+              <View style={[s.categoryTag, { backgroundColor: colors.primary + '20' }]}>
+                <Text style={[s.categoryText, { color: colors.primary }]}>
+                  {todo.category}
+                </Text>
+              </View>
+            ) : null}
+
+            {todo.dueDate ? (
+              <Text style={[s.dueDate, isOverdue && s.overdue]}>
+                {formatDate(todo.dueDate)}
+              </Text>
+            ) : null}
+
+            <View style={[s.priorityDot, { backgroundColor: priorityColor }]} />
+          </View>
+        </Pressable>
+      </View>
+    </Swipeable>
   );
 }
 
@@ -147,6 +183,19 @@ function makeStyles(colors) {
       width: 8,
       height: 8,
       borderRadius: 4,
+    },
+    deleteAction: {
+      backgroundColor: '#DC2626',
+      justifyContent: 'center',
+      alignItems: 'center',
+      width: 80,
+      borderRadius: 10,
+      marginLeft: 8,
+    },
+    deleteActionText: {
+      color: '#fff',
+      fontWeight: '700',
+      fontSize: 14,
     },
   });
 }

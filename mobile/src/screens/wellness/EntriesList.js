@@ -1,15 +1,61 @@
-import { useState } from 'react';
-import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
+import { useRef, useState } from 'react';
+import { View, Text, Pressable, Animated, StyleSheet } from 'react-native';
+import { Swipeable } from 'react-native-gesture-handler';
 import { useTheme } from '../../contexts/ThemeContext';
 import { deleteWeight } from '../../api/weight';
 import ConfirmDialog from '../../components/ConfirmDialog';
 
 const MAX_ENTRIES = 20;
 
+function SwipeableRow({ entry, onEdit, onRequestDelete, colors }) {
+  const s = makeStyles(colors);
+  const swipeableRef = useRef(null);
+
+  const renderRightActions = (_progress, dragX) => {
+    const scale = dragX.interpolate({
+      inputRange: [-80, 0],
+      outputRange: [1, 0.5],
+      extrapolate: 'clamp',
+    });
+
+    return (
+      <Pressable
+        style={s.deleteAction}
+        onPress={() => {
+          swipeableRef.current?.close();
+          onRequestDelete(entry.date);
+        }}
+      >
+        <Animated.Text style={[s.deleteActionText, { transform: [{ scale }] }]}>
+          Delete
+        </Animated.Text>
+      </Pressable>
+    );
+  };
+
+  return (
+    <Swipeable
+      ref={swipeableRef}
+      renderRightActions={renderRightActions}
+      overshootRight={false}
+      friction={2}
+    >
+      <Pressable
+        style={s.row}
+        onLongPress={() => onEdit(entry)}
+        android_ripple={{ color: colors.border }}
+      >
+        <Text style={s.date}>{entry.date}</Text>
+        <Text style={s.weight} numberOfLines={1}>{entry.weight} {entry._unit}</Text>
+      </Pressable>
+    </Swipeable>
+  );
+}
+
 export default function EntriesList({ entries, onEdit, onDeleted }) {
   const { colors, weightUnit } = useTheme();
   const s = makeStyles(colors);
-  const [deleting, setDeleting] = useState(null); // date string
+  const [deleting, setDeleting] = useState(null);
 
   const sorted = [...entries]
     .sort((a, b) => b.date.localeCompare(a.date))
@@ -32,28 +78,16 @@ export default function EntriesList({ entries, onEdit, onDeleted }) {
   return (
     <View>
       <Text style={s.title}>Recent Entries</Text>
+      <Text style={s.hint}>Long press to edit, swipe left to delete</Text>
       <View style={s.list}>
         {sorted.map((entry) => (
-          <View key={entry.date} style={s.row}>
-            <View style={s.entryInfo}>
-              <Text style={s.date}>{entry.date}</Text>
-              <Text style={s.weight} numberOfLines={1}>{entry.weight} {weightUnit}</Text>
-            </View>
-            <View style={s.actions}>
-              <TouchableOpacity
-                style={s.editBtn}
-                onPress={() => onEdit(entry)}
-              >
-                <Text style={s.editText}>Edit</Text>
-              </TouchableOpacity>
-              <TouchableOpacity
-                style={s.deleteBtn}
-                onPress={() => setDeleting(entry.date)}
-              >
-                <Text style={s.deleteText}>Delete</Text>
-              </TouchableOpacity>
-            </View>
-          </View>
+          <SwipeableRow
+            key={entry.date}
+            entry={{ ...entry, _unit: weightUnit }}
+            onEdit={onEdit}
+            onRequestDelete={setDeleting}
+            colors={colors}
+          />
         ))}
       </View>
 
@@ -76,6 +110,11 @@ function makeStyles(colors) {
       fontSize: 17,
       fontWeight: '700',
       color: colors.text,
+      marginBottom: 2,
+    },
+    hint: {
+      fontSize: 12,
+      color: colors.textMuted,
       marginBottom: 10,
     },
     list: {
@@ -89,16 +128,11 @@ function makeStyles(colors) {
       flexDirection: 'row',
       justifyContent: 'space-between',
       alignItems: 'center',
-      paddingVertical: 12,
+      paddingVertical: 14,
       paddingHorizontal: 16,
       borderBottomWidth: 1,
       borderBottomColor: colors.border,
-    },
-    entryInfo: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      gap: 10,
-      flex: 1,
+      backgroundColor: colors.surface,
     },
     date: {
       fontSize: 14,
@@ -109,34 +143,17 @@ function makeStyles(colors) {
       fontSize: 16,
       fontWeight: '600',
       color: colors.text,
-      flexShrink: 1,
     },
-    actions: {
-      flexDirection: 'row',
-      gap: 8,
-      flexShrink: 0,
+    deleteAction: {
+      backgroundColor: colors.error,
+      justifyContent: 'center',
+      alignItems: 'center',
+      width: 80,
     },
-    editBtn: {
-      paddingVertical: 6,
-      paddingHorizontal: 10,
-      borderRadius: 6,
-      backgroundColor: colors.background,
-    },
-    editText: {
-      fontSize: 13,
-      fontWeight: '600',
-      color: colors.primary,
-    },
-    deleteBtn: {
-      paddingVertical: 6,
-      paddingHorizontal: 10,
-      borderRadius: 6,
-      backgroundColor: colors.errorBg,
-    },
-    deleteText: {
-      fontSize: 13,
-      fontWeight: '600',
-      color: colors.error,
+    deleteActionText: {
+      color: '#fff',
+      fontWeight: '700',
+      fontSize: 14,
     },
   });
 }
