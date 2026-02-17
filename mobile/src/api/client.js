@@ -1,9 +1,7 @@
 import * as SecureStore from 'expo-secure-store';
 
 // TODO: Update this to your production API URL
-const BASE_URL = __DEV__
-  ? 'http://localhost:3000'
-  : 'https://sarapeso.com';
+const BASE_URL = 'https://trackmyweight.net';
 
 const TIMEOUT = 10000;
 const MAX_RETRIES = 2;

@@ -13,7 +13,7 @@ const { generateDigestInsight } = require('../lib/llm');
 const logger = require('../lib/logger');
 
 const FROM_EMAIL = process.env.SES_FROM_EMAIL;
-const APP_URL = process.env.APP_URL || 'https://sarapeso.com';
+const APP_URL = process.env.APP_URL || 'https://trackmyweight.net';
 const CONCURRENCY_LIMIT = 5;
 const MAX_RETRIES = 2;
 

@@ -17,8 +17,8 @@ const baseParams = {
     firstName: 'Sara',
     dateLabel: 'Monday, January 15, 2025',
     isSunday: false,
-    appUrl: 'https://sarapeso.com',
-    unsubscribeUrl: 'https://sarapeso.com/api/digest/unsubscribe?token=abc',
+    appUrl: 'https://trackmyweight.net',
+    unsubscribeUrl: 'https://trackmyweight.net/api/digest/unsubscribe?token=abc',
     data: baseData,
 };
 
@@ -40,7 +40,7 @@ describe('buildDigestHtml', () => {
     test('includes app link in footer', () => {
         const html = buildDigestHtml(baseParams);
         expect(html).toContain('Open Sara Peso');
-        expect(html).toContain('https://sarapeso.com');
+        expect(html).toContain('https://trackmyweight.net');
     });
 
     test('shows empty calendar message when no events', () => {
