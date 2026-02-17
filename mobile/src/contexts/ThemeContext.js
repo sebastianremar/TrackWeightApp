@@ -9,6 +9,7 @@ export function ThemeProvider({ children }) {
   const systemScheme = useColorScheme();
   const [dark, setDark] = useState(systemScheme === 'dark');
   const [palette, setPaletteState] = useState('ethereal-ivory');
+  const [weightUnit, setWeightUnitState] = useState('kg');
 
   const colors = useMemo(() => {
     const mode = dark ? 'dark' : 'light';
@@ -32,14 +33,20 @@ export function ThemeProvider({ children }) {
     updateProfile({ palette: value }).catch(() => {});
   }, []);
 
+  const setWeightUnit = useCallback((value) => {
+    setWeightUnitState(value);
+    updateProfile({ weightUnit: value }).catch(() => {});
+  }, []);
+
   const syncFromProfile = useCallback((profile) => {
     if (profile.darkMode !== undefined) setDark(profile.darkMode);
     if (profile.palette) setPaletteState(profile.palette);
+    if (profile.weightUnit) setWeightUnitState(profile.weightUnit);
   }, []);
 
   return (
     <ThemeContext.Provider
-      value={{ dark, toggleDark, setDarkMode, palette, setPalette, syncFromProfile, colors }}
+      value={{ dark, toggleDark, setDarkMode, palette, setPalette, weightUnit, setWeightUnit, syncFromProfile, colors }}
     >
       {children}
     </ThemeContext.Provider>

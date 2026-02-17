@@ -3,7 +3,7 @@ import { View, Text, TouchableOpacity, StyleSheet, Dimensions } from 'react-nati
 import { LineChart } from 'react-native-gifted-charts';
 import { useTheme } from '../../contexts/ThemeContext';
 
-const CHART_WIDTH = Dimensions.get('window').width - 96;
+const CHART_WIDTH = Dimensions.get('window').width - 128; // page 16 + card 12 + body 12 per side + y-axis
 
 const DATA_VIEWS = [
   { key: 'timeline', label: 'Timeline' },

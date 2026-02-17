@@ -49,7 +49,7 @@ const BODY_TABS = [
 ];
 
 export default function FriendCard({ friend, onRemove, onToggleFavorite, initialExpanded }) {
-  const { colors } = useTheme();
+  const { colors, weightUnit } = useTheme();
   const s = makeStyles(colors);
 
   const [expanded, setExpanded] = useState(initialExpanded);
@@ -135,7 +135,7 @@ export default function FriendCard({ friend, onRemove, onToggleFavorite, initial
             <View style={s.avatar}>
               <Text style={s.avatarText}>{friend.name.charAt(0).toUpperCase()}</Text>
             </View>
-            <Text style={s.name}>{friend.name}</Text>
+            <Text style={s.name} numberOfLines={1}>{friend.name}</Text>
           </View>
           <View style={s.headerActions}>
             <TouchableOpacity
@@ -186,11 +186,11 @@ export default function FriendCard({ friend, onRemove, onToggleFavorite, initial
                 <>
                   {data.stats && (
                     <View style={s.statsGrid}>
-                      <StatBox label="Current" value={data.stats.current} colors={colors} />
-                      <StatBox label="Weekly" value={data.stats.weeklyChange} colored colors={colors} />
-                      <StatBox label="Monthly" value={data.stats.monthlyChange} colored colors={colors} />
-                      <StatBox label="Average" value={data.stats.avg} colors={colors} />
-                      <StatBox label="Lowest" value={data.stats.lowest} colors={colors} />
+                      <StatBox label="Current" value={data.stats.current} colors={colors} unit={weightUnit} />
+                      <StatBox label="Weekly" value={data.stats.weeklyChange} colored colors={colors} unit={weightUnit} />
+                      <StatBox label="Monthly" value={data.stats.monthlyChange} colored colors={colors} unit={weightUnit} />
+                      <StatBox label="Average" value={data.stats.avg} colors={colors} unit={weightUnit} />
+                      <StatBox label="Lowest" value={data.stats.lowest} colors={colors} unit={weightUnit} />
                     </View>
                   )}
                   <FriendChart friend={friend} data={data} />
@@ -224,7 +224,7 @@ export default function FriendCard({ friend, onRemove, onToggleFavorite, initial
   );
 }
 
-function StatBox({ label, value, colored, colors }) {
+function StatBox({ label, value, colored, colors, unit }) {
   const s = statStyles(colors);
   let valueColor = colors.text;
   if (colored && value != null) {
@@ -234,11 +234,12 @@ function StatBox({ label, value, colored, colors }) {
   const display = value == null ? '--'
     : colored && value > 0 ? `+${value}`
     : String(value);
+  const suffix = value != null && unit ? ` ${unit}` : '';
 
   return (
     <View style={s.box}>
       <Text style={s.label}>{label}</Text>
-      <Text style={[s.value, { color: valueColor }]}>{display}</Text>
+      <Text style={[s.value, { color: valueColor }]} numberOfLines={1} adjustsFontSizeToFit>{display}{suffix}</Text>
     </View>
   );
 }
@@ -306,6 +307,7 @@ function makeStyles(colors) {
       fontSize: 15,
       fontWeight: '600',
       color: colors.text,
+      flexShrink: 1,
     },
     headerActions: {
       flexDirection: 'row',
@@ -372,6 +374,7 @@ function makeStyles(colors) {
     },
     statsGrid: {
       flexDirection: 'row',
+      flexWrap: 'wrap',
       gap: 6,
       marginBottom: 8,
     },

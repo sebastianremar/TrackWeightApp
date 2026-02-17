@@ -20,7 +20,7 @@ const PALETTES = [
 
 export default function SettingsScreen() {
   const { user, logout } = useAuth();
-  const { colors, dark, toggleDark, palette, setPalette } = useTheme();
+  const { colors, dark, toggleDark, palette, setPalette, weightUnit, setWeightUnit } = useTheme();
   const s = makeStyles(colors);
 
   return (
@@ -68,6 +68,25 @@ export default function SettingsScreen() {
                   ]}
                 >
                   {p.label}
+                </Text>
+              </TouchableOpacity>
+            ))}
+          </View>
+        </View>
+
+        {/* Units Section */}
+        <Text style={s.sectionTitle}>Units</Text>
+        <View style={s.card}>
+          <Text style={s.label}>Body Weight</Text>
+          <View style={s.segmentedControl}>
+            {['kg', 'lbs'].map((unit) => (
+              <TouchableOpacity
+                key={unit}
+                style={[s.segment, weightUnit === unit && s.segmentActive]}
+                onPress={() => setWeightUnit(unit)}
+              >
+                <Text style={[s.segmentText, weightUnit === unit && s.segmentTextActive]}>
+                  {unit}
                 </Text>
               </TouchableOpacity>
             ))}
@@ -132,6 +151,30 @@ function makeStyles(colors) {
     },
     paletteText: { fontSize: 14, color: colors.text },
     paletteTextActive: { color: '#fff', fontWeight: '600' },
+    segmentedControl: {
+      flexDirection: 'row',
+      backgroundColor: colors.background,
+      borderRadius: 8,
+      padding: 2,
+      marginTop: 8,
+    },
+    segment: {
+      flex: 1,
+      paddingVertical: 8,
+      alignItems: 'center',
+      borderRadius: 6,
+    },
+    segmentActive: {
+      backgroundColor: colors.primary,
+    },
+    segmentText: {
+      fontSize: 14,
+      fontWeight: '600',
+      color: colors.textMuted,
+    },
+    segmentTextActive: {
+      color: '#fff',
+    },
     linkButton: { paddingVertical: 4 },
     linkButtonText: { color: colors.primary, fontSize: 15, fontWeight: '500' },
     logoutButton: {

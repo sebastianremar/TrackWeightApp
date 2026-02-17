@@ -7,7 +7,7 @@ import ConfirmDialog from '../../components/ConfirmDialog';
 const MAX_ENTRIES = 20;
 
 export default function EntriesList({ entries, onEdit, onDeleted }) {
-  const { colors } = useTheme();
+  const { colors, weightUnit } = useTheme();
   const s = makeStyles(colors);
   const [deleting, setDeleting] = useState(null); // date string
 
@@ -37,7 +37,7 @@ export default function EntriesList({ entries, onEdit, onDeleted }) {
           <View key={entry.date} style={s.row}>
             <View style={s.entryInfo}>
               <Text style={s.date}>{entry.date}</Text>
-              <Text style={s.weight}>{entry.weight} kg</Text>
+              <Text style={s.weight}>{entry.weight} {weightUnit}</Text>
             </View>
             <View style={s.actions}>
               <TouchableOpacity
@@ -98,12 +98,12 @@ function makeStyles(colors) {
       flexDirection: 'row',
       alignItems: 'center',
       gap: 16,
+      flex: 1,
     },
     date: {
       fontSize: 14,
       color: colors.textSecondary,
       fontWeight: '500',
-      minWidth: 90,
     },
     weight: {
       fontSize: 16,
@@ -113,6 +113,7 @@ function makeStyles(colors) {
     actions: {
       flexDirection: 'row',
       gap: 12,
+      flexShrink: 0,
     },
     editBtn: {
       paddingVertical: 6,

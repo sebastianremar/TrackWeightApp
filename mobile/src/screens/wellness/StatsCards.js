@@ -21,17 +21,17 @@ const ALL_METRICS = [
 
 const COLORED_KEYS = new Set(['avgWeeklyChange', 'weekOverWeek']);
 
-function formatValue(key, val) {
+function formatValue(key, val, unit = 'kg') {
   if (val === null || val === undefined) return '--';
   if (key === 'avgWeeklyChange') {
     const prefix = val > 0 ? '+' : '';
-    return `${prefix}${val} kg/wk`;
+    return `${prefix}${val} ${unit}/wk`;
   }
   if (key === 'weekOverWeek') {
     const prefix = val > 0 ? '+' : '';
-    return `${prefix}${val} kg`;
+    return `${prefix}${val} ${unit}`;
   }
-  return `${val} kg`;
+  return `${val} ${unit}`;
 }
 
 function getColor(key, val, colors) {
@@ -42,7 +42,7 @@ function getColor(key, val, colors) {
 }
 
 export default function StatsCards({ stats, visibleStats, onUpdateVisibleStats }) {
-  const { colors } = useTheme();
+  const { colors, weightUnit } = useTheme();
   const s = makeStyles(colors);
   const [modalOpen, setModalOpen] = useState(false);
   const [selected, setSelected] = useState(visibleStats);
@@ -82,8 +82,12 @@ export default function StatsCards({ stats, visibleStats, onUpdateVisibleStats }
           return (
             <Card key={key} style={s.statCard}>
               <Text style={s.statLabel}>{metric.label}</Text>
-              <Text style={[s.statValue, { color: getColor(key, val, colors) }]}>
-                {formatValue(key, val)}
+              <Text
+                style={[s.statValue, { color: getColor(key, val, colors) }]}
+                numberOfLines={1}
+                adjustsFontSizeToFit
+              >
+                {formatValue(key, val, weightUnit)}
               </Text>
             </Card>
           );

@@ -16,7 +16,7 @@ function todayStr() {
 }
 
 export default function WeightForm({ editingEntry, onCancelEdit, onSaved }) {
-  const { colors } = useTheme();
+  const { colors, weightUnit } = useTheme();
   const s = makeStyles(colors);
   const [weight, setWeight] = useState('');
   const [date, setDate] = useState(todayStr());
@@ -37,8 +37,10 @@ export default function WeightForm({ editingEntry, onCancelEdit, onSaved }) {
   const handleSubmit = async () => {
     setError(null);
     const w = parseFloat(weight);
-    if (isNaN(w) || w < 20 || w > 500) {
-      setError('Weight must be between 20 and 500 kg');
+    const min = weightUnit === 'lbs' ? 44 : 20;
+    const max = weightUnit === 'lbs' ? 1100 : 500;
+    if (isNaN(w) || w < min || w > max) {
+      setError(`Weight must be between ${min} and ${max} ${weightUnit}`);
       return;
     }
     if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) {
@@ -73,7 +75,7 @@ export default function WeightForm({ editingEntry, onCancelEdit, onSaved }) {
 
       <View style={s.row}>
         <View style={s.field}>
-          <Text style={s.label}>Weight (kg)</Text>
+          <Text style={s.label}>Weight ({weightUnit})</Text>
           <TextInput
             style={s.input}
             value={weight}

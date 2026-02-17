@@ -9,10 +9,10 @@ const RANGES = [
   { label: 'All', value: 'all' },
 ];
 
-const CHART_WIDTH = Dimensions.get('window').width - 80; // padding + yAxis space
+const CHART_WIDTH = Dimensions.get('window').width - 96; // 32px page + 32px card + 32px y-axis
 
 export default function WeightChart({ entries, range, onRangeChange }) {
-  const { colors } = useTheme();
+  const { colors, weightUnit } = useTheme();
   const s = makeStyles(colors);
 
   const sorted = [...entries].sort((a, b) => a.date.localeCompare(b.date));
@@ -95,7 +95,7 @@ export default function WeightChart({ entries, range, onRangeChange }) {
                 const entry = sorted[idx >= 0 ? idx : 0];
                 return (
                   <View style={s.tooltip}>
-                    <Text style={s.tooltipWeight}>{item.value} kg</Text>
+                    <Text style={s.tooltipWeight}>{item.value} {weightUnit}</Text>
                     <Text style={s.tooltipDate}>{entry?.date || ''}</Text>
                   </View>
                 );
@@ -152,7 +152,7 @@ function makeStyles(colors) {
       color: '#fff',
     },
     chartWrap: {
-      marginLeft: -8,
+      marginLeft: -4,
     },
     empty: {
       textAlign: 'center',
