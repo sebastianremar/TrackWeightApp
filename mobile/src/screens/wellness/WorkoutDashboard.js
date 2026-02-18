@@ -4,7 +4,6 @@ import {
   Text,
   TouchableOpacity,
   ActivityIndicator,
-  Alert,
   StyleSheet,
 } from 'react-native';
 import { useTheme } from '../../contexts/ThemeContext';
@@ -12,7 +11,7 @@ import InlineError from '../../components/InlineError';
 import { useTemplates } from '../../hooks/useTemplates';
 import { useExercises } from '../../hooks/useExercises';
 import { useWorkoutLogs } from '../../hooks/useWorkoutLogs';
-import { getTemplatePrefill } from '../../api/workouts';
+
 import TemplatesView from './TemplatesView';
 import LogView from './LogView';
 import HistoryView from './HistoryView';
@@ -46,24 +45,10 @@ export default function WorkoutDashboard() {
     fetchExercises();
   }, [fetchTemplates, fetchExercises]);
 
-  const handleQuickLog = useCallback(async (template) => {
-    const prefill = await getTemplatePrefill(template.routineId);
-    const exercises = prefill?.exercises || [];
-    const hasSets = exercises.some((ex) => ex.sets && ex.sets.length > 0);
-    if (hasSets) {
-      const today = new Date().toISOString().split('T')[0];
-      await logState.addLog({
-        date: today,
-        exercises,
-        templateId: template.routineId,
-        templateName: template.name,
-      });
-      Alert.alert('Workout logged!', `${template.name} logged successfully.`);
-    } else {
-      setSelectedTemplate(template);
-      setTab('log');
-    }
-  }, [logState]);
+  const handleQuickLog = useCallback((template) => {
+    setSelectedTemplate(template);
+    setTab('log');
+  }, []);
 
   const loading = templatesLoading || exercisesLoading;
   const error = templatesError || exercisesError;
