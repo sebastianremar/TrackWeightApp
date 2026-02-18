@@ -79,15 +79,6 @@ npm run dev
 # App runs at http://localhost:3000
 ```
 
-## DynamoDB Tables
-
-**Pesos** (Users)
-- Partition key: `email` (String)
-
-**WeightEntries**
-- Partition key: `email` (String)
-- Sort key: `date` (String, YYYY-MM-DD)
-
 ## Deployment
 
 Pushing to `main` triggers automatic deployment via GitHub Actions.
