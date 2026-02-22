@@ -213,7 +213,7 @@ export default function FriendChart({ friend, data }) {
           startOpacity={0.15}
           endOpacity={0}
           areaChart={!isCompare}
-          formatYLabel={(val) => `${Math.round(Number(val) + dataMin)}`}
+          formatYLabel={(val) => `${Math.round(Number(val))}`}
         />
       </View>
     </View>
