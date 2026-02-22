@@ -9,7 +9,7 @@
     "newArchEnabled": true,
     "scheme": "trackmyweight",
     "splash": {
-      "image": "./assets/splash-icon.png",
+      "image": "./assets/download.png",
       "resizeMode": "contain",
       "backgroundColor": "#FFFFFF"
     },
@@ -20,7 +20,7 @@
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
-        "backgroundColor": "#E4E4DE"
+        "backgroundColor": "#FFFFFF"
       },
       "edgeToEdgeEnabled": true,
       "package": "com.trackmyweight.app"
@@ -31,8 +31,8 @@
       "@react-native-community/datetimepicker",
       ["expo-notifications", { "icon": "./assets/icon.png", "color": "#E4E4DE" }],
       ["expo-splash-screen", {
-        "image": "./assets/splash-icon.png",
-        "imageWidth": 200,
+        "image": "./assets/download.png",
+        "imageWidth": 300,
         "backgroundColor": "#FFFFFF"
       }]
     ]

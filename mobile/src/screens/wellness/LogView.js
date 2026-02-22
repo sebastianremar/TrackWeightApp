@@ -8,8 +8,10 @@ import {
   ScrollView,
   ActivityIndicator,
   Animated,
+  Platform,
   StyleSheet,
 } from 'react-native';
+import DateTimePicker from '@react-native-community/datetimepicker';
 import { Swipeable } from 'react-native-gesture-handler';
 import { useTheme } from '../../contexts/ThemeContext';
 import Card from '../../components/Card';
@@ -19,6 +21,11 @@ import { getTemplatePrefill } from '../../api/workouts';
 
 function todayStr() {
   return new Date().toISOString().split('T')[0];
+}
+
+function formatDisplay(dateStr) {
+  const d = new Date(dateStr + 'T12:00:00');
+  return d.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
 }
 
 function emptySet() {
@@ -89,6 +96,7 @@ export default function LogView({ templates, library, custom, addLog, onCreateCu
   const [success, setSuccess] = useState(false);
   const [prefillDate, setPrefillDate] = useState(null);
   const [showPicker, setShowPicker] = useState(false);
+  const [showDatePicker, setShowDatePicker] = useState(false);
 
   // Detail mode state
   const [activeExercise, setActiveExercise] = useState(null);
@@ -409,37 +417,52 @@ export default function LogView({ templates, library, custom, addLog, onCreateCu
   return (
     <View>
       {/* Template Selector */}
-      <Text style={s.label}>Template</Text>
-      <ScrollView horizontal showsHorizontalScrollIndicator={false} style={s.templateRow} contentContainerStyle={s.templateContent}>
-        <TouchableOpacity
-          style={[s.templateChip, !selectedTemplate && s.templateChipActive]}
-          onPress={() => handleTemplateChange('')}
-        >
-          <Text style={[s.templateChipText, !selectedTemplate && s.templateChipTextActive]}>Freestyle</Text>
-        </TouchableOpacity>
-        {templates.map((t) => (
-          <TouchableOpacity
-            key={t.routineId}
-            style={[s.templateChip, selectedTemplate === t.routineId && s.templateChipActive]}
-            onPress={() => handleTemplateChange(t.routineId)}
-          >
-            <Text style={[s.templateChipText, selectedTemplate === t.routineId && s.templateChipTextActive]}>
-              {t.name}
-            </Text>
-          </TouchableOpacity>
-        ))}
-      </ScrollView>
+      {templates.length > 0 && (
+        <>
+          <Text style={s.label}>Template</Text>
+          <ScrollView horizontal showsHorizontalScrollIndicator={false} style={s.templateRow} contentContainerStyle={s.templateContent}>
+            {templates.map((t) => (
+              <TouchableOpacity
+                key={t.routineId}
+                style={[s.templateChip, selectedTemplate === t.routineId && s.templateChipActive]}
+                onPress={() => handleTemplateChange(t.routineId)}
+              >
+                <Text style={[s.templateChipText, selectedTemplate === t.routineId && s.templateChipTextActive]}>
+                  {t.name}
+                </Text>
+              </TouchableOpacity>
+            ))}
+          </ScrollView>
+        </>
+      )}
 
       {/* Date */}
       <Text style={s.label}>Date</Text>
-      <TextInput
-        style={s.dateInput}
-        value={date}
-        onChangeText={(v) => { setDate(v); setSuccess(false); }}
-        placeholder="YYYY-MM-DD"
-        placeholderTextColor={colors.textMuted}
-        maxLength={10}
-      />
+      <TouchableOpacity style={s.dateBtn} onPress={() => setShowDatePicker(true)}>
+        <Text style={s.dateBtnText}>{formatDisplay(date)}</Text>
+        <Text style={s.dateBtnIcon}>📅</Text>
+      </TouchableOpacity>
+      {date !== todayStr() && (
+        <TouchableOpacity onPress={() => { setDate(todayStr()); setSuccess(false); }}>
+          <Text style={s.todayLink}>Reset to today</Text>
+        </TouchableOpacity>
+      )}
+      {showDatePicker && (
+        <DateTimePicker
+          value={new Date(date + 'T12:00:00')}
+          mode="date"
+          display={Platform.OS === 'ios' ? 'inline' : 'default'}
+          maximumDate={new Date()}
+          onChange={(_, selected) => {
+            setShowDatePicker(false);
+            if (selected) {
+              setDate(selected.toISOString().split('T')[0]);
+              setSuccess(false);
+            }
+          }}
+          themeVariant="light"
+        />
+      )}
 
       {prefillDate && (
         <Text style={s.prefillNote}>Pre-filled from session on {prefillDate}</Text>
@@ -572,14 +595,29 @@ function makeStyles(colors) {
     templateChipTextActive: { color: '#fff' },
 
     /* Date */
-    dateInput: {
+    dateBtn: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'space-between',
       backgroundColor: colors.surface,
       borderRadius: 10,
       padding: 12,
-      fontSize: 15,
-      color: colors.text,
       borderWidth: 1,
       borderColor: colors.border,
+    },
+    dateBtnText: {
+      fontSize: 16,
+      fontWeight: '600',
+      color: colors.text,
+    },
+    dateBtnIcon: {
+      fontSize: 18,
+    },
+    todayLink: {
+      fontSize: 13,
+      color: colors.primary,
+      fontWeight: '500',
+      marginTop: 6,
     },
     prefillNote: {
       fontSize: 13,
