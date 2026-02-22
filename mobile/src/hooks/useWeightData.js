@@ -1,5 +1,13 @@
 import { useState, useEffect, useCallback, useRef, useMemo } from 'react';
-import { getWeightHistory } from '../api/weight';
+import { getWeightHistory, logWeight, deleteWeight } from '../api/weight';
+import {
+  getCachedWeightEntries,
+  cacheWeightEntries,
+  cacheWeightEntry,
+  cacheDeleteWeight,
+} from '../offline/cache';
+import { enqueue } from '../offline/mutationQueue';
+import { isOfflineError } from '../offline/syncEngine';
 
 function daysAgo(n) {
   const d = new Date();
@@ -16,20 +24,30 @@ export function useWeightData() {
   const hasLoaded = useRef(false);
 
   const fetchData = useCallback(async () => {
-    if (hasLoaded.current) {
-      setRefreshing(true);
-    }
+    const from = range !== 'all' ? daysAgo(range) : undefined;
+
+    // 1. Load from cache first (instant render)
+    try {
+      const cached = await getCachedWeightEntries(from);
+      if (cached.length > 0) {
+        setEntries(cached);
+        setInitialLoading(false);
+      }
+    } catch {}
+
+    // 2. Fetch from API in background
+    if (hasLoaded.current) setRefreshing(true);
     setError(null);
     try {
       const params = {};
-      if (range !== 'all') {
-        params.from = daysAgo(range);
-      }
+      if (from) params.from = from;
       const data = await getWeightHistory(params);
-      setEntries(data.entries || []);
+      const fetched = data.entries || [];
+      setEntries(fetched);
       hasLoaded.current = true;
+      cacheWeightEntries(fetched).catch(() => {});
     } catch (err) {
-      setError(err.message);
+      if (!isOfflineError(err)) setError(err.message);
     } finally {
       setInitialLoading(false);
       setRefreshing(false);
@@ -50,13 +68,11 @@ export function useWeightData() {
     const highest = Math.max(...weights);
     const average = +(weights.reduce((s, w) => s + w, 0) / weights.length).toFixed(1);
 
-    // Avg weekly change
     const firstDate = new Date(sorted[0].date + 'T00:00:00');
     const lastDate = new Date(sorted[sorted.length - 1].date + 'T00:00:00');
     const weeks = Math.max(1, (lastDate - firstDate) / (7 * 24 * 60 * 60 * 1000));
     const avgWeeklyChange = +((current - first) / weeks).toFixed(2);
 
-    // Week-over-week: this week avg - last week avg
     const today = new Date();
     const dow = today.getDay();
     const thisWeekStart = new Date(today);

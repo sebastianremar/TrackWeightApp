@@ -7,6 +7,8 @@ import {
   removeFriend as apiRemoveFriend,
   toggleFriendFavorite,
 } from '../api/friends';
+import { getCachedFriends, cacheFriends, getCachedFriendRequests, cacheFriendRequests } from '../offline/cache';
+import { isOfflineError } from '../offline/syncEngine';
 
 export function useFriends() {
   const [friends, setFriends] = useState([]);
@@ -15,17 +17,34 @@ export function useFriends() {
   const [error, setError] = useState(null);
 
   const fetchAll = useCallback(async () => {
-    setLoading(true);
+    // 1. Load from cache first
+    try {
+      const [cachedFriends, cachedRequests] = await Promise.all([
+        getCachedFriends(),
+        getCachedFriendRequests(),
+      ]);
+      if (cachedFriends.length > 0 || cachedRequests.length > 0) {
+        setFriends(cachedFriends);
+        setRequests(cachedRequests);
+        setLoading(false);
+      }
+    } catch {}
+
+    // 2. Fetch from API
     setError(null);
     try {
       const [friendsData, requestsData] = await Promise.all([
         getFriends(),
         getFriendRequests(),
       ]);
-      setFriends(friendsData.friends || []);
-      setRequests(requestsData.requests || []);
+      const fetchedFriends = friendsData.friends || [];
+      const fetchedRequests = requestsData.requests || [];
+      setFriends(fetchedFriends);
+      setRequests(fetchedRequests);
+      cacheFriends(fetchedFriends).catch(() => {});
+      cacheFriendRequests(fetchedRequests).catch(() => {});
     } catch (err) {
-      setError(err.message);
+      if (!isOfflineError(err)) setError(err.message);
     } finally {
       setLoading(false);
     }

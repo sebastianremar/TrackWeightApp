@@ -1,6 +1,7 @@
 import { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import { getProfile, signout as apiSignout } from '../api/auth';
 import { clearToken } from '../api/client';
+import { clearAllData } from '../offline/db';
 
 const AuthContext = createContext(null);
 
@@ -24,6 +25,7 @@ export function AuthProvider({ children }) {
       await apiSignout();
     } catch {}
     await clearToken();
+    await clearAllData().catch(() => {});
     setUser(null);
   }, []);
 
