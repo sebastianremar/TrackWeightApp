@@ -1,13 +1,13 @@
 {
   "expo": {
-    "name": "SaraPeso",
-    "slug": "sara-peso",
+    "name": "TrackMyWeight",
+    "slug": "trackmyweight",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
-    "scheme": "sara-peso",
+    "scheme": "trackmyweight",
     "splash": {
       "image": "./assets/splash-icon.png",
       "resizeMode": "contain",
@@ -15,7 +15,7 @@
     },
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.sarapeso.app"
+      "bundleIdentifier": "com.trackmyweight.app"
     },
     "android": {
       "adaptiveIcon": {
@@ -23,7 +23,7 @@
         "backgroundColor": "#E4E4DE"
       },
       "edgeToEdgeEnabled": true,
-      "package": "com.sarapeso.app"
+      "package": "com.trackmyweight.app"
     },
     "plugins": [
       "expo-router",

@@ -54,7 +54,7 @@ export default function SignInScreen() {
           source={require('../../assets/logo.png')}
           style={s.logo}
         />
-        <Text style={s.title}>SaraPeso</Text>
+        <Text style={s.title}>TrackMyWeight</Text>
         <Text style={s.subtitle}>Sign in to your account</Text>
 
         {error ? <Text style={s.error}>{error}</Text> : null}
