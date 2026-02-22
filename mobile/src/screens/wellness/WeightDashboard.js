@@ -46,6 +46,7 @@ export default function WeightDashboard({ scrollRef }) {
   return (
     <View style={s.container}>
       <WeightForm
+        entries={entries}
         onSaved={handleSaved}
       />
 

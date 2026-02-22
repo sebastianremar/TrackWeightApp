@@ -5,8 +5,10 @@ import {
   TextInput,
   TouchableOpacity,
   ActivityIndicator,
+  Platform,
   StyleSheet,
 } from 'react-native';
+import DateTimePicker from '@react-native-community/datetimepicker';
 import { useTheme } from '../../contexts/ThemeContext';
 import { logWeight } from '../../api/weight';
 import InlineError from '../../components/InlineError';
@@ -15,13 +17,25 @@ function todayStr() {
   return new Date().toISOString().split('T')[0];
 }
 
-export default function WeightForm({ onSaved }) {
+function formatDisplay(dateStr) {
+  const d = new Date(dateStr + 'T12:00:00');
+  return d.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
+}
+
+export default function WeightForm({ entries, onSaved }) {
   const { colors, weightUnit } = useTheme();
   const s = makeStyles(colors);
   const [weight, setWeight] = useState('');
   const [date, setDate] = useState(todayStr());
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState(null);
+  const [showDatePicker, setShowDatePicker] = useState(false);
+
+  const handleDateChange = (newDate) => {
+    setDate(newDate);
+    const existing = entries?.find((e) => e.date === newDate);
+    setWeight(existing ? String(existing.weight) : '');
+  };
 
   const handleSubmit = async () => {
     setError(null);
@@ -30,10 +44,6 @@ export default function WeightForm({ onSaved }) {
     const max = weightUnit === 'lbs' ? 1100 : 500;
     if (isNaN(w) || w < min || w > max) {
       setError(`Weight must be between ${min} and ${max} ${weightUnit}`);
-      return;
-    }
-    if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) {
-      setError('Date must be YYYY-MM-DD');
       return;
     }
     if (date > todayStr()) {
@@ -75,17 +85,28 @@ export default function WeightForm({ onSaved }) {
         </View>
         <View style={s.field}>
           <Text style={s.label}>Date</Text>
-          <TextInput
-            style={s.input}
-            value={date}
-            onChangeText={setDate}
-            placeholder="YYYY-MM-DD"
-            placeholderTextColor={colors.textMuted}
-            maxLength={10}
-            returnKeyType="done"
-          />
+          <TouchableOpacity style={s.dateBtn} onPress={() => setShowDatePicker(true)}>
+            <Text style={s.dateBtnText}>{formatDisplay(date)}</Text>
+            <Text style={s.dateBtnIcon}>📅</Text>
+          </TouchableOpacity>
         </View>
       </View>
+
+      {showDatePicker && (
+        <DateTimePicker
+          value={new Date(date + 'T12:00:00')}
+          mode="date"
+          display={Platform.OS === 'ios' ? 'inline' : 'default'}
+          maximumDate={new Date()}
+          onChange={(_, selected) => {
+            setShowDatePicker(false);
+            if (selected) {
+              handleDateChange(selected.toISOString().split('T')[0]);
+            }
+          }}
+          themeVariant="light"
+        />
+      )}
 
       <View style={s.actions}>
         <TouchableOpacity
@@ -138,6 +159,24 @@ function makeStyles(colors) {
       color: colors.text,
       borderWidth: 1,
       borderColor: colors.border,
+    },
+    dateBtn: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+      backgroundColor: colors.background,
+      borderRadius: 8,
+      padding: 12,
+      borderWidth: 1,
+      borderColor: colors.border,
+    },
+    dateBtnText: {
+      fontSize: 14,
+      fontWeight: '600',
+      color: colors.text,
+    },
+    dateBtnIcon: {
+      fontSize: 16,
     },
     actions: {
       flexDirection: 'row',
