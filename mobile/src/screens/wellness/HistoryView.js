@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   View,
   Text,
@@ -30,7 +30,7 @@ function formatDisplay(dateStr) {
   return d.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
 }
 
-export default function HistoryView({ logs, loading, error, nextCursor, fetchLogs, removeLog }) {
+export default React.memo(function HistoryView({ logs, loading, error, nextCursor, fetchLogs, removeLog }) {
   const { colors } = useTheme();
   const s = makeStyles(colors);
   const [from, setFrom] = useState(defaultFrom);
@@ -184,7 +184,7 @@ export default function HistoryView({ logs, loading, error, nextCursor, fetchLog
       />
     </View>
   );
-}
+});
 
 function makeStyles(colors) {
   return StyleSheet.create({

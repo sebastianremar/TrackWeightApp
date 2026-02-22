@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import React, { useState } from 'react';
 import {
   View,
   Text,
@@ -41,7 +41,7 @@ function getColor(key, val, colors) {
   return colors.textMuted;
 }
 
-export default function StatsCards({ stats, visibleStats, onUpdateVisibleStats }) {
+export default React.memo(function StatsCards({ stats, visibleStats, onUpdateVisibleStats }) {
   const { colors, weightUnit } = useTheme();
   const s = makeStyles(colors);
   const [modalOpen, setModalOpen] = useState(false);
@@ -126,7 +126,7 @@ export default function StatsCards({ stats, visibleStats, onUpdateVisibleStats }
       </Modal>
     </View>
   );
-}
+});
 
 function makeStyles(colors) {
   return StyleSheet.create({

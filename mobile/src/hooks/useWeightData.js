@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import { getWeightHistory } from '../api/weight';
 
 function daysAgo(n) {
@@ -9,12 +9,16 @@ function daysAgo(n) {
 
 export function useWeightData() {
   const [entries, setEntries] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const [initialLoading, setInitialLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState(null);
   const [range, setRange] = useState(30);
+  const hasLoaded = useRef(false);
 
   const fetchData = useCallback(async () => {
-    setLoading(true);
+    if (hasLoaded.current) {
+      setRefreshing(true);
+    }
     setError(null);
     try {
       const params = {};
@@ -23,16 +27,18 @@ export function useWeightData() {
       }
       const data = await getWeightHistory(params);
       setEntries(data.entries || []);
+      hasLoaded.current = true;
     } catch (err) {
       setError(err.message);
     } finally {
-      setLoading(false);
+      setInitialLoading(false);
+      setRefreshing(false);
     }
   }, [range]);
 
   useEffect(() => { fetchData(); }, [fetchData]);
 
-  const stats = (() => {
+  const stats = useMemo(() => {
     if (entries.length === 0) {
       return { current: null, avgWeeklyChange: null, weekOverWeek: null, lowest: null, highest: null, average: null };
     }
@@ -72,7 +78,7 @@ export function useWeightData() {
     }
 
     return { current, avgWeeklyChange, weekOverWeek, lowest, highest, average };
-  })();
+  }, [entries]);
 
-  return { entries, loading, error, range, setRange, refetch: fetchData, stats };
+  return { entries, initialLoading, refreshing, error, range, setRange, refetch: fetchData, stats };
 }

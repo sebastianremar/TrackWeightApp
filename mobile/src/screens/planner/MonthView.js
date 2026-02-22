@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import { useTheme } from '../../contexts/ThemeContext';
 import DayDetailPanel from './DayDetailPanel';
@@ -13,7 +13,7 @@ const MONTH_NAMES = [
 ];
 const DAY_NAMES = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
 
-export default function MonthView({
+export default React.memo(function MonthView({
   habits,
   entries,
   refDate,
@@ -59,7 +59,7 @@ export default function MonthView({
     cells.push(fmt(new Date(year, month, d)));
   }
 
-  const goodHabits = habits.filter((h) => h.type !== 'bad');
+  const goodHabits = useMemo(() => habits.filter((h) => h.type !== 'bad'), [habits]);
 
   function ratioToColor(ratio) {
     if (ratio >= 0.8) return colors.success || '#16A34A';
@@ -142,7 +142,7 @@ export default function MonthView({
       />
     </View>
   );
-}
+});
 
 function makeStyles(colors) {
   return StyleSheet.create({

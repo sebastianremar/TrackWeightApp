@@ -48,11 +48,12 @@ export default function WellnessScreen() {
           contentContainerStyle={s.contentInner}
           keyboardShouldPersistTaps="handled"
         >
-          {activeTab === 'Weight' ? (
+          <View style={activeTab === 'Weight' ? undefined : s.hidden}>
             <WeightDashboard scrollRef={scrollRef} />
-          ) : (
+          </View>
+          <View style={activeTab === 'Workouts' ? undefined : s.hidden}>
             <WorkoutDashboard />
-          )}
+          </View>
         </ScrollView>
       </KeyboardAvoidingView>
     </SafeAreaView>
@@ -82,5 +83,6 @@ function makeStyles(colors) {
     tabTextActive: { color: colors.primary, fontWeight: '600' },
     content: { flex: 1 },
     contentInner: { padding: 16, paddingBottom: 32 },
+    hidden: { display: 'none' },
   });
 }

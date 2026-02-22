@@ -1,3 +1,4 @@
+import React, { useMemo, useRef } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, Dimensions } from 'react-native';
 import { LineChart } from 'react-native-gifted-charts';
 import { useTheme } from '../../contexts/ThemeContext';
@@ -11,25 +12,35 @@ const RANGES = [
 
 const CHART_WIDTH = Dimensions.get('window').width - 96; // 32px page + 32px card + 32px y-axis
 
-export default function WeightChart({ entries, range, onRangeChange }) {
+export default React.memo(function WeightChart({ entries, range, onRangeChange }) {
   const { colors, weightUnit } = useTheme();
   const s = makeStyles(colors);
+  const hasAnimated = useRef(false);
 
-  const sorted = [...entries].sort((a, b) => a.date.localeCompare(b.date));
+  const sorted = useMemo(
+    () => [...entries].sort((a, b) => a.date.localeCompare(b.date)),
+    [entries],
+  );
 
-  const weights = sorted.map((e) => e.weight);
-  const dataMin = weights.length > 0 ? Math.floor(Math.min(...weights)) - 1 : 0;
-  const dataMax = weights.length > 0 ? Math.ceil(Math.max(...weights)) + 1 : 100;
+  const { chartData, dataMin, dataMax } = useMemo(() => {
+    const weights = sorted.map((e) => e.weight);
+    const min = weights.length > 0 ? Math.floor(Math.min(...weights)) - 1 : 0;
+    const max = weights.length > 0 ? Math.ceil(Math.max(...weights)) + 1 : 100;
 
-  const chartData = sorted.map((e, i) => {
-    // Show labels for first, last, and some middle points
-    const showLabel = i === 0 || i === sorted.length - 1 || i % Math.max(1, Math.floor(sorted.length / 4)) === 0;
-    return {
-      value: e.weight,
-      label: showLabel ? String(parseInt(e.date.slice(8), 10)) : '', // day number
-      dataPointText: undefined,
-    };
-  });
+    const data = sorted.map((e, i) => {
+      const showLabel = i === 0 || i === sorted.length - 1 || i % Math.max(1, Math.floor(sorted.length / 4)) === 0;
+      return {
+        value: e.weight,
+        label: showLabel ? String(parseInt(e.date.slice(8), 10)) : '',
+        dataPointText: undefined,
+      };
+    });
+
+    return { chartData: data, dataMin: min, dataMax: max };
+  }, [sorted]);
+
+  const shouldAnimate = !hasAnimated.current;
+  if (shouldAnimate) hasAnimated.current = true;
 
   return (
     <View style={s.container}>
@@ -75,7 +86,7 @@ export default function WeightChart({ entries, range, onRangeChange }) {
             spacing={chartData.length > 1 ? Math.max(30, CHART_WIDTH / chartData.length) : 60}
             adjustToWidth={chartData.length <= 10}
             curved
-            isAnimated
+            isAnimated={shouldAnimate}
             animationDuration={500}
             startFillColor={colors.primary}
             endFillColor={colors.surface}
@@ -107,7 +118,7 @@ export default function WeightChart({ entries, range, onRangeChange }) {
       )}
     </View>
   );
-}
+});
 
 function makeStyles(colors) {
   return StyleSheet.create({

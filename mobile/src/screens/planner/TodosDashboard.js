@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useRef } from 'react';
 import {
   View,
   Text,
@@ -34,6 +34,7 @@ export default function TodosDashboard() {
   const [modalOpen, setModalOpen] = useState(false);
   const [editingTodo, setEditingTodo] = useState(null);
   const [deleteTarget, setDeleteTarget] = useState(null);
+  const hasLoaded = useRef(false);
 
   const {
     todos,
@@ -47,6 +48,8 @@ export default function TodosDashboard() {
   } = useTodos();
 
   const { categories, addCategory } = useCategories();
+
+  if (!loading && !hasLoaded.current) hasLoaded.current = true;
 
   const handleToggleCompleted = (completed) => {
     setShowCompleted(completed);
@@ -199,7 +202,7 @@ export default function TodosDashboard() {
 
       <InlineError message={error} />
 
-      {loading && todos.length === 0 ? (
+      {loading && todos.length === 0 && !hasLoaded.current ? (
         <View style={s.center}>
           <ActivityIndicator size="large" color={colors.primary} />
         </View>

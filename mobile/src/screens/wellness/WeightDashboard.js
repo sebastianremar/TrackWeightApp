@@ -16,14 +16,17 @@ const DEFAULT_STATS = ['current', 'avgWeeklyChange', 'lowest'];
 export default function WeightDashboard({ scrollRef }) {
   const { colors } = useTheme();
   const { user, updateUser } = useAuth();
-  const { entries, loading, error, range, setRange, refetch, stats } = useWeightData();
+  const { entries, initialLoading, refreshing, error, range, setRange, refetch, stats } = useWeightData();
   const s = makeStyles(colors);
 
   const visibleStats = user?.dashboardStats || DEFAULT_STATS;
 
+  // Stable callback via ref so WeightForm doesn't re-render on range change
+  const refetchRef = useRef(refetch);
+  refetchRef.current = refetch;
   const handleSaved = useCallback(() => {
-    refetch();
-  }, [refetch]);
+    refetchRef.current();
+  }, []);
 
   const handleUpdateVisibleStats = useCallback(async (newStats) => {
     updateUser({ dashboardStats: newStats });
@@ -35,7 +38,7 @@ export default function WeightDashboard({ scrollRef }) {
     }
   }, [updateUser, visibleStats]);
 
-  if (loading) {
+  if (initialLoading) {
     return (
       <View style={s.center}>
         <ActivityIndicator size="large" color={colors.primary} />
@@ -45,39 +48,46 @@ export default function WeightDashboard({ scrollRef }) {
 
   return (
     <View style={s.container}>
-      <WeightForm
-        entries={entries}
-        onSaved={handleSaved}
-      />
-
-      <InlineError message={error} />
-
-      {entries.length === 0 ? (
-        <EmptyState
-          emoji={"\u2696\uFE0F"}
-          title="No entries yet"
-          message="Log your first weight above to start tracking your progress."
-        />
-      ) : (
-        <>
-          <WeightChart
-            entries={entries}
-            range={range}
-            onRangeChange={setRange}
-          />
-
-          <StatsCards
-            stats={stats}
-            visibleStats={visibleStats}
-            onUpdateVisibleStats={handleUpdateVisibleStats}
-          />
-
-          <EntriesList
-            entries={entries}
-            onDeleted={refetch}
-          />
-        </>
+      {refreshing && (
+        <View style={s.refreshOverlay}>
+          <ActivityIndicator size="small" color={colors.primary} />
+        </View>
       )}
+      <View style={refreshing ? s.dimmed : undefined}>
+        <WeightForm
+          entries={entries}
+          onSaved={handleSaved}
+        />
+
+        <InlineError message={error} />
+
+        {entries.length === 0 ? (
+          <EmptyState
+            emoji={"\u2696\uFE0F"}
+            title="No entries yet"
+            message="Log your first weight above to start tracking your progress."
+          />
+        ) : (
+          <View style={s.dataSection}>
+            <WeightChart
+              entries={entries}
+              range={range}
+              onRangeChange={setRange}
+            />
+
+            <StatsCards
+              stats={stats}
+              visibleStats={visibleStats}
+              onUpdateVisibleStats={handleUpdateVisibleStats}
+            />
+
+            <EntriesList
+              entries={entries}
+              onDeleted={refetch}
+            />
+          </View>
+        )}
+      </View>
     </View>
   );
 }
@@ -88,6 +98,19 @@ function makeStyles(colors) {
     center: {
       paddingVertical: 60,
       alignItems: 'center',
+    },
+    refreshOverlay: {
+      position: 'absolute',
+      top: 0,
+      right: 0,
+      zIndex: 10,
+      padding: 8,
+    },
+    dimmed: {
+      opacity: 0.5,
+    },
+    dataSection: {
+      gap: 16,
     },
   });
 }

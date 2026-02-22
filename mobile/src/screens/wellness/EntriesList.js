@@ -1,4 +1,4 @@
-import { useRef, useState } from 'react';
+import React, { useRef, useState, useMemo } from 'react';
 import { View, Text, TextInput, Pressable, Animated, Keyboard, StyleSheet } from 'react-native';
 import { Swipeable } from 'react-native-gesture-handler';
 import { useTheme } from '../../contexts/ThemeContext';
@@ -106,14 +106,15 @@ function SwipeableRow({ entry, onRequestDelete, onSaved, colors }) {
   );
 }
 
-export default function EntriesList({ entries, onDeleted }) {
+export default React.memo(function EntriesList({ entries, onDeleted }) {
   const { colors, weightUnit } = useTheme();
   const s = makeStyles(colors);
   const [deleting, setDeleting] = useState(null);
 
-  const sorted = [...entries]
-    .sort((a, b) => b.date.localeCompare(a.date))
-    .slice(0, MAX_ENTRIES);
+  const sorted = useMemo(
+    () => [...entries].sort((a, b) => b.date.localeCompare(a.date)).slice(0, MAX_ENTRIES),
+    [entries],
+  );
 
   const handleDelete = async () => {
     if (!deleting) return;
@@ -156,7 +157,7 @@ export default function EntriesList({ entries, onDeleted }) {
       />
     </View>
   );
-}
+});
 
 function makeStyles(colors) {
   return StyleSheet.create({

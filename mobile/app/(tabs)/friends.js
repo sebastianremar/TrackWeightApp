@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useRef } from 'react';
 import { View, Text, ScrollView, TouchableOpacity, ActivityIndicator, StyleSheet } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useTheme } from '../../src/contexts/ThemeContext';
@@ -13,6 +13,9 @@ export default function FriendsScreen() {
   const s = makeStyles(colors);
   const { friends, requests, loading, error, addFriend, respond, removeFriend, toggleFavorite } = useFriends();
   const [addModalOpen, setAddModalOpen] = useState(false);
+  const hasLoaded = useRef(false);
+  if (!loading && !hasLoaded.current) hasLoaded.current = true;
+  const initialLoading = loading && !hasLoaded.current;
 
   const initialExpandEmail = useMemo(() => {
     if (friends.length === 0) return null;
@@ -22,7 +25,7 @@ export default function FriendsScreen() {
     return friends[Math.floor(Math.random() * friends.length)].email;
   }, [friends]);
 
-  if (loading) {
+  if (initialLoading) {
     return (
       <SafeAreaView style={s.safe} edges={['bottom']}>
         <View style={s.center}>

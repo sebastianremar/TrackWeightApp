@@ -1,24 +1,29 @@
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { View, Text, TouchableOpacity, ActivityIndicator, StyleSheet } from 'react-native';
 import { useTheme } from '../../contexts/ThemeContext';
 import { getHabitStats, getHabitStatsSummary } from '../../api/habitEntries';
 import Card from '../../components/Card';
 import StreakRow from './StreakRow';
 
-export default function StatsView({ habits }) {
+export default React.memo(function StatsView({ habits }) {
   const { colors } = useTheme();
   const s = makeStyles(colors);
   const [period, setPeriod] = useState('week');
   const [summary, setSummary] = useState(null);
   const [streakMap, setStreakMap] = useState({});
   const [loading, setLoading] = useState(true);
+  const hasLoaded = useRef(false);
 
   useEffect(() => {
     if (habits.length === 0) {
       setLoading(false);
       return;
     }
-    setLoading(true);
+    if (hasLoaded.current) {
+      // Don't show full loading spinner on period change
+    } else {
+      setLoading(true);
+    }
 
     const streakWeeks = period === 'week' ? 4 : 16;
 
@@ -38,44 +43,52 @@ export default function StatsView({ habits }) {
           map[r.habitId] = r.stats;
         });
         setStreakMap(map);
+        hasLoaded.current = true;
       })
       .finally(() => setLoading(false));
   }, [habits, period]);
 
-  const goodHabits = habits.filter((h) => h.type !== 'bad');
-  const badHabits = habits.filter((h) => h.type === 'bad');
+  const goodHabits = useMemo(() => habits.filter((h) => h.type !== 'bad'), [habits]);
+  const badHabits = useMemo(() => habits.filter((h) => h.type === 'bad'), [habits]);
 
-  let completionRate = 0;
-  let totalCompletions = 0;
-  let totalTarget = 0;
-  if (summary && goodHabits.length > 0) {
-    const goodIds = new Set(goodHabits.map((h) => h.habitId));
-    totalCompletions = Object.entries(summary.counts || {})
-      .filter(([id]) => goodIds.has(id))
-      .reduce((sum, [, c]) => sum + c, 0);
-    const daysInPeriod = summary.totalDays || 7;
-    const weeksInPeriod = Math.max(1, daysInPeriod / 7);
-    totalTarget = goodHabits.reduce(
-      (sum, h) => sum + h.targetFrequency * weeksInPeriod,
-      0,
-    );
-    completionRate =
-      totalTarget > 0 ? Math.round((totalCompletions / totalTarget) * 100) : 0;
-  }
+  const { completionRate, totalCompletions, totalTarget } = useMemo(() => {
+    let rate = 0;
+    let completions = 0;
+    let target = 0;
+    if (summary && goodHabits.length > 0) {
+      const goodIds = new Set(goodHabits.map((h) => h.habitId));
+      completions = Object.entries(summary.counts || {})
+        .filter(([id]) => goodIds.has(id))
+        .reduce((sum, [, c]) => sum + c, 0);
+      const daysInPeriod = summary.totalDays || 7;
+      const weeksInPeriod = Math.max(1, daysInPeriod / 7);
+      target = goodHabits.reduce(
+        (sum, h) => sum + h.targetFrequency * weeksInPeriod,
+        0,
+      );
+      rate = target > 0 ? Math.round((completions / target) * 100) : 0;
+    }
+    return { completionRate: rate, totalCompletions: completions, totalTarget: target };
+  }, [summary, goodHabits]);
 
-  // Breakdown bar data
-  const habitBreakdown =
-    summary && goodHabits.length > 0
-      ? goodHabits
-          .map((h) => ({
-            habitId: h.habitId,
-            name: h.name,
-            color: h.color,
-            count: (summary.counts || {})[h.habitId] || 0,
-          }))
-          .filter((h) => h.count > 0)
-      : [];
-  const breakdownTotal = habitBreakdown.reduce((sum, h) => sum + h.count, 0);
+  const habitBreakdown = useMemo(() => {
+    if (!summary || goodHabits.length === 0) return [];
+    return goodHabits
+      .map((h) => ({
+        habitId: h.habitId,
+        name: h.name,
+        color: h.color,
+        count: (summary.counts || {})[h.habitId] || 0,
+      }))
+      .filter((h) => h.count > 0);
+  }, [summary, goodHabits]);
+
+  const breakdownTotal = useMemo(
+    () => habitBreakdown.reduce((sum, h) => sum + h.count, 0),
+    [habitBreakdown],
+  );
+
+  const initialLoading = loading && !hasLoaded.current;
 
   return (
     <View>
@@ -98,7 +111,7 @@ export default function StatsView({ habits }) {
         </TouchableOpacity>
       </View>
 
-      {loading ? (
+      {initialLoading ? (
         <View style={s.center}>
           <ActivityIndicator size="large" color={colors.primary} />
         </View>
@@ -189,7 +202,7 @@ export default function StatsView({ habits }) {
       )}
     </View>
   );
-}
+});
 
 function makeStyles(colors) {
   return StyleSheet.create({

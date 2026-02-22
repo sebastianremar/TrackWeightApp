@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import React, { useState } from 'react';
 import {
   View,
   Text,
@@ -22,7 +22,7 @@ function formatDisplay(dateStr) {
   return d.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
 }
 
-export default function WeightForm({ entries, onSaved }) {
+export default React.memo(function WeightForm({ entries, onSaved }) {
   const { colors, weightUnit } = useTheme();
   const s = makeStyles(colors);
   const [weight, setWeight] = useState('');
@@ -123,7 +123,7 @@ export default function WeightForm({ entries, onSaved }) {
       </View>
     </View>
   );
-}
+});
 
 function makeStyles(colors) {
   return StyleSheet.create({

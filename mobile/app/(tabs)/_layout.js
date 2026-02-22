@@ -23,6 +23,8 @@ export default function TabLayout() {
   return (
     <Tabs
       screenOptions={{
+        lazy: false,
+        freezeOnBlur: true,
         headerStyle: { backgroundColor: colors.surface },
         headerTintColor: colors.text,
         headerTitleStyle: { fontWeight: '600' },

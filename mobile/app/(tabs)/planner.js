@@ -46,9 +46,15 @@ export default function PlannerScreen() {
           contentContainerStyle={s.contentInner}
           keyboardShouldPersistTaps="handled"
         >
-          {activeTab === 'Habits' && <HabitsDashboard />}
-          {activeTab === 'Calendar' && <CalendarDashboard />}
-          {activeTab === 'Todos' && <TodosDashboard />}
+          <View style={activeTab === 'Habits' ? undefined : s.hidden}>
+            <HabitsDashboard />
+          </View>
+          <View style={activeTab === 'Calendar' ? undefined : s.hidden}>
+            <CalendarDashboard />
+          </View>
+          <View style={activeTab === 'Todos' ? undefined : s.hidden}>
+            <TodosDashboard />
+          </View>
         </ScrollView>
       </KeyboardAvoidingView>
     </SafeAreaView>
@@ -78,5 +84,6 @@ function makeStyles(colors) {
     tabTextActive: { color: colors.primary, fontWeight: '600' },
     content: { flex: 1 },
     contentInner: { padding: 16, paddingBottom: 80 },
+    hidden: { display: 'none' },
   });
 }

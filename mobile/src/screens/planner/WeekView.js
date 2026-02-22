@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import { useTheme } from '../../contexts/ThemeContext';
 import DayDetailPanel from './DayDetailPanel';
@@ -21,7 +21,7 @@ function todayStr() {
 const DAY_NAMES = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
 const MAX_DOTS = 5;
 
-export default function WeekView({
+export default React.memo(function WeekView({
   habits,
   entries,
   refDate,
@@ -39,12 +39,15 @@ export default function WeekView({
   const currentWeekStart = getWeekStart(today);
   const showTodayBtn = weekStart !== currentWeekStart;
 
-  const days = [];
-  for (let i = 0; i < 7; i++) {
-    const d = new Date(weekStart + 'T00:00:00');
-    d.setDate(d.getDate() + i);
-    days.push(fmt(d));
-  }
+  const days = useMemo(() => {
+    const result = [];
+    for (let i = 0; i < 7; i++) {
+      const d = new Date(weekStart + 'T00:00:00');
+      d.setDate(d.getDate() + i);
+      result.push(fmt(d));
+    }
+    return result;
+  }, [weekStart]);
 
   const goWeek = (offset) => {
     const d = new Date(weekStart + 'T00:00:00');
@@ -59,12 +62,12 @@ export default function WeekView({
     setSelectedDate(today);
   };
 
-  const weekLabel = (() => {
+  const weekLabel = useMemo(() => {
     const start = new Date(weekStart + 'T00:00:00');
     const end = new Date(start);
     end.setDate(end.getDate() + 6);
     return `${start.toLocaleDateString(undefined, { month: 'short', day: 'numeric' })} - ${end.toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}`;
-  })();
+  }, [weekStart]);
 
   return (
     <View>
@@ -141,7 +144,7 @@ export default function WeekView({
       />
     </View>
   );
-}
+});
 
 function makeStyles(colors) {
   return StyleSheet.create({

@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo, useRef } from 'react';
 import {
   View,
   Text,
@@ -56,6 +56,7 @@ export default function HabitsDashboard() {
   const [modalOpen, setModalOpen] = useState(false);
   const [editingHabit, setEditingHabit] = useState(null);
   const [deleteTarget, setDeleteTarget] = useState(null);
+  const hasLoaded = useRef(false);
 
   const {
     habits,
@@ -80,6 +81,8 @@ export default function HabitsDashboard() {
   }, [tab, refDate, fetchEntries]);
 
   const loading = habitsLoading || entriesLoading;
+  const initialLoading = loading && !hasLoaded.current && habits.length === 0;
+  if (!loading && !hasLoaded.current) hasLoaded.current = true;
 
   const handleOpenCreate = () => {
     setEditingHabit(null);
@@ -110,7 +113,7 @@ export default function HabitsDashboard() {
     }
   };
 
-  const viewProps = {
+  const viewProps = useMemo(() => ({
     habits,
     entries,
     refDate,
@@ -119,7 +122,7 @@ export default function HabitsDashboard() {
     updateNote,
     onEditHabit: handleOpenEdit,
     onDeleteHabit: handleDeleteHabit,
-  };
+  }), [habits, entries, refDate, toggleEntry, updateNote]);
 
   return (
     <View style={s.container}>
@@ -140,15 +143,21 @@ export default function HabitsDashboard() {
 
       <InlineError message={habitsError} />
 
-      {loading && habits.length === 0 ? (
+      {initialLoading ? (
         <View style={s.center}>
           <ActivityIndicator size="large" color={colors.primary} />
         </View>
       ) : (
         <>
-          {tab === 'week' && <WeekView {...viewProps} />}
-          {tab === 'month' && <MonthView {...viewProps} />}
-          {tab === 'stats' && <StatsView habits={habits} />}
+          <View style={tab === 'week' ? undefined : s.hidden}>
+            <WeekView {...viewProps} />
+          </View>
+          <View style={tab === 'month' ? undefined : s.hidden}>
+            <MonthView {...viewProps} />
+          </View>
+          <View style={tab === 'stats' ? undefined : s.hidden}>
+            <StatsView habits={habits} />
+          </View>
         </>
       )}
 
@@ -224,6 +233,7 @@ function makeStyles(colors) {
       paddingVertical: 60,
       alignItems: 'center',
     },
+    hidden: { display: 'none' },
     fab: {
       position: 'absolute',
       right: 0,

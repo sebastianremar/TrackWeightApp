@@ -1,4 +1,4 @@
-import { useState, useCallback, useEffect, useRef } from 'react';
+import React, { useState, useCallback, useEffect, useRef } from 'react';
 import {
   View,
   Text,
@@ -82,7 +82,7 @@ function SetRow({ set, index, editing, onDelete, onEdit, colors }) {
 
 /* ── Main component ── */
 
-export default function LogView({ templates, library, custom, addLog, onCreateCustom, initialTemplate, onTemplateConsumed }) {
+export default React.memo(function LogView({ templates, library, custom, addLog, onCreateCustom, initialTemplate, onTemplateConsumed }) {
   const { colors } = useTheme();
   const s = makeStyles(colors);
 
@@ -557,7 +557,7 @@ export default function LogView({ templates, library, custom, addLog, onCreateCu
       />
     </View>
   );
-}
+});
 
 /* ── Styles ── */
 

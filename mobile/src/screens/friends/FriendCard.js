@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { View, Text, TouchableOpacity, ActivityIndicator, StyleSheet } from 'react-native';
 import { getFriendWeight } from '../../api/friends';
 import { getWeightHistory } from '../../api/weight';
@@ -48,7 +48,7 @@ const BODY_TABS = [
   { key: 'habits', label: 'Habits' },
 ];
 
-export default function FriendCard({ friend, onRemove, onToggleFavorite, initialExpanded }) {
+export default React.memo(function FriendCard({ friend, onRemove, onToggleFavorite, initialExpanded }) {
   const { colors, weightUnit } = useTheme();
   const s = makeStyles(colors);
 
@@ -222,7 +222,7 @@ export default function FriendCard({ friend, onRemove, onToggleFavorite, initial
       />
     </>
   );
-}
+});
 
 function StatBox({ label, value, colored, colors, unit }) {
   const s = statStyles(colors);

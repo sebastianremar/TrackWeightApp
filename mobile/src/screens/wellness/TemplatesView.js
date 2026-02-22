@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import React, { useState } from 'react';
 import {
   View,
   Text,
@@ -11,7 +11,7 @@ import Card from '../../components/Card';
 import EmptyState from '../../components/EmptyState';
 import TemplateModal from './TemplateModal';
 
-export default function TemplatesView({
+export default React.memo(function TemplatesView({
   templates,
   library,
   custom,
@@ -118,7 +118,7 @@ export default function TemplatesView({
       />
     </View>
   );
-}
+});
 
 function makeStyles(colors) {
   return StyleSheet.create({

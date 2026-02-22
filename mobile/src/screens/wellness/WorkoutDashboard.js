@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import {
   View,
   Text,
@@ -27,6 +27,7 @@ export default function WorkoutDashboard() {
   const s = makeStyles(colors);
   const [tab, setTab] = useState('templates');
   const [selectedTemplate, setSelectedTemplate] = useState(null);
+  const hasLoaded = useRef(false);
 
   const {
     templates, loading: templatesLoading, error: templatesError,
@@ -51,6 +52,8 @@ export default function WorkoutDashboard() {
   }, []);
 
   const loading = templatesLoading || exercisesLoading;
+  const initialLoading = loading && !hasLoaded.current;
+  if (!loading && !hasLoaded.current) hasLoaded.current = true;
   const error = templatesError || exercisesError;
 
   return (
@@ -72,13 +75,13 @@ export default function WorkoutDashboard() {
 
       <InlineError message={error} />
 
-      {loading ? (
+      {initialLoading ? (
         <View style={s.center}>
           <ActivityIndicator size="large" color={colors.primary} />
         </View>
       ) : (
         <>
-          {tab === 'templates' && (
+          <View style={tab === 'templates' ? undefined : s.hidden}>
             <TemplatesView
               templates={templates}
               library={library}
@@ -89,8 +92,8 @@ export default function WorkoutDashboard() {
               onCreateCustom={addCustom}
               onQuickLog={handleQuickLog}
             />
-          )}
-          {tab === 'log' && (
+          </View>
+          <View style={tab === 'log' ? undefined : s.hidden}>
             <LogView
               templates={templates}
               library={library}
@@ -100,12 +103,12 @@ export default function WorkoutDashboard() {
               initialTemplate={selectedTemplate}
               onTemplateConsumed={() => setSelectedTemplate(null)}
             />
-          )}
-          {tab === 'history' && (
+          </View>
+          <View style={tab === 'history' ? undefined : s.hidden}>
             <HistoryView
               {...logState}
             />
-          )}
+          </View>
         </>
       )}
     </View>
@@ -147,5 +150,6 @@ function makeStyles(colors) {
       paddingVertical: 60,
       alignItems: 'center',
     },
+    hidden: { display: 'none' },
   });
 }

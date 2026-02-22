@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import {
   View,
   Text,
@@ -57,6 +57,7 @@ export default function CalendarDashboard() {
   const [editingEvent, setEditingEvent] = useState(null);
   const [deleteTarget, setDeleteTarget] = useState(null);
   const [prefillTime, setPrefillTime] = useState(null);
+  const hasLoaded = useRef(false);
 
   const { events, loading, error, fetchEvents, addEvent, editEvent, removeEvent } = useCalendarEvents();
 
@@ -64,6 +65,9 @@ export default function CalendarDashboard() {
     const { from, to } = getDateRange(tab, refDate);
     fetchEvents(from, to);
   }, [tab, refDate, fetchEvents]);
+
+  const initialLoading = loading && !hasLoaded.current && events.length === 0;
+  if (!loading && !hasLoaded.current) hasLoaded.current = true;
 
   const handleOpenCreate = (time) => {
     setEditingEvent(null);
@@ -121,13 +125,13 @@ export default function CalendarDashboard() {
 
       <InlineError message={error} />
 
-      {loading && events.length === 0 ? (
+      {initialLoading ? (
         <View style={s.center}>
           <ActivityIndicator size="large" color={colors.primary} />
         </View>
       ) : (
         <>
-          {tab === 'day' && (
+          <View style={tab === 'day' ? undefined : s.hidden}>
             <CalendarDayView
               events={events}
               refDate={refDate}
@@ -135,8 +139,8 @@ export default function CalendarDashboard() {
               onEditEvent={handleOpenEdit}
               onCreateEvent={handleOpenCreate}
             />
-          )}
-          {tab === 'week' && (
+          </View>
+          <View style={tab === 'week' ? undefined : s.hidden}>
             <CalendarWeekView
               events={events}
               refDate={refDate}
@@ -144,15 +148,15 @@ export default function CalendarDashboard() {
               onEditEvent={handleOpenEdit}
               onDayClick={handleDayClick}
             />
-          )}
-          {tab === 'month' && (
+          </View>
+          <View style={tab === 'month' ? undefined : s.hidden}>
             <CalendarMonthView
               events={events}
               refDate={refDate}
               setRefDate={setRefDate}
               onDayClick={handleDayClick}
             />
-          )}
+          </View>
         </>
       )}
 
@@ -223,6 +227,7 @@ function makeStyles(colors) {
       paddingVertical: 60,
       alignItems: 'center',
     },
+    hidden: { display: 'none' },
     fab: {
       position: 'absolute',
       right: 0,
