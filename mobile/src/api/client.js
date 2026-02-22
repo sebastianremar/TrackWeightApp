@@ -1,7 +1,7 @@
 import * as SecureStore from 'expo-secure-store';
+import Constants from 'expo-constants';
 
-// TODO: Update this to your production API URL
-const BASE_URL = 'https://trackmyweight.net';
+const BASE_URL = Constants.expoConfig?.extra?.apiBaseUrl ?? 'https://trackmyweight.net';
 
 const TIMEOUT = 10000;
 const MAX_RETRIES = 2;

@@ -1,0 +1,37 @@
+name: Mobile Preview (TestFlight)
+
+on:
+  workflow_dispatch:
+
+concurrency:
+  group: mobile-preview
+  cancel-in-progress: false
+
+jobs:
+  build:
+    name: Build & Submit to TestFlight
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+          cache-dependency-path: mobile/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+        working-directory: mobile
+
+      - name: Setup EAS
+        uses: expo/expo-github-action@v8
+        with:
+          eas-version: latest
+          token: ${{ secrets.EXPO_TOKEN }}
+
+      - name: Build and submit to TestFlight
+        run: eas build --profile preview --platform ios --non-interactive --auto-submit
+        working-directory: mobile
