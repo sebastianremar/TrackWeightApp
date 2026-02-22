@@ -1,13 +1,13 @@
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect } from 'react';
 import {
   View,
   Text,
-  TextInput,
   TouchableOpacity,
-  ScrollView,
   ActivityIndicator,
+  Platform,
   StyleSheet,
 } from 'react-native';
+import DateTimePicker from '@react-native-community/datetimepicker';
 import { useTheme } from '../../contexts/ThemeContext';
 import Card from '../../components/Card';
 import EmptyState from '../../components/EmptyState';
@@ -25,23 +25,24 @@ function todayStr() {
   return new Date().toISOString().split('T')[0];
 }
 
-export default function HistoryView({ templates, logs, loading, error, nextCursor, fetchLogs, removeLog }) {
+function formatDisplay(dateStr) {
+  const d = new Date(dateStr + 'T12:00:00');
+  return d.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
+}
+
+export default function HistoryView({ logs, loading, error, nextCursor, fetchLogs, removeLog }) {
   const { colors } = useTheme();
   const s = makeStyles(colors);
   const [from, setFrom] = useState(defaultFrom);
   const [to, setTo] = useState(todayStr);
-  const [templateFilter, setTemplateFilter] = useState('');
+  const [showFromPicker, setShowFromPicker] = useState(false);
+  const [showToPicker, setShowToPicker] = useState(false);
   const [selectedLog, setSelectedLog] = useState(null);
   const [exporting, setExporting] = useState(false);
 
   useEffect(() => {
     fetchLogs({ from, to, limit: 20 });
   }, [from, to, fetchLogs]);
-
-  const filteredLogs = useMemo(() => {
-    if (!templateFilter) return logs;
-    return logs.filter((l) => l.templateId === templateFilter);
-  }, [logs, templateFilter]);
 
   const handleLoadMore = () => {
     if (nextCursor) {
@@ -50,10 +51,10 @@ export default function HistoryView({ templates, logs, loading, error, nextCurso
   };
 
   const handleExport = async () => {
-    if (filteredLogs.length === 0) return;
+    if (logs.length === 0) return;
     setExporting(true);
     try {
-      await shareWorkbook(filteredLogs);
+      await shareWorkbook(logs);
     } catch {
       // sharing cancelled or failed
     } finally {
@@ -68,63 +69,63 @@ export default function HistoryView({ templates, logs, loading, error, nextCurso
 
   return (
     <View>
-      {/* Filters */}
+      {/* Date range filters */}
       <View style={s.filterRow}>
         <View style={s.filterField}>
           <Text style={s.filterLabel}>From</Text>
-          <TextInput
-            style={s.filterInput}
-            value={from}
-            onChangeText={setFrom}
-            placeholder="YYYY-MM-DD"
-            placeholderTextColor={colors.textMuted}
-            maxLength={10}
-          />
+          <TouchableOpacity style={s.dateBtn} onPress={() => setShowFromPicker(true)}>
+            <Text style={s.dateBtnText}>{formatDisplay(from)}</Text>
+            <Text style={s.dateBtnIcon}>📅</Text>
+          </TouchableOpacity>
+          {showFromPicker && (
+            <DateTimePicker
+              value={new Date(from + 'T12:00:00')}
+              mode="date"
+              display={Platform.OS === 'ios' ? 'inline' : 'default'}
+              maximumDate={new Date(to + 'T12:00:00')}
+              onChange={(_, selected) => {
+                setShowFromPicker(false);
+                if (selected) setFrom(selected.toISOString().split('T')[0]);
+              }}
+              themeVariant="light"
+            />
+          )}
         </View>
         <View style={s.filterField}>
           <Text style={s.filterLabel}>To</Text>
-          <TextInput
-            style={s.filterInput}
-            value={to}
-            onChangeText={setTo}
-            placeholder="YYYY-MM-DD"
-            placeholderTextColor={colors.textMuted}
-            maxLength={10}
-          />
+          <TouchableOpacity style={s.dateBtn} onPress={() => setShowToPicker(true)}>
+            <Text style={s.dateBtnText}>{formatDisplay(to)}</Text>
+            <Text style={s.dateBtnIcon}>📅</Text>
+          </TouchableOpacity>
+          {showToPicker && (
+            <DateTimePicker
+              value={new Date(to + 'T12:00:00')}
+              mode="date"
+              display={Platform.OS === 'ios' ? 'inline' : 'default'}
+              minimumDate={new Date(from + 'T12:00:00')}
+              maximumDate={new Date()}
+              onChange={(_, selected) => {
+                setShowToPicker(false);
+                if (selected) setTo(selected.toISOString().split('T')[0]);
+              }}
+              themeVariant="light"
+            />
+          )}
         </View>
       </View>
 
-      {/* Template filter + Export */}
-      <ScrollView horizontal showsHorizontalScrollIndicator={false} style={s.templateRow} contentContainerStyle={s.templateContent}>
-        <TouchableOpacity
-          style={[s.chip, !templateFilter && s.chipActive]}
-          onPress={() => setTemplateFilter('')}
-        >
-          <Text style={[s.chipText, !templateFilter && s.chipTextActive]}>All</Text>
-        </TouchableOpacity>
-        {templates.map((t) => (
-          <TouchableOpacity
-            key={t.routineId}
-            style={[s.chip, templateFilter === t.routineId && s.chipActive]}
-            onPress={() => setTemplateFilter(t.routineId)}
-          >
-            <Text style={[s.chipText, templateFilter === t.routineId && s.chipTextActive]}>
-              {t.name}
-            </Text>
-          </TouchableOpacity>
-        ))}
-        <TouchableOpacity
-          style={[s.exportBtn, filteredLogs.length === 0 && s.exportBtnDisabled]}
-          onPress={handleExport}
-          disabled={filteredLogs.length === 0 || exporting}
-        >
-          {exporting ? (
-            <ActivityIndicator size="small" color={colors.primary} />
-          ) : (
-            <Text style={s.exportBtnText}>Export</Text>
-          )}
-        </TouchableOpacity>
-      </ScrollView>
+      {/* Export */}
+      <TouchableOpacity
+        style={[s.exportBtn, logs.length === 0 && s.exportBtnDisabled]}
+        onPress={handleExport}
+        disabled={logs.length === 0 || exporting}
+      >
+        {exporting ? (
+          <ActivityIndicator size="small" color={colors.primary} />
+        ) : (
+          <Text style={s.exportBtnText}>Export {formatDisplay(from)} – {formatDisplay(to)}</Text>
+        )}
+      </TouchableOpacity>
 
       <InlineError message={error} />
 
@@ -134,7 +135,7 @@ export default function HistoryView({ templates, logs, loading, error, nextCurso
         </View>
       )}
 
-      {!loading && filteredLogs.length === 0 && (
+      {!loading && logs.length === 0 && (
         <EmptyState
           emoji="📊"
           title="No workout logs"
@@ -144,11 +145,11 @@ export default function HistoryView({ templates, logs, loading, error, nextCurso
 
       {/* Log list */}
       <View style={s.list}>
-        {filteredLogs.map((log) => (
+        {logs.map((log) => (
           <TouchableOpacity key={log.logId} onPress={() => setSelectedLog(log)}>
             <Card style={s.logCard}>
               <View style={s.logTop}>
-                <Text style={s.logDate}>{log.date}</Text>
+                <Text style={s.logDate}>{formatDisplay(log.date)}</Text>
                 <Text style={s.logLabel}>
                   {log.templateName || 'Freestyle'}
                 </Text>
@@ -161,7 +162,7 @@ export default function HistoryView({ templates, logs, loading, error, nextCurso
         ))}
       </View>
 
-      {nextCursor && !templateFilter && (
+      {nextCursor && (
         <TouchableOpacity
           style={s.loadMoreBtn}
           onPress={handleLoadMore}
@@ -201,49 +202,32 @@ function makeStyles(colors) {
       color: colors.textMuted,
       marginBottom: 4,
     },
-    filterInput: {
+    dateBtn: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'space-between',
       backgroundColor: colors.surface,
       borderRadius: 8,
       padding: 10,
+      borderWidth: 1,
+      borderColor: colors.border,
+    },
+    dateBtnText: {
       fontSize: 14,
+      fontWeight: '600',
       color: colors.text,
-      borderWidth: 1,
-      borderColor: colors.border,
     },
-    templateRow: {
-      maxHeight: 44,
-      marginBottom: 12,
-    },
-    templateContent: {
-      gap: 8,
-      alignItems: 'center',
-    },
-    chip: {
-      paddingHorizontal: 14,
-      paddingVertical: 7,
-      borderRadius: 20,
-      backgroundColor: colors.surface,
-      borderWidth: 1,
-      borderColor: colors.border,
-    },
-    chipActive: {
-      backgroundColor: colors.primary,
-      borderColor: colors.primary,
-    },
-    chipText: {
-      fontSize: 13,
-      color: colors.textSecondary,
-      fontWeight: '500',
-    },
-    chipTextActive: {
-      color: '#fff',
+    dateBtnIcon: {
+      fontSize: 16,
     },
     exportBtn: {
-      paddingHorizontal: 14,
-      paddingVertical: 7,
-      borderRadius: 20,
+      paddingVertical: 10,
+      paddingHorizontal: 16,
+      borderRadius: 10,
       borderWidth: 1,
       borderColor: colors.primary,
+      alignItems: 'center',
+      marginBottom: 12,
     },
     exportBtnDisabled: {
       opacity: 0.4,

@@ -103,7 +103,6 @@ export default function WorkoutDashboard() {
           )}
           {tab === 'history' && (
             <HistoryView
-              templates={templates}
               {...logState}
             />
           )}

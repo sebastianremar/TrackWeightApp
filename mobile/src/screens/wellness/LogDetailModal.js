@@ -14,6 +14,11 @@ function calcVolume(sets) {
   return (sets || []).reduce((sum, s) => sum + (s.weight || 0) * (s.reps || 0), 0);
 }
 
+function formatDisplay(dateStr) {
+  const d = new Date(dateStr + 'T12:00:00');
+  return d.toLocaleDateString('en-US', { weekday: 'long', month: 'short', day: 'numeric', year: 'numeric' });
+}
+
 export default function LogDetailModal({ visible, log, onDelete, onClose }) {
   const { colors } = useTheme();
   const s = makeStyles(colors);
@@ -45,7 +50,7 @@ export default function LogDetailModal({ visible, log, onDelete, onClose }) {
 
         <ScrollView style={s.body}>
           <View style={s.metaRow}>
-            <Text style={s.date}>{log.date}</Text>
+            <Text style={s.date}>{formatDisplay(log.date)}</Text>
             {totalVolume > 0 && (
               <Text style={s.totalVolume}>Total: {totalVolume.toLocaleString()} lbs</Text>
             )}
@@ -92,7 +97,7 @@ export default function LogDetailModal({ visible, log, onDelete, onClose }) {
         <ConfirmDialog
           visible={confirmOpen}
           title="Delete Log"
-          message={`Delete the workout log from ${log.date}? This cannot be undone.`}
+          message={`Delete the workout log from ${formatDisplay(log.date)}? This cannot be undone.`}
           confirmLabel="Delete"
           destructive
           onConfirm={handleDelete}
