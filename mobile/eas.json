@@ -21,11 +21,16 @@
     }
   },
   "submit": {
+    "preview": {
+      "ios": {
+        "ascAppId": "6759533052",
+        "appleTeamId": "8XH5WB4Y9T"
+      }
+    },
     "production": {
       "ios": {
-        "appleId": "<YOUR_APPLE_ID_EMAIL>",
-        "ascAppId": "<APP_STORE_CONNECT_APP_ID>",
-        "appleTeamId": "<YOUR_TEAM_ID>"
+        "ascAppId": "6759533052",
+        "appleTeamId": "8XH5WB4Y9T"
       }
     }
   }

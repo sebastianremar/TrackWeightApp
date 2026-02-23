@@ -19,7 +19,7 @@ export default {
     },
     ios: {
       supportsTablet: true,
-      bundleIdentifier: 'com.trackmyweight.app',
+      bundleIdentifier: 'com.trackmyweight.sebasremar.app',
     },
     android: {
       adaptiveIcon: {
@@ -30,13 +30,13 @@ export default {
       package: 'com.trackmyweight.app',
     },
     updates: {
-      url: 'https://u.expo.dev/<PROJECT_ID>',
+      url: 'https://u.expo.dev/db74ea60-8705-4598-892d-fff9096af1b2',
     },
     runtimeVersion: {
       policy: 'appVersion',
     },
     extra: {
-      eas: { projectId: '<PROJECT_ID>' },
+      eas: { projectId: 'db74ea60-8705-4598-892d-fff9096af1b2' },
       apiBaseUrl: 'https://trackmyweight.net',
     },
     plugins: [
