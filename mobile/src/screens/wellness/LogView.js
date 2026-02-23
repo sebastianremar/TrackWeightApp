@@ -463,7 +463,7 @@ export default React.memo(function LogView({ templates, library, custom, addLog,
 
       {/* Date */}
       <Text style={s.label}>Date</Text>
-      <TouchableOpacity style={s.dateBtn} onPress={() => setShowDatePicker(true)}>
+      <TouchableOpacity style={s.dateBtn} onPress={() => setShowDatePicker((v) => !v)}>
         <Text style={s.dateBtnText}>{formatDisplay(date)}</Text>
         <Text style={s.dateBtnIcon}>📅</Text>
       </TouchableOpacity>

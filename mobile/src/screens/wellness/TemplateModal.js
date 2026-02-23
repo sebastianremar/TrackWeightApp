@@ -65,13 +65,6 @@ function ExerciseRow({ item, index, drag, isActive, onRemove, colors }) {
               <Text style={s.exName}>{item.name}</Text>
               <Text style={s.exMuscle}>{item.muscleGroup}</Text>
             </View>
-            <TouchableOpacity
-              onPress={() => onRemove(index)}
-              style={s.exRemoveBtn}
-              hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
-            >
-              <Text style={s.exRemoveText}>✕</Text>
-            </TouchableOpacity>
           </View>
         </Pressable>
       </Swipeable>
@@ -165,6 +158,7 @@ export default function TemplateModal({
   }
 
   async function handleDelete() {
+    setConfirmDelete(false);
     try {
       await onDelete(template.routineId);
       onClose();
@@ -246,17 +240,19 @@ export default function TemplateModal({
           </TouchableOpacity>
         </View>
 
-        <DraggableFlatList
-          data={exercises}
-          renderItem={renderItem}
-          keyExtractor={keyExtractor}
-          onDragEnd={handleDragEnd}
-          ListHeaderComponent={ListHeader}
-          ListFooterComponent={ListFooter}
-          contentContainerStyle={s.listContent}
-          keyboardShouldPersistTaps="handled"
-          activationDistance={10}
-        />
+        <View style={s.flex}>
+          <DraggableFlatList
+            data={exercises}
+            renderItem={renderItem}
+            keyExtractor={keyExtractor}
+            onDragEnd={handleDragEnd}
+            ListHeaderComponent={ListHeader}
+            ListFooterComponent={ListFooter}
+            contentContainerStyle={s.listContent}
+            keyboardShouldPersistTaps="handled"
+            activationDistance={10}
+          />
+        </View>
 
         <ExercisePicker
           visible={showPicker}
@@ -309,7 +305,8 @@ function makeStyles(colors) {
       color: colors.text,
     },
     saveText: { fontWeight: '700', textAlign: 'right' },
-    listContent: { padding: '16@ms' },
+    flex: { flex: 1 },
+    listContent: { padding: '16@ms', paddingBottom: '40@vs' },
     listHeader: { marginBottom: '4@ms' },
     listFooter: { marginTop: '4@ms' },
 
@@ -366,9 +363,6 @@ function makeStyles(colors) {
     exInfo: { flex: 1 },
     exName: { fontSize: '15@ms0.3', fontWeight: '600', color: colors.text },
     exMuscle: { fontSize: '13@ms0.3', color: colors.textMuted, marginTop: '2@ms' },
-    exRemoveBtn: { padding: '6@ms' },
-    exRemoveText: { fontSize: '16@ms0.3', color: colors.error, fontWeight: '600' },
-
     /* Add exercise */
     addBtn: {
       paddingVertical: '14@ms',

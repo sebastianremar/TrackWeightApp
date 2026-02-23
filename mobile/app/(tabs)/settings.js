@@ -1,17 +1,14 @@
-import { useState } from 'react';
 import {
   View,
   Text,
   TouchableOpacity,
   ScrollView,
   Switch,
-  ActivityIndicator,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useAuth } from '../../src/contexts/AuthContext';
 import { useTheme } from '../../src/contexts/ThemeContext';
 import { useNetwork } from '../../src/contexts/NetworkContext';
-import { clearFailed } from '../../src/offline/mutationQueue';
 import NotificationSettings from '../../src/components/NotificationSettings';
 import { ScaledSheet, moderateScale } from '../../src/utils/responsive';
 
@@ -26,17 +23,8 @@ const PALETTES = [
 export default function SettingsScreen() {
   const { user, logout } = useAuth();
   const { colors, dark, toggleDark, palette, setPalette, weightUnit, setWeightUnit } = useTheme();
-  const { isOnline, pendingCount, isSyncing, triggerSync } = useNetwork();
-  const [clearing, setClearing] = useState(false);
+  const { isOnline, pendingCount, isSyncing } = useNetwork();
   const s = makeStyles(colors);
-
-  const handleClearFailed = async () => {
-    setClearing(true);
-    try {
-      await clearFailed();
-    } catch {}
-    setClearing(false);
-  };
 
   return (
     <SafeAreaView style={s.safe} edges={['bottom']}>
@@ -129,28 +117,6 @@ export default function SettingsScreen() {
               <Text style={[s.value, { marginTop: 0 }]}>{pendingCount}</Text>
             </View>
           )}
-          <View style={{ marginTop: moderateScale(12), gap: moderateScale(8) }}>
-            <TouchableOpacity
-              style={[s.syncButton, { backgroundColor: colors.primary, opacity: (!isOnline || isSyncing) ? 0.5 : 1 }]}
-              onPress={triggerSync}
-              disabled={!isOnline || isSyncing}
-            >
-              {isSyncing ? (
-                <ActivityIndicator size="small" color="#fff" />
-              ) : (
-                <Text style={s.syncButtonText}>Sync Now</Text>
-              )}
-            </TouchableOpacity>
-            {pendingCount > 0 && (
-              <TouchableOpacity
-                style={[s.syncButton, { backgroundColor: colors.errorBg, borderWidth: 1, borderColor: colors.error }]}
-                onPress={handleClearFailed}
-                disabled={clearing}
-              >
-                <Text style={[s.syncButtonText, { color: colors.error }]}>Clear Failed</Text>
-              </TouchableOpacity>
-            )}
-          </View>
         </View>
 
         {/* Security Section */}
@@ -234,16 +200,6 @@ function makeStyles(colors) {
     },
     segmentTextActive: {
       color: '#fff',
-    },
-    syncButton: {
-      borderRadius: '8@ms',
-      paddingVertical: '10@ms',
-      alignItems: 'center',
-    },
-    syncButtonText: {
-      color: '#fff',
-      fontSize: '14@ms0.3',
-      fontWeight: '600',
     },
     linkButton: { paddingVertical: '4@ms' },
     linkButtonText: { color: colors.primary, fontSize: '15@ms0.3', fontWeight: '500' },

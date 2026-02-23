@@ -27,9 +27,7 @@ async function getExpoPushToken() {
   const { status } = await Notifications.getPermissionsAsync();
   if (status !== 'granted') return null;
 
-  const tokenData = await Notifications.getExpoPushTokenAsync({
-    projectId: 'your-project-id', // Will be auto-resolved from app.json
-  });
+  const tokenData = await Notifications.getExpoPushTokenAsync();
   return tokenData.data;
 }
 

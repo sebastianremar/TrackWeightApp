@@ -18,7 +18,7 @@ function todayStr() {
 
 function formatDisplay(dateStr) {
   const d = new Date(dateStr + 'T12:00:00');
-  return d.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
+  return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
 }
 
 export default React.memo(function WeightForm({ entries, onSaved }) {
@@ -82,7 +82,7 @@ export default React.memo(function WeightForm({ entries, onSaved }) {
         <View style={s.field}>
           <Text style={s.label}>Date</Text>
           <TouchableOpacity style={s.dateBtn} onPress={() => setShowDatePicker(true)}>
-            <Text style={s.dateBtnText}>{formatDisplay(date)}</Text>
+            <Text style={s.dateBtnText} numberOfLines={1}>{formatDisplay(date)}</Text>
             <Text style={s.dateBtnIcon}>📅</Text>
           </TouchableOpacity>
         </View>
@@ -155,12 +155,14 @@ function makeStyles(colors) {
     input: {
       backgroundColor: colors.background,
       borderRadius: '8@ms',
-      padding: '12@ms',
+      paddingHorizontal: '12@ms',
       borderWidth: 1,
       borderColor: colors.border,
+      height: '44@ms',
+      justifyContent: 'center',
     },
     inputText: {
-      fontSize: '16@ms0.3',
+      fontSize: '15@ms0.3',
       fontWeight: '600',
       color: colors.text,
     },
@@ -171,20 +173,22 @@ function makeStyles(colors) {
     dateBtn: {
       flexDirection: 'row',
       alignItems: 'center',
-      justifyContent: 'space-between',
       backgroundColor: colors.background,
       borderRadius: '8@ms',
-      padding: '12@ms',
+      paddingHorizontal: '12@ms',
       borderWidth: 1,
       borderColor: colors.border,
+      height: '44@ms',
     },
     dateBtnText: {
-      fontSize: '14@ms0.3',
+      flex: 1,
+      fontSize: '15@ms0.3',
       fontWeight: '600',
       color: colors.text,
     },
     dateBtnIcon: {
-      fontSize: '16@ms0.3',
+      fontSize: '14@ms0.3',
+      marginLeft: '6@ms',
     },
     actions: {
       flexDirection: 'row',

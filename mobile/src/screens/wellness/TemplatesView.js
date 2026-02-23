@@ -55,10 +55,6 @@ export default React.memo(function TemplatesView({
     }
   }
 
-  function getMuscleGroups(tmpl) {
-    return [...new Set((tmpl.exercises || []).map((ex) => ex.muscleGroup))];
-  }
-
   return (
     <View>
       {templates.length === 0 ? (
@@ -72,30 +68,22 @@ export default React.memo(function TemplatesView({
           {templates.map((tmpl) => (
             <TouchableOpacity key={tmpl.routineId} onPress={() => openEdit(tmpl)}>
               <Card style={s.card}>
-                <Text style={s.cardName}>{tmpl.name}</Text>
-                <Text style={s.cardMeta}>
-                  {tmpl.exercises?.length || 0} exercise{(tmpl.exercises?.length || 0) !== 1 ? 's' : ''}
-                </Text>
-                <View style={s.tags}>
-                  {getMuscleGroups(tmpl).map((mg) => (
-                    <View key={mg} style={s.tag}>
-                      <Text style={s.tagText}>{mg}</Text>
-                    </View>
-                  ))}
+                <View style={s.cardRow}>
+                  <Text style={s.cardName}>{tmpl.name}</Text>
+                  {onQuickLog && (
+                    <TouchableOpacity
+                      style={s.quickLogBtn}
+                      onPress={() => handleQuickLog(tmpl)}
+                      disabled={quickLogId === tmpl.routineId}
+                    >
+                      {quickLogId === tmpl.routineId ? (
+                        <ActivityIndicator size="small" color={colors.success} />
+                      ) : (
+                        <Text style={s.quickLogText}>Log</Text>
+                      )}
+                    </TouchableOpacity>
+                  )}
                 </View>
-                {onQuickLog && (
-                  <TouchableOpacity
-                    style={s.quickLogBtn}
-                    onPress={() => handleQuickLog(tmpl)}
-                    disabled={quickLogId === tmpl.routineId}
-                  >
-                    {quickLogId === tmpl.routineId ? (
-                      <ActivityIndicator size="small" color={colors.success} />
-                    ) : (
-                      <Text style={s.quickLogText}>Log Workout</Text>
-                    )}
-                  </TouchableOpacity>
-                )}
               </Card>
             </TouchableOpacity>
           ))}
@@ -126,42 +114,27 @@ function makeStyles(colors) {
       gap: '10@ms',
     },
     card: {
-      padding: '14@ms',
+      paddingVertical: '12@ms',
+      paddingHorizontal: '16@ms',
+    },
+    cardRow: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'space-between',
     },
     cardName: {
       fontSize: '16@ms0.3',
-      fontWeight: '700',
-      color: colors.text,
-      marginBottom: '4@ms',
-    },
-    cardMeta: {
-      fontSize: '13@ms0.3',
-      color: colors.textMuted,
-      marginBottom: '8@ms',
-    },
-    tags: {
-      flexDirection: 'row',
-      flexWrap: 'wrap',
-      gap: '6@ms',
-    },
-    tag: {
-      backgroundColor: colors.primaryLight,
-      paddingHorizontal: '8@ms',
-      paddingVertical: '3@ms',
-      borderRadius: '8@ms',
-    },
-    tagText: {
-      fontSize: '11@ms0.3',
-      color: colors.primary,
       fontWeight: '600',
+      color: colors.text,
+      flex: 1,
     },
     quickLogBtn: {
-      marginTop: '10@ms',
-      paddingVertical: '8@ms',
-      alignItems: 'center',
+      paddingVertical: '6@ms',
+      paddingHorizontal: '14@ms',
       borderRadius: '8@ms',
       borderWidth: 1,
       borderColor: colors.success,
+      marginLeft: '12@ms',
     },
     quickLogText: {
       fontSize: '13@ms0.3',

@@ -95,7 +95,7 @@ export default function WeightDashboard({ scrollRef }) {
 
 function makeStyles(colors) {
   return ScaledSheet.create({
-    container: { gap: '16@ms' },
+    container: { gap: '20@vs' },
     center: {
       paddingVertical: '60@vs',
       alignItems: 'center',
