@@ -7,6 +7,6 @@ set -e
 cd "$(dirname "$0")"
 
 echo "Building and submitting to TestFlight..."
-eas build --profile preview --platform ios --non-interactive --auto-submit
+npx eas-cli build --profile preview --platform ios --non-interactive --auto-submit
 
 echo "Done! Build will appear in TestFlight in ~15-30 min."
