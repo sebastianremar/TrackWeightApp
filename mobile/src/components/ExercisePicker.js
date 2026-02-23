@@ -8,6 +8,8 @@ import {
   Modal,
   ActivityIndicator,
   StyleSheet,
+  KeyboardAvoidingView,
+  Platform,
 } from 'react-native';
 import { useTheme } from '../contexts/ThemeContext';
 import { ScaledSheet } from '../utils/responsive';
@@ -74,7 +76,7 @@ export default function ExercisePicker({ visible, library, custom, onSelect, onC
 
   return (
     <Modal visible={visible} animationType="slide" onRequestClose={handleClose}>
-      <View style={s.container}>
+      <KeyboardAvoidingView style={s.container} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
         <View style={s.header}>
           <Text style={s.title}>Select Exercise</Text>
           <TouchableOpacity onPress={handleClose} style={s.closeBtn}>
@@ -166,7 +168,7 @@ export default function ExercisePicker({ visible, library, custom, onSelect, onC
             <Text style={s.createBtnText}>+ Create Custom Exercise</Text>
           </TouchableOpacity>
         )}
-      </View>
+      </KeyboardAvoidingView>
     </Modal>
   );
 }
