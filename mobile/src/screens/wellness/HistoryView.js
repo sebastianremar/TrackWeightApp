@@ -4,13 +4,12 @@ import {
   Text,
   TouchableOpacity,
   ActivityIndicator,
-  Platform,
 } from 'react-native';
-import DateTimePicker from '@react-native-community/datetimepicker';
 import { useTheme } from '../../contexts/ThemeContext';
 import Card from '../../components/Card';
 import EmptyState from '../../components/EmptyState';
 import InlineError from '../../components/InlineError';
+import CalendarPickerModal from '../../components/CalendarPickerModal';
 import LogDetailModal from './LogDetailModal';
 import { shareWorkbook } from './exportWorkouts';
 import { ScaledSheet } from '../../utils/responsive';
@@ -77,19 +76,6 @@ export default React.memo(function HistoryView({ logs, loading, error, nextCurso
             <Text style={s.dateBtnText}>{formatDisplay(from)}</Text>
             <Text style={s.dateBtnIcon}>📅</Text>
           </TouchableOpacity>
-          {showFromPicker && (
-            <DateTimePicker
-              value={new Date(from + 'T12:00:00')}
-              mode="date"
-              display={Platform.OS === 'ios' ? 'inline' : 'default'}
-              maximumDate={new Date(to + 'T12:00:00')}
-              onChange={(_, selected) => {
-                setShowFromPicker(false);
-                if (selected) setFrom(selected.toISOString().split('T')[0]);
-              }}
-              themeVariant="light"
-            />
-          )}
         </View>
         <View style={s.filterField}>
           <Text style={s.filterLabel}>To</Text>
@@ -97,22 +83,27 @@ export default React.memo(function HistoryView({ logs, loading, error, nextCurso
             <Text style={s.dateBtnText}>{formatDisplay(to)}</Text>
             <Text style={s.dateBtnIcon}>📅</Text>
           </TouchableOpacity>
-          {showToPicker && (
-            <DateTimePicker
-              value={new Date(to + 'T12:00:00')}
-              mode="date"
-              display={Platform.OS === 'ios' ? 'inline' : 'default'}
-              minimumDate={new Date(from + 'T12:00:00')}
-              maximumDate={new Date()}
-              onChange={(_, selected) => {
-                setShowToPicker(false);
-                if (selected) setTo(selected.toISOString().split('T')[0]);
-              }}
-              themeVariant="light"
-            />
-          )}
         </View>
       </View>
+
+      <CalendarPickerModal
+        visible={showFromPicker}
+        value={from}
+        maxDate={to}
+        label="From Date"
+        onSelect={(d) => { setFrom(d); setShowFromPicker(false); }}
+        onClose={() => setShowFromPicker(false)}
+      />
+
+      <CalendarPickerModal
+        visible={showToPicker}
+        value={to}
+        minDate={from}
+        maxDate={todayStr()}
+        label="To Date"
+        onSelect={(d) => { setTo(d); setShowToPicker(false); }}
+        onClose={() => setShowToPicker(false)}
+      />
 
       {/* Export */}
       <TouchableOpacity
