@@ -2,16 +2,17 @@ import { Tabs, Redirect } from 'expo-router';
 import { Text, Image } from 'react-native';
 import { useAuth } from '../../src/contexts/AuthContext';
 import { useTheme } from '../../src/contexts/ThemeContext';
+import { moderateScale } from '../../src/utils/responsive';
 
 function TabIcon({ name, color }) {
   // Simple emoji icons — replace with a proper icon library (e.g. @expo/vector-icons) later
   const icons = {
-    wellness: '💪',
-    planner: '📋',
-    friends: '👥',
-    settings: '⚙️',
+    wellness: '\u{1F4AA}',
+    planner: '\u{1F4CB}',
+    friends: '\u{1F465}',
+    settings: '\u2699\uFE0F',
   };
-  return <Text style={{ fontSize: 22 }}>{icons[name] || '•'}</Text>;
+  return <Text style={{ fontSize: moderateScale(22, 0.3) }}>{icons[name] || '\u2022'}</Text>;
 }
 
 export default function TabLayout() {
@@ -31,7 +32,7 @@ export default function TabLayout() {
         headerLeft: () => (
           <Image
             source={require('../../assets/logo.png')}
-            style={{ width: 32, height: 32, borderRadius: 16, marginLeft: 16 }}
+            style={{ width: moderateScale(32), height: moderateScale(32), borderRadius: moderateScale(16), marginLeft: moderateScale(16) }}
           />
         ),
         tabBarStyle: {

@@ -1,7 +1,8 @@
 import { useState } from 'react';
-import { View, Text, TouchableOpacity, ActivityIndicator, StyleSheet } from 'react-native';
+import { View, Text, TouchableOpacity, ActivityIndicator } from 'react-native';
 import { useTheme } from '../../contexts/ThemeContext';
 import InlineError from '../../components/InlineError';
+import { ScaledSheet } from '../../utils/responsive';
 
 export default function FriendRequestCard({ request, onRespond }) {
   const { colors } = useTheme();
@@ -53,9 +54,9 @@ export default function FriendRequestCard({ request, onRespond }) {
 }
 
 function makeStyles(colors) {
-  return StyleSheet.create({
+  return ScaledSheet.create({
     card: {
-      paddingVertical: 10,
+      paddingVertical: '10@ms',
       borderBottomWidth: 1,
       borderBottomColor: colors.border,
     },
@@ -70,47 +71,47 @@ function makeStyles(colors) {
       flex: 1,
     },
     avatar: {
-      width: 40,
-      height: 40,
-      borderRadius: 20,
+      width: '40@ms',
+      height: '40@ms',
+      borderRadius: '20@ms',
       backgroundColor: colors.primary + '20',
       alignItems: 'center',
       justifyContent: 'center',
-      marginRight: 10,
+      marginRight: '10@ms',
     },
     avatarText: {
-      fontSize: 16,
+      fontSize: '16@ms0.3',
       fontWeight: '700',
       color: colors.primary,
     },
     name: {
-      fontSize: 15,
+      fontSize: '15@ms0.3',
       fontWeight: '600',
       color: colors.text,
     },
     actions: {
       flexDirection: 'row',
-      gap: 8,
+      gap: '8@ms',
     },
     acceptBtn: {
-      paddingVertical: 7,
-      paddingHorizontal: 14,
-      borderRadius: 8,
+      paddingVertical: '7@ms',
+      paddingHorizontal: '14@ms',
+      borderRadius: '8@ms',
       backgroundColor: colors.primary,
     },
     acceptText: {
-      fontSize: 13,
+      fontSize: '13@ms0.3',
       fontWeight: '600',
       color: '#fff',
     },
     rejectBtn: {
-      paddingVertical: 7,
-      paddingHorizontal: 14,
-      borderRadius: 8,
+      paddingVertical: '7@ms',
+      paddingHorizontal: '14@ms',
+      borderRadius: '8@ms',
       backgroundColor: colors.background,
     },
     rejectText: {
-      fontSize: 13,
+      fontSize: '13@ms0.3',
       fontWeight: '600',
       color: colors.textSecondary,
     },

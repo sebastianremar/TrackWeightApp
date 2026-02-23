@@ -1,9 +1,8 @@
 import { useState, useMemo } from 'react';
-import { View, Text, TouchableOpacity, StyleSheet, Dimensions } from 'react-native';
+import { View, Text, TouchableOpacity, useWindowDimensions } from 'react-native';
 import { LineChart } from 'react-native-gifted-charts';
 import { useTheme } from '../../contexts/ThemeContext';
-
-const CHART_WIDTH = Dimensions.get('window').width - 128; // page 16 + card 12 + body 12 per side + y-axis
+import { ScaledSheet, moderateScale } from '../../utils/responsive';
 
 const DATA_VIEWS = [
   { key: 'timeline', label: 'Timeline' },
@@ -54,6 +53,9 @@ export default function FriendChart({ friend, data }) {
   const { colors } = useTheme();
   const s = makeStyles(colors);
   const [dataView, setDataView] = useState('timeline');
+  const { width: windowWidth } = useWindowDimensions();
+
+  const chartWidth = windowWidth - moderateScale(128); // page 16 + card 12 + body 12 per side + y-axis
 
   const isCompare = dataView === 'compare';
 
@@ -145,7 +147,7 @@ export default function FriendChart({ friend, data }) {
     : `${friend.name}'s last 30 days`;
 
   const spacing = giftedData.length > 1
-    ? Math.max(30, CHART_WIDTH / giftedData.length)
+    ? Math.max(30, chartWidth / giftedData.length)
     : 60;
 
   return (
@@ -183,7 +185,7 @@ export default function FriendChart({ friend, data }) {
         <LineChart
           data={giftedData}
           data2={giftedData2}
-          width={CHART_WIDTH}
+          width={chartWidth}
           height={180}
           color={isCompare ? colors.primary : colors.warning}
           color2={colors.warning}
@@ -221,34 +223,34 @@ export default function FriendChart({ friend, data }) {
 }
 
 function makeStyles(colors) {
-  return StyleSheet.create({
+  return ScaledSheet.create({
     container: {
-      marginTop: 12,
+      marginTop: '12@ms',
     },
     title: {
-      fontSize: 15,
+      fontSize: '15@ms0.3',
       fontWeight: '700',
       color: colors.text,
-      marginBottom: 8,
+      marginBottom: '8@ms',
     },
     viewPicker: {
       flexDirection: 'row',
       backgroundColor: colors.background,
-      borderRadius: 8,
-      padding: 2,
-      marginBottom: 10,
+      borderRadius: '8@ms',
+      padding: '2@ms',
+      marginBottom: '10@ms',
     },
     viewBtn: {
       flex: 1,
-      paddingVertical: 6,
+      paddingVertical: '6@ms',
       alignItems: 'center',
-      borderRadius: 6,
+      borderRadius: '6@ms',
     },
     viewBtnActive: {
       backgroundColor: colors.primary,
     },
     viewText: {
-      fontSize: 11,
+      fontSize: '11@ms0.3',
       fontWeight: '600',
       color: colors.textMuted,
     },
@@ -257,25 +259,25 @@ function makeStyles(colors) {
     },
     legend: {
       flexDirection: 'row',
-      gap: 16,
-      marginBottom: 8,
+      gap: '16@ms',
+      marginBottom: '8@ms',
     },
     legendItem: {
       flexDirection: 'row',
       alignItems: 'center',
-      gap: 4,
+      gap: '4@ms',
     },
     legendDot: {
-      width: 8,
-      height: 8,
-      borderRadius: 4,
+      width: '8@ms',
+      height: '8@ms',
+      borderRadius: '4@ms',
     },
     legendLabel: {
-      fontSize: 12,
+      fontSize: '12@ms0.3',
       color: colors.textSecondary,
     },
     chartWrap: {
-      marginLeft: -8,
+      marginLeft: '-8@ms',
     },
   });
 }

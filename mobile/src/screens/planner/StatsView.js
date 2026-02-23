@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useMemo, useRef } from 'react';
-import { View, Text, TouchableOpacity, ActivityIndicator, StyleSheet } from 'react-native';
+import { View, Text, TouchableOpacity, ActivityIndicator } from 'react-native';
+import { ScaledSheet } from '../../utils/responsive';
 import { useTheme } from '../../contexts/ThemeContext';
 import { getHabitStats, getHabitStatsSummary } from '../../api/habitEntries';
 import Card from '../../components/Card';
@@ -205,17 +206,17 @@ export default React.memo(function StatsView({ habits }) {
 });
 
 function makeStyles(colors) {
-  return StyleSheet.create({
+  return ScaledSheet.create({
     toggleRow: {
       flexDirection: 'row',
-      gap: 8,
-      marginBottom: 16,
+      gap: '8@ms',
+      marginBottom: '16@ms',
     },
     toggleBtn: {
       flex: 1,
-      paddingVertical: 10,
+      paddingVertical: '10@ms',
       alignItems: 'center',
-      borderRadius: 8,
+      borderRadius: '8@ms',
       backgroundColor: colors.surface,
       borderWidth: 1,
       borderColor: colors.border,
@@ -225,7 +226,7 @@ function makeStyles(colors) {
       borderColor: colors.primary,
     },
     toggleText: {
-      fontSize: 14,
+      fontSize: '14@ms0.3',
       fontWeight: '600',
       color: colors.textSecondary,
     },
@@ -233,73 +234,73 @@ function makeStyles(colors) {
       color: '#fff',
     },
     center: {
-      paddingVertical: 60,
+      paddingVertical: '60@vs',
       alignItems: 'center',
     },
     content: {
-      gap: 12,
+      gap: '12@ms',
     },
     cardTitle: {
-      fontSize: 16,
+      fontSize: '16@ms0.3',
       fontWeight: '700',
       color: colors.text,
-      marginBottom: 12,
+      marginBottom: '12@ms',
     },
     cardSpacing: {
-      marginTop: 12,
+      marginTop: '12@ms',
     },
     completionRow: {
-      marginBottom: 8,
+      marginBottom: '8@ms',
     },
     completionPct: {
-      fontSize: 32,
+      fontSize: '32@ms0.3',
       fontWeight: '800',
       color: colors.primary,
     },
     completionSub: {
-      fontSize: 13,
+      fontSize: '13@ms0.3',
       color: colors.textMuted,
-      marginTop: 2,
+      marginTop: '2@ms',
     },
     progressBar: {
-      height: 8,
+      height: '8@ms',
       backgroundColor: colors.border,
-      borderRadius: 4,
+      borderRadius: '4@ms',
       overflow: 'hidden',
-      marginBottom: 12,
+      marginBottom: '12@ms',
     },
     progressFill: {
       height: '100%',
-      borderRadius: 4,
+      borderRadius: '4@ms',
     },
     breakdownBar: {
       flexDirection: 'row',
-      borderRadius: 4,
+      borderRadius: '4@ms',
       overflow: 'hidden',
     },
     muted: {
-      fontSize: 14,
+      fontSize: '14@ms0.3',
       color: colors.textMuted,
     },
     badRow: {
       flexDirection: 'row',
       alignItems: 'center',
-      paddingVertical: 8,
+      paddingVertical: '8@ms',
     },
     badDot: {
-      width: 10,
-      height: 10,
-      borderRadius: 5,
-      marginRight: 10,
+      width: '10@ms',
+      height: '10@ms',
+      borderRadius: '5@ms',
+      marginRight: '10@ms',
     },
     badName: {
       flex: 1,
-      fontSize: 14,
+      fontSize: '14@ms0.3',
       fontWeight: '500',
       color: colors.text,
     },
     badCount: {
-      fontSize: 13,
+      fontSize: '13@ms0.3',
       color: colors.textMuted,
       fontWeight: '500',
     },

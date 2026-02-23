@@ -1,8 +1,9 @@
 import { useState, useEffect, useRef } from 'react';
-import { View, Text, TouchableOpacity, ActivityIndicator, StyleSheet } from 'react-native';
+import { View, Text, TouchableOpacity, ActivityIndicator } from 'react-native';
 import { getFriendHabits, getFriendHabitsStats } from '../../api/friends';
 import { useTheme } from '../../contexts/ThemeContext';
 import InlineError from '../../components/InlineError';
+import { ScaledSheet } from '../../utils/responsive';
 
 export default function FriendHabitsPanel({ friendEmail }) {
   const { colors } = useTheme();
@@ -151,36 +152,36 @@ export default function FriendHabitsPanel({ friendEmail }) {
 }
 
 function makeStyles(colors) {
-  return StyleSheet.create({
-    panel: { marginTop: 8 },
+  return ScaledSheet.create({
+    panel: { marginTop: '8@ms' },
     center: {
-      paddingVertical: 24,
+      paddingVertical: '24@ms',
       alignItems: 'center',
     },
     empty: {
       textAlign: 'center',
       color: colors.textMuted,
-      fontSize: 14,
-      paddingVertical: 20,
+      fontSize: '14@ms0.3',
+      paddingVertical: '20@ms',
     },
     periodToggle: {
       flexDirection: 'row',
       backgroundColor: colors.background,
-      borderRadius: 8,
-      padding: 2,
-      marginBottom: 12,
+      borderRadius: '8@ms',
+      padding: '2@ms',
+      marginBottom: '12@ms',
     },
     periodBtn: {
       flex: 1,
-      paddingVertical: 6,
+      paddingVertical: '6@ms',
       alignItems: 'center',
-      borderRadius: 6,
+      borderRadius: '6@ms',
     },
     periodActive: {
       backgroundColor: colors.primary,
     },
     periodText: {
-      fontSize: 13,
+      fontSize: '13@ms0.3',
       fontWeight: '600',
       color: colors.textMuted,
     },
@@ -191,75 +192,75 @@ function makeStyles(colors) {
       flexDirection: 'row',
       justifyContent: 'space-between',
       alignItems: 'center',
-      marginBottom: 12,
+      marginBottom: '12@ms',
     },
     overallLabel: {
-      fontSize: 14,
+      fontSize: '14@ms0.3',
       fontWeight: '600',
       color: colors.textSecondary,
     },
     overallPct: {
-      fontSize: 18,
+      fontSize: '18@ms0.3',
       fontWeight: '700',
       color: colors.primary,
     },
     habitRow: {
-      marginBottom: 10,
+      marginBottom: '10@ms',
     },
     habitHeader: {
       flexDirection: 'row',
       alignItems: 'center',
-      marginBottom: 4,
+      marginBottom: '4@ms',
     },
     habitDot: {
-      width: 8,
-      height: 8,
-      borderRadius: 4,
-      marginRight: 6,
+      width: '8@ms',
+      height: '8@ms',
+      borderRadius: '4@ms',
+      marginRight: '6@ms',
     },
     habitName: {
-      fontSize: 13,
+      fontSize: '13@ms0.3',
       color: colors.text,
       flex: 1,
     },
     buildBadge: {
-      paddingHorizontal: 6,
-      paddingVertical: 2,
-      borderRadius: 4,
+      paddingHorizontal: '6@ms',
+      paddingVertical: '2@ms',
+      borderRadius: '4@ms',
       backgroundColor: colors.successBg,
-      marginRight: 8,
+      marginRight: '8@ms',
     },
     buildBadgeText: {
-      fontSize: 10,
+      fontSize: '10@ms0.3',
       fontWeight: '600',
       color: colors.success,
     },
     limitBadge: {
-      paddingHorizontal: 6,
-      paddingVertical: 2,
-      borderRadius: 4,
+      paddingHorizontal: '6@ms',
+      paddingVertical: '2@ms',
+      borderRadius: '4@ms',
       backgroundColor: colors.warningBg,
-      marginRight: 8,
+      marginRight: '8@ms',
     },
     limitBadgeText: {
-      fontSize: 10,
+      fontSize: '10@ms0.3',
       fontWeight: '600',
       color: colors.warning,
     },
     habitCount: {
-      fontSize: 12,
+      fontSize: '12@ms0.3',
       fontWeight: '600',
       color: colors.textMuted,
     },
     barBg: {
-      height: 6,
-      borderRadius: 3,
+      height: '6@ms',
+      borderRadius: '3@ms',
       backgroundColor: colors.background,
       overflow: 'hidden',
     },
     barFill: {
-      height: 6,
-      borderRadius: 3,
+      height: '6@ms',
+      borderRadius: '3@ms',
     },
   });
 }

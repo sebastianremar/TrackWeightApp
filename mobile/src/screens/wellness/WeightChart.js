@@ -1,7 +1,8 @@
 import React, { useMemo, useRef } from 'react';
-import { View, Text, TouchableOpacity, StyleSheet, Dimensions } from 'react-native';
+import { View, Text, TouchableOpacity, useWindowDimensions } from 'react-native';
 import { LineChart } from 'react-native-gifted-charts';
 import { useTheme } from '../../contexts/ThemeContext';
+import { ScaledSheet, moderateScale } from '../../utils/responsive';
 
 const RANGES = [
   { label: '7D', value: 7 },
@@ -10,12 +11,13 @@ const RANGES = [
   { label: 'All', value: 'all' },
 ];
 
-const CHART_WIDTH = Dimensions.get('window').width - 96; // 32px page + 32px card + 32px y-axis
-
 export default React.memo(function WeightChart({ entries, range, onRangeChange }) {
   const { colors, weightUnit } = useTheme();
   const s = makeStyles(colors);
   const hasAnimated = useRef(false);
+  const { width: screenWidth } = useWindowDimensions();
+
+  const CHART_WIDTH = screenWidth - moderateScale(96); // 32px page + 32px card + 32px y-axis
 
   const sorted = useMemo(
     () => [...entries].sort((a, b) => a.date.localeCompare(b.date)),
@@ -121,11 +123,11 @@ export default React.memo(function WeightChart({ entries, range, onRangeChange }
 });
 
 function makeStyles(colors) {
-  return StyleSheet.create({
+  return ScaledSheet.create({
     container: {
       backgroundColor: colors.surface,
-      borderRadius: 12,
-      padding: 16,
+      borderRadius: '12@ms',
+      padding: '16@ms',
       borderWidth: 1,
       borderColor: colors.border,
     },
@@ -133,10 +135,10 @@ function makeStyles(colors) {
       flexDirection: 'row',
       justifyContent: 'space-between',
       alignItems: 'center',
-      marginBottom: 12,
+      marginBottom: '12@ms',
     },
     title: {
-      fontSize: 15,
+      fontSize: '15@ms0.3',
       fontWeight: '700',
       color: colors.text,
       flexShrink: 1,
@@ -144,20 +146,20 @@ function makeStyles(colors) {
     rangePicker: {
       flexDirection: 'row',
       backgroundColor: colors.background,
-      borderRadius: 8,
-      padding: 2,
+      borderRadius: '8@ms',
+      padding: '2@ms',
       flexShrink: 0,
     },
     rangeBtn: {
-      paddingVertical: 6,
-      paddingHorizontal: 8,
-      borderRadius: 6,
+      paddingVertical: '6@ms',
+      paddingHorizontal: '8@ms',
+      borderRadius: '6@ms',
     },
     rangeBtnActive: {
       backgroundColor: colors.primary,
     },
     rangeText: {
-      fontSize: 12,
+      fontSize: '12@ms0.3',
       fontWeight: '600',
       color: colors.textMuted,
     },
@@ -165,29 +167,29 @@ function makeStyles(colors) {
       color: '#fff',
     },
     chartWrap: {
-      marginLeft: -4,
+      marginLeft: '-4@ms',
     },
     empty: {
       textAlign: 'center',
       color: colors.textMuted,
-      fontSize: 14,
-      paddingVertical: 40,
+      fontSize: '14@ms0.3',
+      paddingVertical: '40@ms',
     },
     tooltip: {
       backgroundColor: colors.surface,
-      borderRadius: 6,
-      padding: 6,
+      borderRadius: '6@ms',
+      padding: '6@ms',
       borderWidth: 1,
       borderColor: colors.border,
       alignItems: 'center',
     },
     tooltipWeight: {
-      fontSize: 13,
+      fontSize: '13@ms0.3',
       fontWeight: '700',
       color: colors.text,
     },
     tooltipDate: {
-      fontSize: 11,
+      fontSize: '11@ms0.3',
       color: colors.textMuted,
     },
   });

@@ -1,12 +1,13 @@
-import { View, Text, StyleSheet } from 'react-native';
+import { View, Text } from 'react-native';
 import Svg, { Circle } from 'react-native-svg';
+import { ScaledSheet, moderateScale } from '../../utils/responsive';
 import { useTheme } from '../../contexts/ThemeContext';
 import EmptyState from '../../components/EmptyState';
 import HabitItem from './HabitItem';
 
 function CompletionRing({ completed, total, pct, colors }) {
-  const size = 80;
-  const strokeWidth = 8;
+  const size = moderateScale(80);
+  const strokeWidth = moderateScale(8);
   const radius = (size - strokeWidth) / 2;
   const circumference = 2 * Math.PI * radius;
   const offset = circumference * (1 - (total > 0 ? completed / total : 0));
@@ -44,16 +45,16 @@ function CompletionRing({ completed, total, pct, colors }) {
   );
 }
 
-const ringStyles = StyleSheet.create({
+const ringStyles = ScaledSheet.create({
   wrap: {
     alignItems: 'center',
     justifyContent: 'center',
-    width: 80,
-    height: 80,
+    width: '80@ms',
+    height: '80@ms',
   },
   label: {
     position: 'absolute',
-    fontSize: 18,
+    fontSize: '18@ms0.3',
     fontWeight: '700',
   },
 });
@@ -145,18 +146,18 @@ export default function DayDetailPanel({
 }
 
 function makeStyles(colors) {
-  return StyleSheet.create({
+  return ScaledSheet.create({
     panel: {
-      marginTop: 12,
+      marginTop: '12@ms',
     },
     summary: {
       flexDirection: 'row',
       alignItems: 'center',
-      gap: 16,
-      marginBottom: 16,
+      gap: '16@ms',
+      marginBottom: '16@ms',
       backgroundColor: colors.surface,
-      borderRadius: 12,
-      padding: 16,
+      borderRadius: '12@ms',
+      padding: '16@ms',
       borderWidth: 1,
       borderColor: colors.border,
     },
@@ -164,13 +165,13 @@ function makeStyles(colors) {
       flex: 1,
     },
     dayLabel: {
-      fontSize: 16,
+      fontSize: '16@ms0.3',
       fontWeight: '700',
       color: colors.text,
-      marginBottom: 4,
+      marginBottom: '4@ms',
     },
     summaryLine: {
-      fontSize: 14,
+      fontSize: '14@ms0.3',
       color: colors.textSecondary,
     },
   });

@@ -8,16 +8,17 @@ import {
   ScrollView,
   ActivityIndicator,
   Animated,
-  Platform,
   StyleSheet,
 } from 'react-native';
-import DateTimePicker from '@react-native-community/datetimepicker';
 import { Swipeable } from 'react-native-gesture-handler';
 import { useTheme } from '../../contexts/ThemeContext';
 import Card from '../../components/Card';
 import InlineError from '../../components/InlineError';
 import ExercisePicker from '../../components/ExercisePicker';
+import NumberPicker from '../../components/NumberPicker';
+import CalendarPickerModal from '../../components/CalendarPickerModal';
 import { getTemplatePrefill } from '../../api/workouts';
+import { ScaledSheet } from '../../utils/responsive';
 
 function todayStr() {
   return new Date().toISOString().split('T')[0];
@@ -103,6 +104,8 @@ export default React.memo(function LogView({ templates, library, custom, addLog,
   const [stepperWeight, setStepperWeight] = useState(0);
   const [stepperReps, setStepperReps] = useState(0);
   const [editingSetIdx, setEditingSetIdx] = useState(null);
+  const [showWeightWheel, setShowWeightWheel] = useState(false);
+  const [showRepsWheel, setShowRepsWheel] = useState(false);
 
   /* ── Template handling ── */
 
@@ -308,13 +311,12 @@ export default React.memo(function LogView({ templates, library, custom, addLog,
           >
             <Text style={s.stepperBtnText}>−</Text>
           </TouchableOpacity>
-          <TextInput
+          <TouchableOpacity
             style={s.stepperValue}
-            value={String(stepperWeight)}
-            onChangeText={(v) => setStepperWeight(parseFloat(v) || 0)}
-            keyboardType="decimal-pad"
-            selectTextOnFocus
-          />
+            onPress={() => setShowWeightWheel(true)}
+          >
+            <Text style={s.stepperValueText}>{stepperWeight}</Text>
+          </TouchableOpacity>
           <TouchableOpacity
             style={s.stepperBtn}
             onPress={() => setStepperWeight((w) => +(w + 2.5).toFixed(1))}
@@ -322,6 +324,18 @@ export default React.memo(function LogView({ templates, library, custom, addLog,
             <Text style={s.stepperBtnText}>+</Text>
           </TouchableOpacity>
         </View>
+
+        <NumberPicker
+          visible={showWeightWheel}
+          value={stepperWeight}
+          min={0}
+          max={999}
+          step={0.1}
+          unit="lb"
+          label="Weight"
+          onConfirm={(v) => { setStepperWeight(v); setShowWeightWheel(false); }}
+          onCancel={() => setShowWeightWheel(false)}
+        />
 
         {/* Reps Stepper */}
         <Text style={s.stepperLabel}>Reps</Text>
@@ -332,13 +346,12 @@ export default React.memo(function LogView({ templates, library, custom, addLog,
           >
             <Text style={s.stepperBtnText}>−</Text>
           </TouchableOpacity>
-          <TextInput
+          <TouchableOpacity
             style={s.stepperValue}
-            value={String(stepperReps)}
-            onChangeText={(v) => setStepperReps(parseInt(v, 10) || 0)}
-            keyboardType="number-pad"
-            selectTextOnFocus
-          />
+            onPress={() => setShowRepsWheel(true)}
+          >
+            <Text style={s.stepperValueText}>{stepperReps}</Text>
+          </TouchableOpacity>
           <TouchableOpacity
             style={s.stepperBtn}
             onPress={() => setStepperReps((r) => r + 1)}
@@ -346,6 +359,18 @@ export default React.memo(function LogView({ templates, library, custom, addLog,
             <Text style={s.stepperBtnText}>+</Text>
           </TouchableOpacity>
         </View>
+
+        <NumberPicker
+          visible={showRepsWheel}
+          value={stepperReps}
+          min={0}
+          max={999}
+          step={1}
+          unit="reps"
+          label="Reps"
+          onConfirm={(v) => { setStepperReps(v); setShowRepsWheel(false); }}
+          onCancel={() => setShowRepsWheel(false)}
+        />
 
         {/* Save / Clear / +1 */}
         <View style={s.stepperActions}>
@@ -447,22 +472,14 @@ export default React.memo(function LogView({ templates, library, custom, addLog,
           <Text style={s.todayLink}>Reset to today</Text>
         </TouchableOpacity>
       )}
-      {showDatePicker && (
-        <DateTimePicker
-          value={new Date(date + 'T12:00:00')}
-          mode="date"
-          display={Platform.OS === 'ios' ? 'inline' : 'default'}
-          maximumDate={new Date()}
-          onChange={(_, selected) => {
-            setShowDatePicker(false);
-            if (selected) {
-              setDate(selected.toISOString().split('T')[0]);
-              setSuccess(false);
-            }
-          }}
-          themeVariant="light"
-        />
-      )}
+      <CalendarPickerModal
+        visible={showDatePicker}
+        value={date}
+        maxDate={todayStr()}
+        label="Workout Date"
+        onSelect={(d) => { setDate(d); setSuccess(false); setShowDatePicker(false); }}
+        onClose={() => setShowDatePicker(false)}
+      />
 
       {prefillDate && (
         <Text style={s.prefillNote}>Pre-filled from session on {prefillDate}</Text>
@@ -562,23 +579,23 @@ export default React.memo(function LogView({ templates, library, custom, addLog,
 /* ── Styles ── */
 
 function makeStyles(colors) {
-  return StyleSheet.create({
+  return ScaledSheet.create({
     /* Shared */
     label: {
-      fontSize: 14,
+      fontSize: '14@ms0.3',
       fontWeight: '600',
       color: colors.textSecondary,
-      marginBottom: 6,
-      marginTop: 12,
+      marginBottom: '6@ms',
+      marginTop: '12@ms',
     },
 
     /* Template chips */
-    templateRow: { maxHeight: 44, marginBottom: 4 },
-    templateContent: { gap: 8 },
+    templateRow: { maxHeight: '44@ms', marginBottom: '4@ms' },
+    templateContent: { gap: '8@ms' },
     templateChip: {
-      paddingHorizontal: 16,
-      paddingVertical: 8,
-      borderRadius: 20,
+      paddingHorizontal: '16@ms',
+      paddingVertical: '8@ms',
+      borderRadius: '20@ms',
       backgroundColor: colors.surface,
       borderWidth: 1,
       borderColor: colors.border,
@@ -588,7 +605,7 @@ function makeStyles(colors) {
       borderColor: colors.primary,
     },
     templateChipText: {
-      fontSize: 14,
+      fontSize: '14@ms0.3',
       color: colors.textSecondary,
       fontWeight: '500',
     },
@@ -600,155 +617,155 @@ function makeStyles(colors) {
       alignItems: 'center',
       justifyContent: 'space-between',
       backgroundColor: colors.surface,
-      borderRadius: 10,
-      padding: 12,
+      borderRadius: '10@ms',
+      padding: '12@ms',
       borderWidth: 1,
       borderColor: colors.border,
     },
     dateBtnText: {
-      fontSize: 16,
+      fontSize: '16@ms0.3',
       fontWeight: '600',
       color: colors.text,
     },
     dateBtnIcon: {
-      fontSize: 18,
+      fontSize: '18@ms0.3',
     },
     todayLink: {
-      fontSize: 13,
+      fontSize: '13@ms0.3',
       color: colors.primary,
       fontWeight: '500',
-      marginTop: 6,
+      marginTop: '6@ms',
     },
     prefillNote: {
-      fontSize: 13,
+      fontSize: '13@ms0.3',
       color: colors.primary,
       fontWeight: '500',
-      marginTop: 6,
+      marginTop: '6@ms',
     },
 
     /* Overview exercise card */
-    exCard: { marginTop: 12, padding: 12 },
+    exCard: { marginTop: '12@ms', padding: '12@ms' },
     exHeader: {
       flexDirection: 'row',
       justifyContent: 'space-between',
       alignItems: 'center',
     },
     exInfo: { flex: 1 },
-    exName: { fontSize: 15, fontWeight: '600', color: colors.text },
-    exMuscle: { fontSize: 13, color: colors.textMuted, marginTop: 2 },
-    exRemoveBtn: { padding: 6 },
-    exRemoveText: { fontSize: 16, color: colors.error, fontWeight: '600' },
+    exName: { fontSize: '15@ms0.3', fontWeight: '600', color: colors.text },
+    exMuscle: { fontSize: '13@ms0.3', color: colors.textMuted, marginTop: '2@ms' },
+    exRemoveBtn: { padding: '6@ms' },
+    exRemoveText: { fontSize: '16@ms0.3', color: colors.error, fontWeight: '600' },
 
-    overviewSets: { marginTop: 10 },
+    overviewSets: { marginTop: '10@ms' },
     overviewSetRow: {
       flexDirection: 'row',
       alignItems: 'center',
-      paddingVertical: 3,
+      paddingVertical: '3@ms',
     },
     overviewSetHeader: {
-      fontSize: 11,
+      fontSize: '11@ms0.3',
       fontWeight: '600',
       color: colors.textMuted,
       textTransform: 'uppercase',
     },
     overviewSetText: {
-      fontSize: 14,
+      fontSize: '14@ms0.3',
       color: colors.textSecondary,
     },
-    overviewSetNumCol: { width: 36, textAlign: 'center' },
+    overviewSetNumCol: { width: '36@ms', textAlign: 'center' },
     overviewSetValCol: { flex: 1, textAlign: 'center' },
     noSetsText: {
-      fontSize: 13,
+      fontSize: '13@ms0.3',
       color: colors.textMuted,
       fontStyle: 'italic',
-      marginTop: 8,
+      marginTop: '8@ms',
     },
 
     /* Add exercise button */
     addExBtn: {
-      marginTop: 12,
-      paddingVertical: 14,
+      marginTop: '12@ms',
+      paddingVertical: '14@ms',
       alignItems: 'center',
-      borderRadius: 10,
+      borderRadius: '10@ms',
       backgroundColor: colors.surface,
       borderWidth: 1,
       borderColor: colors.primary,
       borderStyle: 'dashed',
     },
-    addExBtnText: { fontSize: 15, color: colors.primary, fontWeight: '600' },
+    addExBtnText: { fontSize: '15@ms0.3', color: colors.primary, fontWeight: '600' },
 
     /* Notes */
     notesInput: {
       backgroundColor: colors.surface,
-      borderRadius: 10,
-      padding: 12,
-      fontSize: 15,
+      borderRadius: '10@ms',
+      padding: '12@ms',
+      fontSize: '15@ms0.3',
       color: colors.text,
       borderWidth: 1,
       borderColor: colors.border,
       textAlignVertical: 'top',
-      minHeight: 60,
+      minHeight: '60@ms',
     },
 
     /* Success / Save */
     successBox: {
       backgroundColor: colors.successBg,
-      borderRadius: 8,
-      padding: 12,
-      marginTop: 8,
+      borderRadius: '8@ms',
+      padding: '12@ms',
+      marginTop: '8@ms',
       borderWidth: 1,
       borderColor: colors.success,
     },
     successText: {
       color: colors.success,
-      fontSize: 14,
+      fontSize: '14@ms0.3',
       fontWeight: '600',
       textAlign: 'center',
     },
     saveBtn: {
-      marginTop: 12,
-      paddingVertical: 14,
+      marginTop: '12@ms',
+      paddingVertical: '14@ms',
       alignItems: 'center',
-      borderRadius: 10,
+      borderRadius: '10@ms',
       backgroundColor: colors.primary,
     },
     saveBtnDisabled: { opacity: 0.5 },
     btnDisabled: { opacity: 0.4 },
-    saveBtnText: { fontSize: 16, color: '#fff', fontWeight: '700' },
+    saveBtnText: { fontSize: '16@ms0.3', color: '#fff', fontWeight: '700' },
 
     /* ── Detail mode ── */
-    backBtn: { marginBottom: 4 },
-    backBtnText: { fontSize: 16, color: colors.primary, fontWeight: '600' },
+    backBtn: { marginBottom: '4@ms' },
+    backBtnText: { fontSize: '16@ms0.3', color: colors.primary, fontWeight: '600' },
     detailTitle: {
-      fontSize: 22,
+      fontSize: '22@ms0.3',
       fontWeight: '700',
       color: colors.text,
-      marginTop: 4,
+      marginTop: '4@ms',
     },
     detailMuscle: {
-      fontSize: 14,
+      fontSize: '14@ms0.3',
       color: colors.textMuted,
-      marginTop: 2,
-      marginBottom: 8,
+      marginTop: '2@ms',
+      marginBottom: '8@ms',
     },
 
     /* Steppers */
     stepperLabel: {
-      fontSize: 14,
+      fontSize: '14@ms0.3',
       fontWeight: '600',
       color: colors.textSecondary,
-      marginTop: 16,
-      marginBottom: 8,
+      marginTop: '16@ms',
+      marginBottom: '8@ms',
     },
     stepperRow: {
       flexDirection: 'row',
       alignItems: 'center',
-      gap: 12,
+      gap: '12@ms',
     },
     stepperBtn: {
-      width: 52,
-      height: 52,
-      borderRadius: 12,
+      width: '52@ms',
+      height: '52@ms',
+      borderRadius: '12@ms',
       backgroundColor: colors.surface,
       borderWidth: 1,
       borderColor: colors.border,
@@ -756,89 +773,93 @@ function makeStyles(colors) {
       justifyContent: 'center',
     },
     stepperBtnText: {
-      fontSize: 24,
+      fontSize: '24@ms0.3',
       fontWeight: '700',
       color: colors.primary,
     },
     stepperValue: {
       flex: 1,
-      fontSize: 28,
+      backgroundColor: colors.surface,
+      borderRadius: '12@ms',
+      borderWidth: 1,
+      borderColor: colors.border,
+      paddingVertical: '8@ms',
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+    stepperValueText: {
+      fontSize: '28@ms0.3',
       fontWeight: '700',
       color: colors.text,
       textAlign: 'center',
-      backgroundColor: colors.surface,
-      borderRadius: 12,
-      borderWidth: 1,
-      borderColor: colors.border,
-      paddingVertical: 8,
     },
 
     /* Save / Clear actions */
     stepperActions: {
       flexDirection: 'row',
-      gap: 12,
-      marginTop: 20,
+      gap: '12@ms',
+      marginTop: '20@ms',
     },
     clearBtn: {
       flex: 1,
-      paddingVertical: 14,
+      paddingVertical: '14@ms',
       alignItems: 'center',
-      borderRadius: 10,
+      borderRadius: '10@ms',
       backgroundColor: colors.surface,
       borderWidth: 1,
       borderColor: colors.border,
     },
     clearBtnText: {
-      fontSize: 15,
+      fontSize: '15@ms0.3',
       fontWeight: '600',
       color: colors.textSecondary,
     },
     plusOneBtn: {
-      paddingVertical: 14,
-      paddingHorizontal: 18,
+      paddingVertical: '14@ms',
+      paddingHorizontal: '18@ms',
       alignItems: 'center',
-      borderRadius: 10,
+      borderRadius: '10@ms',
       backgroundColor: colors.surface,
       borderWidth: 1,
       borderColor: colors.primary,
     },
     plusOneBtnText: {
-      fontSize: 15,
+      fontSize: '15@ms0.3',
       fontWeight: '700',
       color: colors.primary,
     },
     saveSetBtn: {
       flex: 1,
-      paddingVertical: 14,
+      paddingVertical: '14@ms',
       alignItems: 'center',
-      borderRadius: 10,
+      borderRadius: '10@ms',
       backgroundColor: colors.primary,
     },
-    saveSetBtnText: { fontSize: 15, fontWeight: '700', color: '#fff' },
-    cancelEditBtn: { alignItems: 'center', marginTop: 8 },
+    saveSetBtnText: { fontSize: '15@ms0.3', fontWeight: '700', color: '#fff' },
+    cancelEditBtn: { alignItems: 'center', marginTop: '8@ms' },
     cancelEditText: {
-      fontSize: 14,
+      fontSize: '14@ms0.3',
       color: colors.textMuted,
       fontWeight: '500',
     },
 
     /* Set list in detail */
     emptyText: {
-      fontSize: 14,
+      fontSize: '14@ms0.3',
       color: colors.textMuted,
       fontStyle: 'italic',
-      marginTop: 8,
+      marginTop: '8@ms',
     },
     setListHeaderRow: {
       flexDirection: 'row',
       alignItems: 'center',
-      paddingVertical: 6,
-      paddingHorizontal: 12,
+      paddingVertical: '6@ms',
+      paddingHorizontal: '12@ms',
       borderBottomWidth: StyleSheet.hairlineWidth,
       borderBottomColor: colors.border,
     },
     setListHeaderText: {
-      fontSize: 12,
+      fontSize: '12@ms0.3',
       fontWeight: '600',
       color: colors.textMuted,
       textTransform: 'uppercase',
@@ -846,8 +867,8 @@ function makeStyles(colors) {
     setListRow: {
       flexDirection: 'row',
       alignItems: 'center',
-      paddingVertical: 12,
-      paddingHorizontal: 12,
+      paddingVertical: '12@ms',
+      paddingHorizontal: '12@ms',
       backgroundColor: colors.surface,
       borderBottomWidth: StyleSheet.hairlineWidth,
       borderBottomColor: colors.border,
@@ -859,16 +880,16 @@ function makeStyles(colors) {
       borderLeftColor: colors.primary,
     },
     setListText: {
-      fontSize: 15,
+      fontSize: '15@ms0.3',
       color: colors.text,
     },
-    setListNumCol: { width: 36, textAlign: 'center', fontWeight: '600' },
+    setListNumCol: { width: '36@ms', textAlign: 'center', fontWeight: '600' },
     setListValCol: { flex: 1, textAlign: 'center' },
     setListHint: {
-      fontSize: 12,
+      fontSize: '12@ms0.3',
       color: colors.textMuted,
       textAlign: 'center',
-      marginTop: 8,
+      marginTop: '8@ms',
     },
 
     /* Swipeable delete action */
@@ -876,8 +897,8 @@ function makeStyles(colors) {
       backgroundColor: colors.error,
       justifyContent: 'center',
       alignItems: 'center',
-      width: 80,
+      width: '80@ms',
     },
-    deleteActionText: { color: '#fff', fontWeight: '700', fontSize: 14 },
+    deleteActionText: { color: '#fff', fontWeight: '700', fontSize: '14@ms0.3' },
   });
 }

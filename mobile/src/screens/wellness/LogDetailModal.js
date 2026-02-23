@@ -9,6 +9,7 @@ import {
 } from 'react-native';
 import { useTheme } from '../../contexts/ThemeContext';
 import ConfirmDialog from '../../components/ConfirmDialog';
+import { ScaledSheet } from '../../utils/responsive';
 
 function calcVolume(sets) {
   return (sets || []).reduce((sum, s) => sum + (s.weight || 0) * (s.reps || 0), 0);
@@ -109,7 +110,7 @@ export default function LogDetailModal({ visible, log, onDelete, onClose }) {
 }
 
 function makeStyles(colors) {
-  return StyleSheet.create({
+  return ScaledSheet.create({
     container: {
       flex: 1,
       backgroundColor: colors.background,
@@ -118,58 +119,58 @@ function makeStyles(colors) {
       flexDirection: 'row',
       justifyContent: 'space-between',
       alignItems: 'center',
-      padding: 16,
-      paddingTop: 60,
+      padding: '16@ms',
+      paddingTop: '60@vs',
       backgroundColor: colors.surface,
       borderBottomWidth: 1,
       borderBottomColor: colors.border,
     },
     headerBtn: {
-      minWidth: 60,
+      minWidth: '60@ms',
     },
     headerBtnText: {
-      fontSize: 16,
+      fontSize: '16@ms0.3',
       color: colors.primary,
       fontWeight: '500',
     },
     headerTitle: {
-      fontSize: 17,
+      fontSize: '17@ms0.3',
       fontWeight: '700',
       color: colors.text,
       flex: 1,
       textAlign: 'center',
     },
     deleteText: {
-      fontSize: 16,
+      fontSize: '16@ms0.3',
       color: colors.error,
       fontWeight: '500',
       textAlign: 'right',
     },
     body: {
       flex: 1,
-      padding: 16,
+      padding: '16@ms',
     },
     metaRow: {
       flexDirection: 'row',
       justifyContent: 'space-between',
       alignItems: 'center',
-      marginBottom: 16,
+      marginBottom: '16@ms',
     },
     date: {
-      fontSize: 16,
+      fontSize: '16@ms0.3',
       fontWeight: '600',
       color: colors.text,
     },
     totalVolume: {
-      fontSize: 14,
+      fontSize: '14@ms0.3',
       fontWeight: '600',
       color: colors.primary,
     },
     exCard: {
       backgroundColor: colors.surface,
-      borderRadius: 10,
-      padding: 12,
-      marginBottom: 10,
+      borderRadius: '10@ms',
+      padding: '12@ms',
+      marginBottom: '10@ms',
       borderWidth: 1,
       borderColor: colors.border,
     },
@@ -177,69 +178,69 @@ function makeStyles(colors) {
       flexDirection: 'row',
       justifyContent: 'space-between',
       alignItems: 'center',
-      marginBottom: 10,
+      marginBottom: '10@ms',
     },
     exName: {
-      fontSize: 15,
+      fontSize: '15@ms0.3',
       fontWeight: '600',
       color: colors.text,
     },
     exMuscle: {
-      fontSize: 13,
+      fontSize: '13@ms0.3',
       color: colors.textMuted,
     },
     setsHeader: {
       flexDirection: 'row',
-      paddingBottom: 6,
+      paddingBottom: '6@ms',
       borderBottomWidth: StyleSheet.hairlineWidth,
       borderBottomColor: colors.border,
-      marginBottom: 4,
+      marginBottom: '4@ms',
     },
     setHeaderText: {
-      fontSize: 12,
+      fontSize: '12@ms0.3',
       fontWeight: '600',
       color: colors.textMuted,
       textTransform: 'uppercase',
     },
     setNumCol: {
-      width: 40,
+      width: '40@ms',
     },
     setValCol: {
       flex: 1,
     },
     setRow: {
       flexDirection: 'row',
-      paddingVertical: 5,
+      paddingVertical: '5@ms',
     },
     setText: {
-      fontSize: 14,
+      fontSize: '14@ms0.3',
       color: colors.text,
     },
     volume: {
-      fontSize: 13,
+      fontSize: '13@ms0.3',
       color: colors.primary,
       fontWeight: '600',
-      marginTop: 8,
+      marginTop: '8@ms',
       textAlign: 'right',
     },
     notesCard: {
       backgroundColor: colors.surface,
-      borderRadius: 10,
-      padding: 12,
-      marginTop: 6,
+      borderRadius: '10@ms',
+      padding: '12@ms',
+      marginTop: '6@ms',
       borderWidth: 1,
       borderColor: colors.border,
     },
     notesLabel: {
-      fontSize: 13,
+      fontSize: '13@ms0.3',
       fontWeight: '600',
       color: colors.textMuted,
-      marginBottom: 4,
+      marginBottom: '4@ms',
     },
     notesText: {
-      fontSize: 14,
+      fontSize: '14@ms0.3',
       color: colors.text,
-      lineHeight: 20,
+      lineHeight: '20@ms0.3',
     },
   });
 }

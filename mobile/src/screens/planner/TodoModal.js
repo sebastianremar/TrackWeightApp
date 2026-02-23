@@ -6,13 +6,12 @@ import {
   TouchableOpacity,
   ScrollView,
   Modal,
-  Platform,
   ActivityIndicator,
-  StyleSheet,
 } from 'react-native';
-import DateTimePicker from '@react-native-community/datetimepicker';
+import { ScaledSheet } from '../../utils/responsive';
 import { useTheme } from '../../contexts/ThemeContext';
 import InlineError from '../../components/InlineError';
+import CalendarPickerModal from '../../components/CalendarPickerModal';
 
 const PRIORITIES = ['low', 'medium', 'high'];
 const PRIORITY_LABELS = { low: 'Low', medium: 'Medium', high: 'High' };
@@ -24,11 +23,6 @@ function fmtDate(d) {
 function formatDateDisplay(dateStr) {
   const d = new Date(dateStr + 'T00:00:00');
   return d.toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric' });
-}
-
-function parseDateStr(dateStr) {
-  const [y, m, d] = dateStr.split('-').map(Number);
-  return new Date(y, m - 1, d);
 }
 
 export default function TodoModal({ visible, todo, categories, onSave, onDelete, onClose }) {
@@ -69,11 +63,6 @@ export default function TodoModal({ visible, todo, categories, onSave, onDelete,
     setError('');
     setShowDatePicker(false);
   }, [todo, visible]);
-
-  const onDateChange = (_, selected) => {
-    if (Platform.OS === 'android') setShowDatePicker(false);
-    if (selected) setDueDate(fmtDate(selected));
-  };
 
   const toggleDueDate = () => {
     if (hasDueDate) {
@@ -198,22 +187,20 @@ export default function TodoModal({ visible, todo, categories, onSave, onDelete,
             <>
               <TouchableOpacity
                 style={s.pickerBtn}
-                onPress={() => setShowDatePicker(!showDatePicker)}
+                onPress={() => setShowDatePicker(true)}
               >
                 <Text style={s.pickerBtnText}>
                   {dueDate ? formatDateDisplay(dueDate) : 'Select date'}
                 </Text>
-                <Text style={s.pickerChevron}>{showDatePicker ? '▲' : '▼'}</Text>
+                <Text style={s.pickerChevron}>📅</Text>
               </TouchableOpacity>
-              {showDatePicker && (
-                <DateTimePicker
-                  value={dueDate ? parseDateStr(dueDate) : new Date()}
-                  mode="date"
-                  display={Platform.OS === 'ios' ? 'spinner' : 'default'}
-                  onChange={onDateChange}
-                  themeVariant={colors.background === '#0F172A' ? 'dark' : 'light'}
-                />
-              )}
+              <CalendarPickerModal
+                visible={showDatePicker}
+                value={dueDate}
+                label="Due Date"
+                onSelect={(d) => { setDueDate(d); setShowDatePicker(false); }}
+                onClose={() => setShowDatePicker(false)}
+              />
             </>
           )}
 
@@ -276,7 +263,7 @@ export default function TodoModal({ visible, todo, categories, onSave, onDelete,
 }
 
 function makeStyles(colors) {
-  return StyleSheet.create({
+  return ScaledSheet.create({
     container: {
       flex: 1,
       backgroundColor: colors.background,
@@ -285,31 +272,31 @@ function makeStyles(colors) {
       flexDirection: 'row',
       justifyContent: 'space-between',
       alignItems: 'center',
-      padding: 16,
-      paddingTop: 60,
+      padding: '16@ms',
+      paddingTop: '60@vs',
       backgroundColor: colors.surface,
       borderBottomWidth: 1,
       borderBottomColor: colors.border,
     },
-    headerBtn: { minWidth: 60 },
+    headerBtn: { minWidth: '60@ms' },
     headerBtnText: {
-      fontSize: 16,
+      fontSize: '16@ms0.3',
       color: colors.primary,
       fontWeight: '500',
     },
     headerTitle: {
-      fontSize: 17,
+      fontSize: '17@ms0.3',
       fontWeight: '700',
       color: colors.text,
     },
     saveText: { fontWeight: '700', textAlign: 'right' },
-    body: { flex: 1, padding: 16 },
+    body: { flex: 1, padding: '16@ms' },
     label: {
-      fontSize: 14,
+      fontSize: '14@ms0.3',
       fontWeight: '600',
       color: colors.textSecondary,
-      marginBottom: 6,
-      marginTop: 16,
+      marginBottom: '6@ms',
+      marginTop: '16@ms',
     },
     optional: {
       fontWeight: '400',
@@ -317,36 +304,36 @@ function makeStyles(colors) {
     },
     input: {
       backgroundColor: colors.surface,
-      borderRadius: 10,
-      padding: 12,
-      fontSize: 15,
+      borderRadius: '10@ms',
+      padding: '12@ms',
+      fontSize: '15@ms0.3',
       color: colors.text,
       borderWidth: 1,
       borderColor: colors.border,
     },
     textarea: {
-      minHeight: 72,
+      minHeight: '72@ms',
       textAlignVertical: 'top',
     },
     segmentedControl: {
       flexDirection: 'row',
       backgroundColor: colors.surface,
-      borderRadius: 10,
-      padding: 3,
+      borderRadius: '10@ms',
+      padding: '3@ms',
       borderWidth: 1,
       borderColor: colors.border,
     },
     segment: {
       flex: 1,
-      paddingVertical: 8,
+      paddingVertical: '8@ms',
       alignItems: 'center',
-      borderRadius: 8,
+      borderRadius: '8@ms',
     },
     segmentActive: {
       backgroundColor: colors.primary,
     },
     segmentText: {
-      fontSize: 14,
+      fontSize: '14@ms0.3',
       fontWeight: '500',
       color: colors.textMuted,
     },
@@ -360,14 +347,14 @@ function makeStyles(colors) {
       alignItems: 'center',
     },
     dueDateToggle: {
-      paddingHorizontal: 10,
-      paddingVertical: 4,
-      borderRadius: 6,
+      paddingHorizontal: '10@ms',
+      paddingVertical: '4@ms',
+      borderRadius: '6@ms',
       backgroundColor: colors.primary + '18',
-      marginTop: 12,
+      marginTop: '12@ms',
     },
     dueDateToggleText: {
-      fontSize: 13,
+      fontSize: '13@ms0.3',
       fontWeight: '600',
       color: colors.primary,
     },
@@ -376,28 +363,28 @@ function makeStyles(colors) {
       justifyContent: 'space-between',
       alignItems: 'center',
       backgroundColor: colors.surface,
-      borderRadius: 10,
-      padding: 12,
+      borderRadius: '10@ms',
+      padding: '12@ms',
       borderWidth: 1,
       borderColor: colors.border,
     },
     pickerBtnText: {
-      fontSize: 15,
+      fontSize: '15@ms0.3',
       color: colors.text,
     },
     pickerChevron: {
-      fontSize: 10,
+      fontSize: '10@ms0.3',
       color: colors.textMuted,
     },
     chipRow: {
       flexDirection: 'row',
       flexWrap: 'wrap',
-      gap: 8,
+      gap: '8@ms',
     },
     chip: {
-      paddingHorizontal: 12,
-      paddingVertical: 6,
-      borderRadius: 16,
+      paddingHorizontal: '12@ms',
+      paddingVertical: '6@ms',
+      borderRadius: '16@ms',
       backgroundColor: colors.surface,
       borderWidth: 1,
       borderColor: colors.border,
@@ -407,7 +394,7 @@ function makeStyles(colors) {
       borderColor: colors.primary,
     },
     chipText: {
-      fontSize: 13,
+      fontSize: '13@ms0.3',
       fontWeight: '500',
       color: colors.textSecondary,
     },
@@ -417,37 +404,37 @@ function makeStyles(colors) {
     },
     newCategoryRow: {
       flexDirection: 'row',
-      gap: 8,
-      marginTop: 8,
+      gap: '8@ms',
+      marginTop: '8@ms',
     },
     newCategoryInput: {
       flex: 1,
     },
     addBtn: {
-      paddingHorizontal: 16,
+      paddingHorizontal: '16@ms',
       justifyContent: 'center',
-      borderRadius: 10,
+      borderRadius: '10@ms',
       backgroundColor: colors.primary,
     },
     addBtnText: {
-      fontSize: 14,
+      fontSize: '14@ms0.3',
       fontWeight: '600',
       color: '#fff',
     },
     deleteBtn: {
-      marginTop: 24,
-      paddingVertical: 14,
+      marginTop: '24@ms',
+      paddingVertical: '14@ms',
       alignItems: 'center',
-      borderRadius: 10,
+      borderRadius: '10@ms',
       backgroundColor: colors.errorBg,
       borderWidth: 1,
       borderColor: colors.error,
     },
     deleteBtnText: {
-      fontSize: 15,
+      fontSize: '15@ms0.3',
       color: colors.error,
       fontWeight: '600',
     },
-    bottomSpacer: { height: 40 },
+    bottomSpacer: { height: '40@ms' },
   });
 }

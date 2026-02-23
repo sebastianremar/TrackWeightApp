@@ -1,5 +1,6 @@
 import React, { useState, useMemo } from 'react';
-import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
+import { View, Text, TouchableOpacity } from 'react-native';
+import { ScaledSheet } from '../../utils/responsive';
 import { useTheme } from '../../contexts/ThemeContext';
 import DayDetailPanel from './DayDetailPanel';
 
@@ -145,35 +146,35 @@ export default React.memo(function MonthView({
 });
 
 function makeStyles(colors) {
-  return StyleSheet.create({
+  return ScaledSheet.create({
     nav: {
       flexDirection: 'row',
       alignItems: 'center',
       justifyContent: 'center',
-      gap: 8,
-      marginBottom: 12,
+      gap: '8@ms',
+      marginBottom: '12@ms',
     },
-    arrowBtn: { padding: 8 },
+    arrowBtn: { padding: '8@ms' },
     arrow: {
-      fontSize: 24,
+      fontSize: '24@ms0.3',
       color: colors.primary,
       fontWeight: '600',
     },
     navLabel: {
-      fontSize: 15,
+      fontSize: '15@ms0.3',
       fontWeight: '600',
       color: colors.text,
-      minWidth: 160,
+      minWidth: '160@ms',
       textAlign: 'center',
     },
     todayBtn: {
-      paddingHorizontal: 12,
-      paddingVertical: 6,
-      borderRadius: 16,
+      paddingHorizontal: '12@ms',
+      paddingVertical: '6@ms',
+      borderRadius: '16@ms',
       backgroundColor: colors.primary,
     },
     todayText: {
-      fontSize: 12,
+      fontSize: '12@ms0.3',
       fontWeight: '600',
       color: '#fff',
     },
@@ -184,10 +185,10 @@ function makeStyles(colors) {
     dayHeader: {
       width: '14.28%',
       alignItems: 'center',
-      paddingVertical: 6,
+      paddingVertical: '6@ms',
     },
     dayHeaderText: {
-      fontSize: 12,
+      fontSize: '12@ms0.3',
       fontWeight: '600',
       color: colors.textMuted,
     },
@@ -200,7 +201,7 @@ function makeStyles(colors) {
       aspectRatio: 1,
       alignItems: 'center',
       justifyContent: 'center',
-      borderRadius: 8,
+      borderRadius: '8@ms',
     },
     cellSelected: {
       backgroundColor: colors.primary,
@@ -210,7 +211,7 @@ function makeStyles(colors) {
       borderColor: colors.primary,
     },
     cellNum: {
-      fontSize: 14,
+      fontSize: '14@ms0.3',
       fontWeight: '500',
       color: colors.text,
     },
@@ -219,10 +220,10 @@ function makeStyles(colors) {
       fontWeight: '700',
     },
     completionDot: {
-      width: 6,
-      height: 6,
-      borderRadius: 3,
-      marginTop: 2,
+      width: '6@ms',
+      height: '6@ms',
+      borderRadius: '3@ms',
+      marginTop: '2@ms',
     },
   });
 }

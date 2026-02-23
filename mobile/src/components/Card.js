@@ -1,5 +1,6 @@
-import { View, StyleSheet } from 'react-native';
+import { View } from 'react-native';
 import { useTheme } from '../contexts/ThemeContext';
+import { ScaledSheet } from '../utils/responsive';
 
 export default function Card({ children, style }) {
   const { colors } = useTheme();
@@ -8,11 +9,11 @@ export default function Card({ children, style }) {
 }
 
 function makeStyles(colors) {
-  return StyleSheet.create({
+  return ScaledSheet.create({
     card: {
       backgroundColor: colors.surface,
-      borderRadius: 12,
-      padding: 16,
+      borderRadius: '12@ms',
+      padding: '16@ms',
       borderWidth: 1,
       borderColor: colors.border,
     },

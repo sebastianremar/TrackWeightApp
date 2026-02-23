@@ -1,12 +1,13 @@
 import { useState, useEffect } from 'react';
-import { View, Text, TouchableOpacity, ScrollView, StyleSheet } from 'react-native';
+import { View, Text, TouchableOpacity, ScrollView } from 'react-native';
+import { ScaledSheet, moderateScale } from '../../utils/responsive';
 import { useTheme } from '../../contexts/ThemeContext';
 
-const HOUR_HEIGHT = 60;
+const HOUR_HEIGHT = moderateScale(60);
 const START_HOUR = 6;
 const END_HOUR = 23;
-const MIN_EVENT_HEIGHT = 30;
-const LABEL_WIDTH = 56;
+const MIN_EVENT_HEIGHT = moderateScale(30);
+const LABEL_WIDTH = moderateScale(56);
 
 const DAY_NAMES = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
 const MONTH_NAMES = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
@@ -159,53 +160,53 @@ export default function CalendarDayView({ events, refDate, setRefDate, onEditEve
 }
 
 function makeStyles(colors) {
-  return StyleSheet.create({
+  return ScaledSheet.create({
     nav: {
       flexDirection: 'row',
       alignItems: 'center',
       justifyContent: 'center',
-      gap: 8,
-      marginBottom: 12,
+      gap: '8@ms',
+      marginBottom: '12@ms',
     },
-    arrowBtn: { padding: 8 },
+    arrowBtn: { padding: '8@ms' },
     arrow: {
-      fontSize: 24,
+      fontSize: '24@ms0.3',
       color: colors.primary,
       fontWeight: '600',
     },
     navLabel: {
-      fontSize: 15,
+      fontSize: '15@ms0.3',
       fontWeight: '600',
       color: colors.text,
-      minWidth: 180,
+      minWidth: '180@ms',
       textAlign: 'center',
     },
     todayBtn: {
-      paddingHorizontal: 12,
-      paddingVertical: 6,
-      borderRadius: 16,
+      paddingHorizontal: '12@ms',
+      paddingVertical: '6@ms',
+      borderRadius: '16@ms',
       backgroundColor: colors.primary,
     },
     todayText: {
-      fontSize: 12,
+      fontSize: '12@ms0.3',
       fontWeight: '600',
       color: '#fff',
     },
     emptyHint: {
       backgroundColor: colors.surface,
-      borderRadius: 10,
-      padding: 16,
+      borderRadius: '10@ms',
+      padding: '16@ms',
       alignItems: 'center',
-      marginBottom: 12,
+      marginBottom: '12@ms',
       borderWidth: 1,
       borderColor: colors.border,
     },
     emptyText: {
-      fontSize: 14,
+      fontSize: '14@ms0.3',
       color: colors.textMuted,
     },
     scrollContainer: {
-      maxHeight: 500,
+      maxHeight: '500@ms',
     },
     timeline: {
       position: 'relative',
@@ -219,11 +220,11 @@ function makeStyles(colors) {
     },
     hourLabel: {
       width: LABEL_WIDTH,
-      fontSize: 11,
+      fontSize: '11@ms0.3',
       color: colors.textMuted,
       textAlign: 'right',
-      paddingRight: 8,
-      marginTop: -6,
+      paddingRight: '8@ms',
+      marginTop: '-6@ms',
     },
     hourLine: {
       flex: 1,
@@ -239,11 +240,11 @@ function makeStyles(colors) {
       zIndex: 10,
     },
     nowDot: {
-      width: 8,
-      height: 8,
-      borderRadius: 4,
+      width: '8@ms',
+      height: '8@ms',
+      borderRadius: '4@ms',
       backgroundColor: '#DC2626',
-      marginLeft: -4,
+      marginLeft: '-4@ms',
     },
     nowLineBar: {
       flex: 1,
@@ -252,27 +253,27 @@ function makeStyles(colors) {
     },
     eventBlock: {
       position: 'absolute',
-      left: LABEL_WIDTH + 4,
-      right: 8,
+      left: LABEL_WIDTH + moderateScale(4),
+      right: '8@ms',
       borderLeftWidth: 4,
-      borderRadius: 6,
-      padding: 6,
+      borderRadius: '6@ms',
+      padding: '6@ms',
       zIndex: 5,
     },
     eventTitle: {
-      fontSize: 13,
+      fontSize: '13@ms0.3',
       fontWeight: '600',
       color: colors.text,
     },
     eventTime: {
-      fontSize: 11,
+      fontSize: '11@ms0.3',
       color: colors.textSecondary,
-      marginTop: 1,
+      marginTop: '1@ms',
     },
     eventCategory: {
-      fontSize: 10,
+      fontSize: '10@ms0.3',
       color: colors.textMuted,
-      marginTop: 2,
+      marginTop: '2@ms',
     },
   });
 }

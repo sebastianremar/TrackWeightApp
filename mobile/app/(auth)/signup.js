@@ -5,7 +5,6 @@ import {
   TextInput,
   TouchableOpacity,
   Image,
-  StyleSheet,
   KeyboardAvoidingView,
   Platform,
   ScrollView,
@@ -15,6 +14,7 @@ import { useAuth } from '../../src/contexts/AuthContext';
 import { useTheme } from '../../src/contexts/ThemeContext';
 import { signup } from '../../src/api/auth';
 import { setToken } from '../../src/api/client';
+import { ScaledSheet } from '../../src/utils/responsive';
 
 export default function SignUpScreen() {
   const { login } = useAuth();
@@ -124,61 +124,61 @@ export default function SignUpScreen() {
 }
 
 function makeStyles(colors) {
-  return StyleSheet.create({
+  return ScaledSheet.create({
     flex: { flex: 1, backgroundColor: colors.background },
     container: {
       flexGrow: 1,
       justifyContent: 'center',
-      padding: 24,
+      padding: '24@ms',
     },
     logo: {
-      width: 100,
-      height: 100,
-      borderRadius: 50,
+      width: '100@ms',
+      height: '100@ms',
+      borderRadius: '50@ms',
       alignSelf: 'center',
-      marginBottom: 16,
+      marginBottom: '16@ms',
     },
     title: {
-      fontSize: 32,
+      fontSize: '32@ms0.3',
       fontWeight: '700',
       color: colors.primary,
       textAlign: 'center',
-      marginBottom: 8,
+      marginBottom: '8@ms',
     },
     subtitle: {
-      fontSize: 16,
+      fontSize: '16@ms0.3',
       color: colors.textSecondary,
       textAlign: 'center',
-      marginBottom: 32,
+      marginBottom: '32@ms',
     },
     input: {
       backgroundColor: colors.surface,
       borderWidth: 1,
       borderColor: colors.border,
-      borderRadius: 10,
-      padding: 14,
-      fontSize: 16,
+      borderRadius: '10@ms',
+      padding: '14@ms',
+      fontSize: '16@ms0.3',
       color: colors.text,
-      marginBottom: 14,
+      marginBottom: '14@ms',
     },
     button: {
       backgroundColor: colors.primary,
-      borderRadius: 10,
-      padding: 16,
+      borderRadius: '10@ms',
+      padding: '16@ms',
       alignItems: 'center',
-      marginTop: 8,
+      marginTop: '8@ms',
     },
     buttonDisabled: { opacity: 0.6 },
-    buttonText: { color: '#fff', fontSize: 16, fontWeight: '600' },
+    buttonText: { color: '#fff', fontSize: '16@ms0.3', fontWeight: '600' },
     error: {
       color: colors.error,
       backgroundColor: colors.errorBg,
-      padding: 12,
-      borderRadius: 8,
-      marginBottom: 16,
+      padding: '12@ms',
+      borderRadius: '8@ms',
+      marginBottom: '16@ms',
       textAlign: 'center',
     },
-    link: { marginTop: 24, alignSelf: 'center' },
-    linkText: { color: colors.primary, fontSize: 14 },
+    link: { marginTop: '24@ms', alignSelf: 'center' },
+    linkText: { color: colors.primary, fontSize: '14@ms0.3' },
   });
 }

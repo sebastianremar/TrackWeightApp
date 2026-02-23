@@ -4,13 +4,13 @@ import {
   Text,
   TouchableOpacity,
   ActivityIndicator,
-  StyleSheet,
 } from 'react-native';
 import { useTheme } from '../../contexts/ThemeContext';
 import InlineError from '../../components/InlineError';
 import { useTemplates } from '../../hooks/useTemplates';
 import { useExercises } from '../../hooks/useExercises';
 import { useWorkoutLogs } from '../../hooks/useWorkoutLogs';
+import { ScaledSheet } from '../../utils/responsive';
 
 import TemplatesView from './TemplatesView';
 import LogView from './LogView';
@@ -116,29 +116,29 @@ export default function WorkoutDashboard() {
 }
 
 function makeStyles(colors) {
-  return StyleSheet.create({
+  return ScaledSheet.create({
     container: {
-      gap: 12,
+      gap: '12@ms',
     },
     segmentedControl: {
       flexDirection: 'row',
       backgroundColor: colors.surface,
-      borderRadius: 10,
-      padding: 3,
+      borderRadius: '10@ms',
+      padding: '3@ms',
       borderWidth: 1,
       borderColor: colors.border,
     },
     segment: {
       flex: 1,
-      paddingVertical: 8,
+      paddingVertical: '8@ms',
       alignItems: 'center',
-      borderRadius: 8,
+      borderRadius: '8@ms',
     },
     segmentActive: {
       backgroundColor: colors.primary,
     },
     segmentText: {
-      fontSize: 14,
+      fontSize: '14@ms0.3',
       fontWeight: '500',
       color: colors.textMuted,
     },
@@ -147,7 +147,7 @@ function makeStyles(colors) {
       fontWeight: '600',
     },
     center: {
-      paddingVertical: 60,
+      paddingVertical: '60@vs',
       alignItems: 'center',
     },
     hidden: { display: 'none' },

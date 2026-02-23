@@ -1,5 +1,5 @@
 import { useState, useRef, useCallback } from 'react';
-import { View, ActivityIndicator, StyleSheet } from 'react-native';
+import { View, ActivityIndicator } from 'react-native';
 import { useTheme } from '../../contexts/ThemeContext';
 import { useAuth } from '../../contexts/AuthContext';
 import { updateProfile } from '../../api/auth';
@@ -10,6 +10,7 @@ import WeightForm from './WeightForm';
 import WeightChart from './WeightChart';
 import StatsCards from './StatsCards';
 import EntriesList from './EntriesList';
+import { ScaledSheet } from '../../utils/responsive';
 
 const DEFAULT_STATS = ['current', 'avgWeeklyChange', 'lowest'];
 
@@ -93,10 +94,10 @@ export default function WeightDashboard({ scrollRef }) {
 }
 
 function makeStyles(colors) {
-  return StyleSheet.create({
-    container: { gap: 16 },
+  return ScaledSheet.create({
+    container: { gap: '16@ms' },
     center: {
-      paddingVertical: 60,
+      paddingVertical: '60@vs',
       alignItems: 'center',
     },
     refreshOverlay: {
@@ -104,13 +105,13 @@ function makeStyles(colors) {
       top: 0,
       right: 0,
       zIndex: 10,
-      padding: 8,
+      padding: '8@ms',
     },
     dimmed: {
       opacity: 0.5,
     },
     dataSection: {
-      gap: 16,
+      gap: '16@ms',
     },
   });
 }

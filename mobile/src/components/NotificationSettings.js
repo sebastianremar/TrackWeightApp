@@ -6,6 +6,7 @@ import DateTimePicker from '@react-native-community/datetimepicker';
 import { useAuth } from '../contexts/AuthContext';
 import { useTheme } from '../contexts/ThemeContext';
 import { updateProfile } from '../api/auth';
+import { ScaledSheet } from '../utils/responsive';
 
 const DEFAULT_SETTINGS = {
   weight: { enabled: true, hour: 20 },
@@ -222,36 +223,36 @@ export default function NotificationSettings() {
 }
 
 function makeStyles(colors) {
-  return StyleSheet.create({
+  return ScaledSheet.create({
     row: {
       flexDirection: 'row',
       justifyContent: 'space-between',
       alignItems: 'center',
     },
-    label: { fontSize: 14, color: colors.textSecondary, fontWeight: '500' },
-    rules: { marginTop: 16, gap: 12 },
+    label: { fontSize: '14@ms0.3', color: colors.textSecondary, fontWeight: '500' },
+    rules: { marginTop: '16@ms', gap: '12@ms' },
     ruleRow: {
       flexDirection: 'row',
       alignItems: 'center',
       justifyContent: 'space-between',
-      paddingTop: 12,
+      paddingTop: '12@ms',
       borderTopWidth: StyleSheet.hairlineWidth,
       borderTopColor: colors.border,
     },
     ruleLabel: {
-      fontSize: 14,
+      fontSize: '14@ms0.3',
       color: colors.text,
       flex: 1,
     },
     timeButton: {
-      paddingHorizontal: 10,
-      paddingVertical: 4,
+      paddingHorizontal: '10@ms',
+      paddingVertical: '4@ms',
       backgroundColor: colors.background,
-      borderRadius: 6,
-      marginRight: 10,
+      borderRadius: '6@ms',
+      marginRight: '10@ms',
     },
     timeText: {
-      fontSize: 13,
+      fontSize: '13@ms0.3',
       color: colors.primary,
       fontWeight: '500',
     },

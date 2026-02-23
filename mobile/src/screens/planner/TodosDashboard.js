@@ -6,8 +6,8 @@ import {
   FlatList,
   ScrollView,
   ActivityIndicator,
-  StyleSheet,
 } from 'react-native';
+import { ScaledSheet } from '../../utils/responsive';
 import { useTheme } from '../../contexts/ThemeContext';
 import { useTodos } from '../../hooks/useTodos';
 import { useCategories } from '../../hooks/useCategories';
@@ -260,19 +260,19 @@ export default function TodosDashboard() {
 }
 
 function makeStyles(colors) {
-  return StyleSheet.create({
+  return ScaledSheet.create({
     container: {
-      gap: 12,
+      gap: '12@ms',
     },
     toggleRow: {
       flexDirection: 'row',
-      gap: 8,
+      gap: '8@ms',
     },
     toggleBtn: {
       flex: 1,
-      paddingVertical: 10,
+      paddingVertical: '10@ms',
       alignItems: 'center',
-      borderRadius: 10,
+      borderRadius: '10@ms',
       backgroundColor: colors.surface,
       borderWidth: 1,
       borderColor: colors.border,
@@ -282,7 +282,7 @@ function makeStyles(colors) {
       borderColor: colors.primary,
     },
     toggleText: {
-      fontSize: 14,
+      fontSize: '14@ms0.3',
       fontWeight: '500',
       color: colors.textMuted,
     },
@@ -294,13 +294,13 @@ function makeStyles(colors) {
       flexGrow: 0,
     },
     chipRow: {
-      gap: 8,
-      paddingVertical: 2,
+      gap: '8@ms',
+      paddingVertical: '2@ms',
     },
     chip: {
-      paddingHorizontal: 14,
-      paddingVertical: 6,
-      borderRadius: 16,
+      paddingHorizontal: '14@ms',
+      paddingVertical: '6@ms',
+      borderRadius: '16@ms',
       backgroundColor: colors.surface,
       borderWidth: 1,
       borderColor: colors.border,
@@ -310,7 +310,7 @@ function makeStyles(colors) {
       borderColor: colors.primary,
     },
     chipText: {
-      fontSize: 13,
+      fontSize: '13@ms0.3',
       fontWeight: '500',
       color: colors.textSecondary,
     },
@@ -321,22 +321,22 @@ function makeStyles(colors) {
     segmentedControl: {
       flexDirection: 'row',
       backgroundColor: colors.surface,
-      borderRadius: 10,
-      padding: 3,
+      borderRadius: '10@ms',
+      padding: '3@ms',
       borderWidth: 1,
       borderColor: colors.border,
     },
     segment: {
       flex: 1,
-      paddingVertical: 8,
+      paddingVertical: '8@ms',
       alignItems: 'center',
-      borderRadius: 8,
+      borderRadius: '8@ms',
     },
     segmentActive: {
       backgroundColor: colors.primary,
     },
     segmentText: {
-      fontSize: 14,
+      fontSize: '14@ms0.3',
       fontWeight: '500',
       color: colors.textMuted,
     },
@@ -345,46 +345,46 @@ function makeStyles(colors) {
       fontWeight: '600',
     },
     center: {
-      paddingVertical: 60,
+      paddingVertical: '60@vs',
       alignItems: 'center',
     },
     empty: {
       alignItems: 'center',
-      paddingVertical: 40,
+      paddingVertical: '40@vs',
     },
     emptyEmoji: {
-      fontSize: 48,
-      marginBottom: 12,
+      fontSize: '48@ms0.3',
+      marginBottom: '12@ms',
     },
     emptyTitle: {
-      fontSize: 18,
+      fontSize: '18@ms0.3',
       fontWeight: '700',
       color: colors.text,
-      marginBottom: 6,
+      marginBottom: '6@ms',
     },
     emptyText: {
-      fontSize: 14,
+      fontSize: '14@ms0.3',
       color: colors.textSecondary,
       textAlign: 'center',
     },
     list: {
-      gap: 8,
+      gap: '8@ms',
     },
     addButton: {
       alignSelf: 'center',
-      width: 56,
-      height: 56,
-      borderRadius: 28,
+      width: '56@ms',
+      height: '56@ms',
+      borderRadius: '28@ms',
       backgroundColor: colors.primary,
       alignItems: 'center',
       justifyContent: 'center',
-      marginTop: 4,
+      marginTop: '4@ms',
     },
     addButtonText: {
-      fontSize: 28,
+      fontSize: '28@ms0.3',
       fontWeight: '400',
       color: '#fff',
-      marginTop: -2,
+      marginTop: '-2@ms',
     },
   });
 }

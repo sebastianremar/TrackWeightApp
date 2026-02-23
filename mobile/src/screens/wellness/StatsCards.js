@@ -5,10 +5,10 @@ import {
   TouchableOpacity,
   Modal,
   Switch,
-  StyleSheet,
 } from 'react-native';
 import { useTheme } from '../../contexts/ThemeContext';
 import Card from '../../components/Card';
+import { ScaledSheet } from '../../utils/responsive';
 
 const ALL_METRICS = [
   { key: 'current', label: 'Current' },
@@ -129,39 +129,39 @@ export default React.memo(function StatsCards({ stats, visibleStats, onUpdateVis
 });
 
 function makeStyles(colors) {
-  return StyleSheet.create({
+  return ScaledSheet.create({
     header: {
       flexDirection: 'row',
       justifyContent: 'space-between',
       alignItems: 'center',
-      marginBottom: 10,
+      marginBottom: '10@ms',
     },
     title: {
-      fontSize: 17,
+      fontSize: '17@ms0.3',
       fontWeight: '700',
       color: colors.text,
     },
-    gearBtn: { padding: 4 },
-    gearIcon: { fontSize: 20, color: colors.textMuted },
+    gearBtn: { padding: '4@ms' },
+    gearIcon: { fontSize: '20@ms0.3', color: colors.textMuted },
     grid: {
       flexDirection: 'row',
       flexWrap: 'wrap',
-      gap: 10,
+      gap: '10@ms',
     },
     statCard: {
       width: '47%',
-      padding: 14,
+      padding: '14@ms',
     },
     statLabel: {
-      fontSize: 12,
+      fontSize: '12@ms0.3',
       fontWeight: '600',
       color: colors.textMuted,
-      marginBottom: 4,
+      marginBottom: '4@ms',
       textTransform: 'uppercase',
-      letterSpacing: 0.3,
+      letterSpacing: '0.3@ms0.3',
     },
     statValue: {
-      fontSize: 18,
+      fontSize: '18@ms0.3',
       fontWeight: '700',
       color: colors.text,
     },
@@ -171,56 +171,56 @@ function makeStyles(colors) {
       backgroundColor: 'rgba(0,0,0,0.5)',
       justifyContent: 'center',
       alignItems: 'center',
-      padding: 32,
+      padding: '32@ms',
     },
     dialog: {
       backgroundColor: colors.surface,
-      borderRadius: 14,
-      padding: 20,
+      borderRadius: '14@ms',
+      padding: '20@ms',
       width: '100%',
-      maxWidth: 340,
+      maxWidth: '340@ms',
     },
     dialogTitle: {
-      fontSize: 17,
+      fontSize: '17@ms0.3',
       fontWeight: '700',
       color: colors.text,
-      marginBottom: 16,
+      marginBottom: '16@ms',
     },
     toggleRow: {
       flexDirection: 'row',
       justifyContent: 'space-between',
       alignItems: 'center',
-      paddingVertical: 8,
+      paddingVertical: '8@ms',
     },
     toggleLabel: {
-      fontSize: 15,
+      fontSize: '15@ms0.3',
       color: colors.text,
     },
     dialogActions: {
       flexDirection: 'row',
       justifyContent: 'flex-end',
-      gap: 12,
-      marginTop: 16,
+      gap: '12@ms',
+      marginTop: '16@ms',
     },
     dialogCancelBtn: {
-      paddingVertical: 10,
-      paddingHorizontal: 16,
-      borderRadius: 8,
+      paddingVertical: '10@ms',
+      paddingHorizontal: '16@ms',
+      borderRadius: '8@ms',
       backgroundColor: colors.background,
     },
     dialogCancelText: {
-      fontSize: 15,
+      fontSize: '15@ms0.3',
       fontWeight: '600',
       color: colors.textSecondary,
     },
     dialogSaveBtn: {
-      paddingVertical: 10,
-      paddingHorizontal: 16,
-      borderRadius: 8,
+      paddingVertical: '10@ms',
+      paddingHorizontal: '16@ms',
+      borderRadius: '8@ms',
       backgroundColor: colors.primary,
     },
     dialogSaveText: {
-      fontSize: 15,
+      fontSize: '15@ms0.3',
       fontWeight: '600',
       color: '#fff',
     },

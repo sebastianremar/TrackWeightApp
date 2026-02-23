@@ -1,6 +1,7 @@
 import { useRef } from 'react';
-import { View, Text, TouchableOpacity, Pressable, Animated, StyleSheet } from 'react-native';
+import { View, Text, TouchableOpacity, Pressable, Animated } from 'react-native';
 import { Swipeable } from 'react-native-gesture-handler';
+import { ScaledSheet } from '../../utils/responsive';
 import { useTheme } from '../../contexts/ThemeContext';
 
 const PRIORITY_COLORS = {
@@ -109,26 +110,26 @@ export default function TodoItem({ todo, onToggle, onEdit, onDelete }) {
 }
 
 function makeStyles(colors) {
-  return StyleSheet.create({
+  return ScaledSheet.create({
     card: {
       flexDirection: 'row',
       alignItems: 'flex-start',
       backgroundColor: colors.surface,
-      borderRadius: 10,
+      borderRadius: '10@ms',
       borderWidth: 1,
       borderColor: colors.border,
-      padding: 12,
-      gap: 12,
+      padding: '12@ms',
+      gap: '12@ms',
     },
     checkbox: {
-      width: 24,
-      height: 24,
-      borderRadius: 12,
+      width: '24@ms',
+      height: '24@ms',
+      borderRadius: '12@ms',
       borderWidth: 2,
       borderColor: colors.textMuted,
       alignItems: 'center',
       justifyContent: 'center',
-      marginTop: 2,
+      marginTop: '2@ms',
     },
     checkboxChecked: {
       backgroundColor: colors.primary,
@@ -136,15 +137,15 @@ function makeStyles(colors) {
     },
     checkmark: {
       color: '#fff',
-      fontSize: 14,
+      fontSize: '14@ms0.3',
       fontWeight: '700',
     },
     content: {
       flex: 1,
-      gap: 2,
+      gap: '2@ms',
     },
     title: {
-      fontSize: 15,
+      fontSize: '15@ms0.3',
       fontWeight: '600',
       color: colors.text,
     },
@@ -153,26 +154,26 @@ function makeStyles(colors) {
       color: colors.textMuted,
     },
     description: {
-      fontSize: 13,
+      fontSize: '13@ms0.3',
       color: colors.textSecondary,
     },
     meta: {
       flexDirection: 'row',
       alignItems: 'center',
-      gap: 8,
-      marginTop: 4,
+      gap: '8@ms',
+      marginTop: '4@ms',
     },
     categoryTag: {
-      paddingHorizontal: 8,
-      paddingVertical: 2,
-      borderRadius: 4,
+      paddingHorizontal: '8@ms',
+      paddingVertical: '2@ms',
+      borderRadius: '4@ms',
     },
     categoryText: {
-      fontSize: 11,
+      fontSize: '11@ms0.3',
       fontWeight: '600',
     },
     dueDate: {
-      fontSize: 12,
+      fontSize: '12@ms0.3',
       color: colors.textSecondary,
     },
     overdue: {
@@ -180,22 +181,22 @@ function makeStyles(colors) {
       fontWeight: '600',
     },
     priorityDot: {
-      width: 8,
-      height: 8,
-      borderRadius: 4,
+      width: '8@ms',
+      height: '8@ms',
+      borderRadius: '4@ms',
     },
     deleteAction: {
       backgroundColor: '#DC2626',
       justifyContent: 'center',
       alignItems: 'center',
-      width: 80,
-      borderRadius: 10,
-      marginLeft: 8,
+      width: '80@ms',
+      borderRadius: '10@ms',
+      marginLeft: '8@ms',
     },
     deleteActionText: {
       color: '#fff',
       fontWeight: '700',
-      fontSize: 14,
+      fontSize: '14@ms0.3',
     },
   });
 }

@@ -1,5 +1,6 @@
-import { Modal, View, Text, TouchableOpacity, StyleSheet } from 'react-native';
+import { Modal, View, Text, TouchableOpacity } from 'react-native';
 import { useTheme } from '../contexts/ThemeContext';
+import { ScaledSheet } from '../utils/responsive';
 
 export default function ConfirmDialog({
   visible,
@@ -36,57 +37,57 @@ export default function ConfirmDialog({
 
 function makeStyles(colors, destructive) {
   const confirmColor = destructive ? colors.error : colors.primary;
-  return StyleSheet.create({
+  return ScaledSheet.create({
     overlay: {
       flex: 1,
       backgroundColor: 'rgba(0,0,0,0.5)',
       justifyContent: 'center',
       alignItems: 'center',
-      padding: 32,
+      padding: '32@ms',
     },
     dialog: {
       backgroundColor: colors.surface,
-      borderRadius: 14,
-      padding: 20,
+      borderRadius: '14@ms',
+      padding: '20@ms',
       width: '100%',
-      maxWidth: 340,
+      maxWidth: '340@ms',
     },
     title: {
-      fontSize: 17,
+      fontSize: '17@ms0.3',
       fontWeight: '700',
       color: colors.text,
-      marginBottom: 8,
+      marginBottom: '8@ms',
     },
     message: {
-      fontSize: 14,
+      fontSize: '14@ms0.3',
       color: colors.textSecondary,
-      lineHeight: 20,
-      marginBottom: 20,
+      lineHeight: '20@ms0.3',
+      marginBottom: '20@ms',
     },
     actions: {
       flexDirection: 'row',
       justifyContent: 'flex-end',
-      gap: 12,
+      gap: '12@ms',
     },
     cancelBtn: {
-      paddingVertical: 10,
-      paddingHorizontal: 16,
-      borderRadius: 8,
+      paddingVertical: '10@ms',
+      paddingHorizontal: '16@ms',
+      borderRadius: '8@ms',
       backgroundColor: colors.background,
     },
     cancelText: {
-      fontSize: 15,
+      fontSize: '15@ms0.3',
       fontWeight: '600',
       color: colors.textSecondary,
     },
     confirmBtn: {
-      paddingVertical: 10,
-      paddingHorizontal: 16,
-      borderRadius: 8,
+      paddingVertical: '10@ms',
+      paddingHorizontal: '16@ms',
+      borderRadius: '8@ms',
       backgroundColor: confirmColor,
     },
     confirmText: {
-      fontSize: 15,
+      fontSize: '15@ms0.3',
       fontWeight: '600',
       color: '#fff',
     },

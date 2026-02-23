@@ -7,10 +7,11 @@ import {
   ScrollView,
   Modal,
   ActivityIndicator,
-  StyleSheet,
 } from 'react-native';
+import { ScaledSheet } from '../../utils/responsive';
 import { useTheme } from '../../contexts/ThemeContext';
 import InlineError from '../../components/InlineError';
+import NumberPicker from '../../components/NumberPicker';
 
 const COLORS = [
   '#991B1B', '#DC2626', '#F87171', '#FECACA',
@@ -34,6 +35,7 @@ export default function HabitModal({ visible, habit, onSave, onDelete, onClose }
   const [limitPeriod, setLimitPeriod] = useState('week');
   const [error, setError] = useState('');
   const [saving, setSaving] = useState(false);
+  const [showFreqPicker, setShowFreqPicker] = useState(false);
 
   const isBad = type === 'bad';
   const maxFreq = isBad && limitPeriod === 'month' ? 30 : 7;
@@ -180,16 +182,21 @@ export default function HabitModal({ visible, habit, onSave, onDelete, onClose }
               ))}
             </View>
           ) : (
-            <TextInput
-              style={s.input}
-              value={String(freq)}
-              onChangeText={(v) => {
-                const parsed = parseInt(v) || 1;
-                setFreq(Math.max(1, Math.min(maxFreq, parsed)));
-              }}
-              keyboardType="number-pad"
-              maxLength={2}
-            />
+            <>
+              <TouchableOpacity style={s.input} onPress={() => setShowFreqPicker(true)}>
+                <Text style={s.inputValueText}>{freq}</Text>
+              </TouchableOpacity>
+              <NumberPicker
+                visible={showFreqPicker}
+                value={freq}
+                min={1}
+                max={maxFreq}
+                step={1}
+                label="Monthly Limit"
+                onConfirm={(v) => { setFreq(v); setShowFreqPicker(false); }}
+                onCancel={() => setShowFreqPicker(false)}
+              />
+            </>
           )}
 
           <Text style={s.label}>Color</Text>
@@ -229,7 +236,7 @@ export default function HabitModal({ visible, habit, onSave, onDelete, onClose }
 }
 
 function makeStyles(colors) {
-  return StyleSheet.create({
+  return ScaledSheet.create({
     container: {
       flex: 1,
       backgroundColor: colors.background,
@@ -238,50 +245,55 @@ function makeStyles(colors) {
       flexDirection: 'row',
       justifyContent: 'space-between',
       alignItems: 'center',
-      padding: 16,
-      paddingTop: 60,
+      padding: '16@ms',
+      paddingTop: '60@vs',
       backgroundColor: colors.surface,
       borderBottomWidth: 1,
       borderBottomColor: colors.border,
     },
-    headerBtn: { minWidth: 60 },
+    headerBtn: { minWidth: '60@ms' },
     headerBtnText: {
-      fontSize: 16,
+      fontSize: '16@ms0.3',
       color: colors.primary,
       fontWeight: '500',
     },
     headerTitle: {
-      fontSize: 17,
+      fontSize: '17@ms0.3',
       fontWeight: '700',
       color: colors.text,
     },
     saveText: { fontWeight: '700', textAlign: 'right' },
-    body: { flex: 1, padding: 16 },
+    body: { flex: 1, padding: '16@ms' },
     label: {
-      fontSize: 14,
+      fontSize: '14@ms0.3',
       fontWeight: '600',
       color: colors.textSecondary,
-      marginBottom: 6,
-      marginTop: 16,
+      marginBottom: '6@ms',
+      marginTop: '16@ms',
     },
     input: {
       backgroundColor: colors.surface,
-      borderRadius: 10,
-      padding: 12,
-      fontSize: 15,
+      borderRadius: '10@ms',
+      padding: '12@ms',
+      fontSize: '15@ms0.3',
       color: colors.text,
       borderWidth: 1,
       borderColor: colors.border,
     },
+    inputValueText: {
+      fontSize: '15@ms0.3',
+      fontWeight: '600',
+      color: colors.text,
+    },
     toggleRow: {
       flexDirection: 'row',
-      gap: 8,
+      gap: '8@ms',
     },
     toggleBtn: {
       flex: 1,
-      paddingVertical: 10,
+      paddingVertical: '10@ms',
       alignItems: 'center',
-      borderRadius: 8,
+      borderRadius: '8@ms',
       backgroundColor: colors.surface,
       borderWidth: 1,
       borderColor: colors.border,
@@ -291,7 +303,7 @@ function makeStyles(colors) {
       borderColor: colors.primary,
     },
     toggleText: {
-      fontSize: 14,
+      fontSize: '14@ms0.3',
       fontWeight: '600',
       color: colors.textSecondary,
     },
@@ -300,13 +312,13 @@ function makeStyles(colors) {
     },
     freqRow: {
       flexDirection: 'row',
-      gap: 6,
+      gap: '6@ms',
     },
     freqBtn: {
       flex: 1,
-      paddingVertical: 10,
+      paddingVertical: '10@ms',
       alignItems: 'center',
-      borderRadius: 8,
+      borderRadius: '8@ms',
       backgroundColor: colors.surface,
       borderWidth: 1,
       borderColor: colors.border,
@@ -316,7 +328,7 @@ function makeStyles(colors) {
       borderColor: colors.primary,
     },
     freqText: {
-      fontSize: 14,
+      fontSize: '14@ms0.3',
       fontWeight: '600',
       color: colors.textSecondary,
     },
@@ -326,12 +338,12 @@ function makeStyles(colors) {
     colorGrid: {
       flexDirection: 'row',
       flexWrap: 'wrap',
-      gap: 8,
+      gap: '8@ms',
     },
     colorBtn: {
-      width: 36,
-      height: 36,
-      borderRadius: 18,
+      width: '36@ms',
+      height: '36@ms',
+      borderRadius: '18@ms',
       alignItems: 'center',
       justifyContent: 'center',
     },
@@ -346,23 +358,23 @@ function makeStyles(colors) {
     },
     colorCheck: {
       color: '#fff',
-      fontSize: 16,
+      fontSize: '16@ms0.3',
       fontWeight: '700',
     },
     archiveBtn: {
-      marginTop: 24,
-      paddingVertical: 14,
+      marginTop: '24@ms',
+      paddingVertical: '14@ms',
       alignItems: 'center',
-      borderRadius: 10,
+      borderRadius: '10@ms',
       backgroundColor: colors.errorBg,
       borderWidth: 1,
       borderColor: colors.error,
     },
     archiveBtnText: {
-      fontSize: 15,
+      fontSize: '15@ms0.3',
       color: colors.error,
       fontWeight: '600',
     },
-    bottomSpacer: { height: 40 },
+    bottomSpacer: { height: '40@ms' },
   });
 }

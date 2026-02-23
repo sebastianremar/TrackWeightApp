@@ -1,10 +1,11 @@
 import React, { useState, useEffect, useRef, useMemo } from 'react';
-import { View, Text, TouchableOpacity, ActivityIndicator, StyleSheet } from 'react-native';
+import { View, Text, TouchableOpacity, ActivityIndicator } from 'react-native';
 import { getFriendWeight } from '../../api/friends';
 import { getWeightHistory } from '../../api/weight';
 import { useTheme } from '../../contexts/ThemeContext';
 import ConfirmDialog from '../../components/ConfirmDialog';
 import InlineError from '../../components/InlineError';
+import { ScaledSheet } from '../../utils/responsive';
 import FriendChart from './FriendChart';
 import FriendHabitsPanel from './FriendHabitsPanel';
 
@@ -245,23 +246,23 @@ function StatBox({ label, value, colored, colors, unit }) {
 }
 
 function statStyles(colors) {
-  return StyleSheet.create({
+  return ScaledSheet.create({
     box: {
       backgroundColor: colors.background,
-      borderRadius: 8,
-      padding: 8,
+      borderRadius: '8@ms',
+      padding: '8@ms',
       alignItems: 'center',
-      minWidth: 60,
+      minWidth: '60@ms',
       flex: 1,
     },
     label: {
-      fontSize: 10,
+      fontSize: '10@ms0.3',
       fontWeight: '600',
       color: colors.textMuted,
-      marginBottom: 2,
+      marginBottom: '2@ms',
     },
     value: {
-      fontSize: 14,
+      fontSize: '14@ms0.3',
       fontWeight: '700',
       color: colors.text,
     },
@@ -269,20 +270,20 @@ function statStyles(colors) {
 }
 
 function makeStyles(colors) {
-  return StyleSheet.create({
+  return ScaledSheet.create({
     card: {
       backgroundColor: colors.surface,
-      borderRadius: 12,
+      borderRadius: '12@ms',
       borderWidth: 1,
       borderColor: colors.border,
-      marginBottom: 10,
+      marginBottom: '10@ms',
       overflow: 'hidden',
     },
     header: {
       flexDirection: 'row',
       alignItems: 'center',
       justifyContent: 'space-between',
-      padding: 12,
+      padding: '12@ms',
     },
     info: {
       flexDirection: 'row',
@@ -290,21 +291,21 @@ function makeStyles(colors) {
       flex: 1,
     },
     avatar: {
-      width: 40,
-      height: 40,
-      borderRadius: 20,
+      width: '40@ms',
+      height: '40@ms',
+      borderRadius: '20@ms',
       backgroundColor: colors.primary + '20',
       alignItems: 'center',
       justifyContent: 'center',
-      marginRight: 10,
+      marginRight: '10@ms',
     },
     avatarText: {
-      fontSize: 16,
+      fontSize: '16@ms0.3',
       fontWeight: '700',
       color: colors.primary,
     },
     name: {
-      fontSize: 15,
+      fontSize: '15@ms0.3',
       fontWeight: '600',
       color: colors.text,
       flexShrink: 1,
@@ -312,52 +313,52 @@ function makeStyles(colors) {
     headerActions: {
       flexDirection: 'row',
       alignItems: 'center',
-      gap: 10,
+      gap: '10@ms',
     },
     star: {
-      fontSize: 20,
+      fontSize: '20@ms0.3',
       color: colors.textMuted,
     },
     starActive: {
       color: colors.warning,
     },
     removeBtn: {
-      paddingVertical: 4,
-      paddingHorizontal: 8,
-      borderRadius: 6,
+      paddingVertical: '4@ms',
+      paddingHorizontal: '8@ms',
+      borderRadius: '6@ms',
       backgroundColor: colors.errorBg,
     },
     removeText: {
-      fontSize: 12,
+      fontSize: '12@ms0.3',
       fontWeight: '600',
       color: colors.error,
     },
     chevron: {
-      fontSize: 10,
+      fontSize: '10@ms0.3',
       color: colors.textMuted,
     },
     body: {
-      padding: 12,
+      padding: '12@ms',
       paddingTop: 0,
     },
     bodyTabs: {
       flexDirection: 'row',
       backgroundColor: colors.background,
-      borderRadius: 8,
-      padding: 2,
-      marginBottom: 12,
+      borderRadius: '8@ms',
+      padding: '2@ms',
+      marginBottom: '12@ms',
     },
     bodyTab: {
       flex: 1,
-      paddingVertical: 7,
+      paddingVertical: '7@ms',
       alignItems: 'center',
-      borderRadius: 6,
+      borderRadius: '6@ms',
     },
     bodyTabActive: {
       backgroundColor: colors.primary,
     },
     bodyTabText: {
-      fontSize: 13,
+      fontSize: '13@ms0.3',
       fontWeight: '600',
       color: colors.textMuted,
     },
@@ -369,20 +370,20 @@ function makeStyles(colors) {
       overflow: 'hidden',
     },
     center: {
-      paddingVertical: 24,
+      paddingVertical: '24@ms',
       alignItems: 'center',
     },
     statsGrid: {
       flexDirection: 'row',
       flexWrap: 'wrap',
-      gap: 6,
-      marginBottom: 8,
+      gap: '6@ms',
+      marginBottom: '8@ms',
     },
     emptyText: {
       textAlign: 'center',
       color: colors.textMuted,
-      fontSize: 14,
-      paddingVertical: 20,
+      fontSize: '14@ms0.3',
+      paddingVertical: '20@ms',
     },
   });
 }

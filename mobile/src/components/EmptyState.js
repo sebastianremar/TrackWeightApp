@@ -1,5 +1,6 @@
-import { View, Text, StyleSheet } from 'react-native';
+import { View, Text } from 'react-native';
 import { useTheme } from '../contexts/ThemeContext';
+import { ScaledSheet } from '../utils/responsive';
 
 export default function EmptyState({ emoji = '', title, message }) {
   const { colors } = useTheme();
@@ -14,25 +15,25 @@ export default function EmptyState({ emoji = '', title, message }) {
 }
 
 function makeStyles(colors) {
-  return StyleSheet.create({
+  return ScaledSheet.create({
     container: {
       alignItems: 'center',
-      paddingVertical: 32,
-      paddingHorizontal: 24,
+      paddingVertical: '32@vs',
+      paddingHorizontal: '24@ms',
     },
-    emoji: { fontSize: 48, marginBottom: 12 },
+    emoji: { fontSize: '48@ms0.3', marginBottom: '12@ms' },
     title: {
-      fontSize: 18,
+      fontSize: '18@ms0.3',
       fontWeight: '700',
       color: colors.text,
-      marginBottom: 8,
+      marginBottom: '8@ms',
       textAlign: 'center',
     },
     message: {
-      fontSize: 14,
+      fontSize: '14@ms0.3',
       color: colors.textSecondary,
       textAlign: 'center',
-      lineHeight: 20,
+      lineHeight: '20@ms0.3',
     },
   });
 }

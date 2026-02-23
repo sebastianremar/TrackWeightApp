@@ -1,49 +1,17 @@
 import React, { useRef, useState, useMemo } from 'react';
-import { View, Text, TextInput, Pressable, Animated, Keyboard, StyleSheet } from 'react-native';
+import { View, Text, Pressable, Animated } from 'react-native';
 import { Swipeable } from 'react-native-gesture-handler';
 import { useTheme } from '../../contexts/ThemeContext';
 import { logWeight, deleteWeight } from '../../api/weight';
 import ConfirmDialog from '../../components/ConfirmDialog';
+import NumberPicker from '../../components/NumberPicker';
+import { ScaledSheet } from '../../utils/responsive';
 
 const MAX_ENTRIES = 20;
 
-function SwipeableRow({ entry, onRequestDelete, onSaved, colors }) {
+function SwipeableRow({ entry, onRequestDelete, onSaved, onRequestEdit, colors }) {
   const s = makeStyles(colors);
   const swipeableRef = useRef(null);
-  const inputRef = useRef(null);
-  const [editing, setEditing] = useState(false);
-  const [draft, setDraft] = useState('');
-  const [saving, setSaving] = useState(false);
-
-  const startEdit = () => {
-    setDraft(String(entry.weight));
-    setEditing(true);
-    setTimeout(() => inputRef.current?.focus(), 50);
-  };
-
-  const cancelEdit = () => {
-    setEditing(false);
-    Keyboard.dismiss();
-  };
-
-  const saveEdit = async () => {
-    const w = parseFloat(draft);
-    if (isNaN(w) || w <= 0 || w === entry.weight) {
-      cancelEdit();
-      return;
-    }
-    setSaving(true);
-    try {
-      await logWeight(w, entry.date);
-      onSaved?.();
-    } catch {
-      // silently fail
-    } finally {
-      setSaving(false);
-      setEditing(false);
-      Keyboard.dismiss();
-    }
-  };
 
   const renderRightActions = (_progress, dragX) => {
     const scale = dragX.interpolate({
@@ -72,35 +40,15 @@ function SwipeableRow({ entry, onRequestDelete, onSaved, colors }) {
       ref={swipeableRef}
       renderRightActions={renderRightActions}
       overshootRight={false}
-      enabled={!editing}
       friction={2}
     >
       <Pressable
         style={s.row}
-        onLongPress={startEdit}
-        disabled={editing}
+        onLongPress={() => onRequestEdit(entry)}
         android_ripple={{ color: colors.border }}
       >
         <Text style={s.date}>{entry.date}</Text>
-        {editing ? (
-          <View style={s.editRow}>
-            <TextInput
-              ref={inputRef}
-              style={s.editInput}
-              value={draft}
-              onChangeText={setDraft}
-              keyboardType="decimal-pad"
-              returnKeyType="done"
-              onSubmitEditing={saveEdit}
-              onBlur={cancelEdit}
-              selectTextOnFocus
-              editable={!saving}
-            />
-            <Text style={s.editUnit}>{entry._unit}</Text>
-          </View>
-        ) : (
-          <Text style={s.weight} numberOfLines={1}>{entry.weight} {entry._unit}</Text>
-        )}
+        <Text style={s.weight} numberOfLines={1}>{entry.weight} {entry._unit}</Text>
       </Pressable>
     </Swipeable>
   );
@@ -110,6 +58,7 @@ export default React.memo(function EntriesList({ entries, onDeleted }) {
   const { colors, weightUnit } = useTheme();
   const s = makeStyles(colors);
   const [deleting, setDeleting] = useState(null);
+  const [editingEntry, setEditingEntry] = useState(null);
 
   const sorted = useMemo(
     () => [...entries].sort((a, b) => b.date.localeCompare(a.date)).slice(0, MAX_ENTRIES),
@@ -128,6 +77,21 @@ export default React.memo(function EntriesList({ entries, onDeleted }) {
     }
   };
 
+  const handleEditConfirm = async (newWeight) => {
+    if (!editingEntry || newWeight === editingEntry.weight) {
+      setEditingEntry(null);
+      return;
+    }
+    try {
+      await logWeight(newWeight, editingEntry.date);
+      onDeleted?.();
+    } catch {
+      // silently fail
+    } finally {
+      setEditingEntry(null);
+    }
+  };
+
   if (sorted.length === 0) return null;
 
   return (
@@ -140,7 +104,7 @@ export default React.memo(function EntriesList({ entries, onDeleted }) {
             key={entry.date}
             entry={{ ...entry, _unit: weightUnit }}
             onRequestDelete={setDeleting}
-            onSaved={onDeleted}
+            onRequestEdit={setEditingEntry}
             colors={colors}
           />
         ))}
@@ -155,26 +119,38 @@ export default React.memo(function EntriesList({ entries, onDeleted }) {
         onConfirm={handleDelete}
         onCancel={() => setDeleting(null)}
       />
+
+      <NumberPicker
+        visible={!!editingEntry}
+        value={editingEntry?.weight || 70}
+        min={weightUnit === 'lbs' ? 44 : 20}
+        max={weightUnit === 'lbs' ? 1100 : 500}
+        step={0.1}
+        unit={weightUnit}
+        label="Edit Weight"
+        onConfirm={(v) => handleEditConfirm(v)}
+        onCancel={() => setEditingEntry(null)}
+      />
     </View>
   );
 });
 
 function makeStyles(colors) {
-  return StyleSheet.create({
+  return ScaledSheet.create({
     title: {
-      fontSize: 17,
+      fontSize: '17@ms0.3',
       fontWeight: '700',
       color: colors.text,
-      marginBottom: 2,
+      marginBottom: '2@ms',
     },
     hint: {
-      fontSize: 12,
+      fontSize: '12@ms0.3',
       color: colors.textMuted,
-      marginBottom: 10,
+      marginBottom: '10@ms',
     },
     list: {
       backgroundColor: colors.surface,
-      borderRadius: 12,
+      borderRadius: '12@ms',
       borderWidth: 1,
       borderColor: colors.border,
       overflow: 'hidden',
@@ -183,52 +159,32 @@ function makeStyles(colors) {
       flexDirection: 'row',
       justifyContent: 'space-between',
       alignItems: 'center',
-      paddingVertical: 14,
-      paddingHorizontal: 16,
+      paddingVertical: '14@ms',
+      paddingHorizontal: '16@ms',
       borderBottomWidth: 1,
       borderBottomColor: colors.border,
       backgroundColor: colors.surface,
     },
     date: {
-      fontSize: 14,
+      fontSize: '14@ms0.3',
       color: colors.textSecondary,
       fontWeight: '500',
     },
     weight: {
-      fontSize: 16,
+      fontSize: '16@ms0.3',
       fontWeight: '600',
       color: colors.text,
-    },
-    editRow: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      gap: 4,
-    },
-    editInput: {
-      fontSize: 16,
-      fontWeight: '600',
-      color: colors.text,
-      borderBottomWidth: 2,
-      borderBottomColor: colors.primary,
-      paddingVertical: 2,
-      paddingHorizontal: 4,
-      minWidth: 60,
-      textAlign: 'right',
-    },
-    editUnit: {
-      fontSize: 14,
-      color: colors.textSecondary,
     },
     deleteAction: {
       backgroundColor: colors.error,
       justifyContent: 'center',
       alignItems: 'center',
-      width: 80,
+      width: '80@ms',
     },
     deleteActionText: {
       color: '#fff',
       fontWeight: '700',
-      fontSize: 14,
+      fontSize: '14@ms0.3',
     },
   });
 }

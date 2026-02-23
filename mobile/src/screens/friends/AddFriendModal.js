@@ -6,10 +6,10 @@ import {
   TouchableOpacity,
   Modal,
   ActivityIndicator,
-  StyleSheet,
 } from 'react-native';
 import { useTheme } from '../../contexts/ThemeContext';
 import InlineError from '../../components/InlineError';
+import { ScaledSheet } from '../../utils/responsive';
 
 export default function AddFriendModal({ visible, onClose, onAdd }) {
   const { colors } = useTheme();
@@ -90,7 +90,7 @@ export default function AddFriendModal({ visible, onClose, onAdd }) {
 }
 
 function makeStyles(colors) {
-  return StyleSheet.create({
+  return ScaledSheet.create({
     container: {
       flex: 1,
       backgroundColor: colors.background,
@@ -99,53 +99,53 @@ function makeStyles(colors) {
       flexDirection: 'row',
       justifyContent: 'space-between',
       alignItems: 'center',
-      padding: 16,
-      paddingTop: 60,
+      padding: '16@ms',
+      paddingTop: '60@vs',
       backgroundColor: colors.surface,
       borderBottomWidth: 1,
       borderBottomColor: colors.border,
     },
-    headerBtn: { minWidth: 60 },
+    headerBtn: { minWidth: '60@ms' },
     headerBtnText: {
-      fontSize: 16,
+      fontSize: '16@ms0.3',
       color: colors.primary,
       fontWeight: '500',
     },
     headerTitle: {
-      fontSize: 17,
+      fontSize: '17@ms0.3',
       fontWeight: '700',
       color: colors.text,
     },
     sendText: { fontWeight: '700', textAlign: 'right' },
-    body: { padding: 16 },
+    body: { padding: '16@ms' },
     label: {
-      fontSize: 14,
+      fontSize: '14@ms0.3',
       fontWeight: '600',
       color: colors.textSecondary,
-      marginBottom: 6,
-      marginTop: 16,
+      marginBottom: '6@ms',
+      marginTop: '16@ms',
     },
     input: {
       backgroundColor: colors.surface,
-      borderRadius: 10,
-      padding: 12,
-      fontSize: 15,
+      borderRadius: '10@ms',
+      padding: '12@ms',
+      fontSize: '15@ms0.3',
       color: colors.text,
       borderWidth: 1,
       borderColor: colors.border,
-      marginBottom: 12,
+      marginBottom: '12@ms',
     },
     successBox: {
       backgroundColor: colors.successBg,
-      borderRadius: 8,
-      padding: 12,
+      borderRadius: '8@ms',
+      padding: '12@ms',
       borderWidth: 1,
       borderColor: colors.success,
-      marginTop: 8,
+      marginTop: '8@ms',
     },
     successText: {
       color: colors.success,
-      fontSize: 14,
+      fontSize: '14@ms0.3',
       fontWeight: '500',
     },
   });

@@ -4,12 +4,12 @@ import {
   Text,
   TouchableOpacity,
   ActivityIndicator,
-  StyleSheet,
 } from 'react-native';
 import { useTheme } from '../../contexts/ThemeContext';
 import Card from '../../components/Card';
 import EmptyState from '../../components/EmptyState';
 import TemplateModal from './TemplateModal';
+import { ScaledSheet } from '../../utils/responsive';
 
 export default React.memo(function TemplatesView({
   templates,
@@ -121,62 +121,62 @@ export default React.memo(function TemplatesView({
 });
 
 function makeStyles(colors) {
-  return StyleSheet.create({
+  return ScaledSheet.create({
     grid: {
-      gap: 10,
+      gap: '10@ms',
     },
     card: {
-      padding: 14,
+      padding: '14@ms',
     },
     cardName: {
-      fontSize: 16,
+      fontSize: '16@ms0.3',
       fontWeight: '700',
       color: colors.text,
-      marginBottom: 4,
+      marginBottom: '4@ms',
     },
     cardMeta: {
-      fontSize: 13,
+      fontSize: '13@ms0.3',
       color: colors.textMuted,
-      marginBottom: 8,
+      marginBottom: '8@ms',
     },
     tags: {
       flexDirection: 'row',
       flexWrap: 'wrap',
-      gap: 6,
+      gap: '6@ms',
     },
     tag: {
       backgroundColor: colors.primaryLight,
-      paddingHorizontal: 8,
-      paddingVertical: 3,
-      borderRadius: 8,
+      paddingHorizontal: '8@ms',
+      paddingVertical: '3@ms',
+      borderRadius: '8@ms',
     },
     tagText: {
-      fontSize: 11,
+      fontSize: '11@ms0.3',
       color: colors.primary,
       fontWeight: '600',
     },
     quickLogBtn: {
-      marginTop: 10,
-      paddingVertical: 8,
+      marginTop: '10@ms',
+      paddingVertical: '8@ms',
       alignItems: 'center',
-      borderRadius: 8,
+      borderRadius: '8@ms',
       borderWidth: 1,
       borderColor: colors.success,
     },
     quickLogText: {
-      fontSize: 13,
+      fontSize: '13@ms0.3',
       fontWeight: '600',
       color: colors.success,
     },
     createBtn: {
-      marginTop: 14,
-      paddingVertical: 14,
+      marginTop: '14@ms',
+      paddingVertical: '14@ms',
       alignItems: 'center',
-      borderRadius: 10,
+      borderRadius: '10@ms',
       backgroundColor: colors.primary,
     },
     createBtnText: {
-      fontSize: 15,
+      fontSize: '15@ms0.3',
       color: '#fff',
       fontWeight: '600',
     },

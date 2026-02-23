@@ -4,8 +4,8 @@ import {
   Text,
   TouchableOpacity,
   ActivityIndicator,
-  StyleSheet,
 } from 'react-native';
+import { ScaledSheet } from '../../utils/responsive';
 import { useTheme } from '../../contexts/ThemeContext';
 import { useHabits } from '../../hooks/useHabits';
 import { useHabitEntries } from '../../hooks/useHabitEntries';
@@ -199,29 +199,29 @@ export default function HabitsDashboard() {
 }
 
 function makeStyles(colors) {
-  return StyleSheet.create({
+  return ScaledSheet.create({
     container: {
-      gap: 12,
+      gap: '12@ms',
     },
     segmentedControl: {
       flexDirection: 'row',
       backgroundColor: colors.surface,
-      borderRadius: 10,
-      padding: 3,
+      borderRadius: '10@ms',
+      padding: '3@ms',
       borderWidth: 1,
       borderColor: colors.border,
     },
     segment: {
       flex: 1,
-      paddingVertical: 8,
+      paddingVertical: '8@ms',
       alignItems: 'center',
-      borderRadius: 8,
+      borderRadius: '8@ms',
     },
     segmentActive: {
       backgroundColor: colors.primary,
     },
     segmentText: {
-      fontSize: 14,
+      fontSize: '14@ms0.3',
       fontWeight: '500',
       color: colors.textMuted,
     },
@@ -230,7 +230,7 @@ function makeStyles(colors) {
       fontWeight: '600',
     },
     center: {
-      paddingVertical: 60,
+      paddingVertical: '60@vs',
       alignItems: 'center',
     },
     hidden: { display: 'none' },
@@ -238,9 +238,9 @@ function makeStyles(colors) {
       position: 'absolute',
       right: 0,
       bottom: 0,
-      width: 56,
-      height: 56,
-      borderRadius: 28,
+      width: '56@ms',
+      height: '56@ms',
+      borderRadius: '28@ms',
       backgroundColor: colors.primary,
       alignItems: 'center',
       justifyContent: 'center',
@@ -251,10 +251,10 @@ function makeStyles(colors) {
       elevation: 6,
     },
     fabText: {
-      fontSize: 28,
+      fontSize: '28@ms0.3',
       fontWeight: '400',
       color: '#fff',
-      marginTop: -2,
+      marginTop: '-2@ms',
     },
   });
 }

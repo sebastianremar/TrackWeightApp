@@ -6,13 +6,13 @@ import {
   ScrollView,
   KeyboardAvoidingView,
   Platform,
-  StyleSheet,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useTheme } from '../../src/contexts/ThemeContext';
 import HabitsDashboard from '../../src/screens/planner/HabitsDashboard';
 import CalendarDashboard from '../../src/screens/planner/CalendarDashboard';
 import TodosDashboard from '../../src/screens/planner/TodosDashboard';
+import { ScaledSheet } from '../../src/utils/responsive';
 
 const TABS = ['Habits', 'Calendar', 'Todos'];
 
@@ -62,7 +62,7 @@ export default function PlannerScreen() {
 }
 
 function makeStyles(colors) {
-  return StyleSheet.create({
+  return ScaledSheet.create({
     safe: { flex: 1, backgroundColor: colors.background },
     flex: { flex: 1 },
     tabBar: {
@@ -73,17 +73,17 @@ function makeStyles(colors) {
     },
     tab: {
       flex: 1,
-      paddingVertical: 12,
+      paddingVertical: '12@ms',
       alignItems: 'center',
     },
     tabActive: {
       borderBottomWidth: 2,
       borderBottomColor: colors.primary,
     },
-    tabText: { fontSize: 15, color: colors.textMuted, fontWeight: '500' },
+    tabText: { fontSize: '15@ms0.3', color: colors.textMuted, fontWeight: '500' },
     tabTextActive: { color: colors.primary, fontWeight: '600' },
     content: { flex: 1 },
-    contentInner: { padding: 16, paddingBottom: 80 },
+    contentInner: { padding: '16@ms', paddingBottom: '80@ms' },
     hidden: { display: 'none' },
   });
 }

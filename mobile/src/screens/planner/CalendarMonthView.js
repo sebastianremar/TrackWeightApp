@@ -1,4 +1,5 @@
-import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
+import { View, Text, TouchableOpacity } from 'react-native';
+import { ScaledSheet } from '../../utils/responsive';
 import { useTheme } from '../../contexts/ThemeContext';
 
 const MONTH_NAMES = [
@@ -113,35 +114,35 @@ export default function CalendarMonthView({ events, refDate, setRefDate, onDayCl
 }
 
 function makeStyles(colors) {
-  return StyleSheet.create({
+  return ScaledSheet.create({
     nav: {
       flexDirection: 'row',
       alignItems: 'center',
       justifyContent: 'center',
-      gap: 8,
-      marginBottom: 12,
+      gap: '8@ms',
+      marginBottom: '12@ms',
     },
-    arrowBtn: { padding: 8 },
+    arrowBtn: { padding: '8@ms' },
     arrow: {
-      fontSize: 24,
+      fontSize: '24@ms0.3',
       color: colors.primary,
       fontWeight: '600',
     },
     navLabel: {
-      fontSize: 15,
+      fontSize: '15@ms0.3',
       fontWeight: '600',
       color: colors.text,
-      minWidth: 160,
+      minWidth: '160@ms',
       textAlign: 'center',
     },
     todayBtn: {
-      paddingHorizontal: 12,
-      paddingVertical: 6,
-      borderRadius: 16,
+      paddingHorizontal: '12@ms',
+      paddingVertical: '6@ms',
+      borderRadius: '16@ms',
       backgroundColor: colors.primary,
     },
     todayText: {
-      fontSize: 12,
+      fontSize: '12@ms0.3',
       fontWeight: '600',
       color: '#fff',
     },
@@ -152,10 +153,10 @@ function makeStyles(colors) {
     dayHeader: {
       width: '14.28%',
       alignItems: 'center',
-      paddingVertical: 6,
+      paddingVertical: '6@ms',
     },
     dayHeaderText: {
-      fontSize: 12,
+      fontSize: '12@ms0.3',
       fontWeight: '600',
       color: colors.textMuted,
     },
@@ -168,14 +169,14 @@ function makeStyles(colors) {
       aspectRatio: 1,
       alignItems: 'center',
       justifyContent: 'center',
-      borderRadius: 8,
+      borderRadius: '8@ms',
     },
     cellToday: {
       borderWidth: 2,
       borderColor: colors.primary,
     },
     cellNum: {
-      fontSize: 14,
+      fontSize: '14@ms0.3',
       fontWeight: '500',
       color: colors.text,
     },
@@ -186,16 +187,16 @@ function makeStyles(colors) {
     dots: {
       flexDirection: 'row',
       justifyContent: 'center',
-      gap: 2,
-      marginTop: 2,
+      gap: '2@ms',
+      marginTop: '2@ms',
     },
     dot: {
-      width: 5,
-      height: 5,
-      borderRadius: 2.5,
+      width: '5@ms',
+      height: '5@ms',
+      borderRadius: '2.5@ms',
     },
     overflowText: {
-      fontSize: 7,
+      fontSize: '7@ms0.3',
       color: colors.textMuted,
     },
   });

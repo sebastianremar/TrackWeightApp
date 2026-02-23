@@ -5,7 +5,6 @@ import {
   TouchableOpacity,
   ActivityIndicator,
   Platform,
-  StyleSheet,
 } from 'react-native';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { useTheme } from '../../contexts/ThemeContext';
@@ -14,6 +13,7 @@ import EmptyState from '../../components/EmptyState';
 import InlineError from '../../components/InlineError';
 import LogDetailModal from './LogDetailModal';
 import { shareWorkbook } from './exportWorkouts';
+import { ScaledSheet } from '../../utils/responsive';
 
 function defaultFrom() {
   const d = new Date();
@@ -187,97 +187,97 @@ export default React.memo(function HistoryView({ logs, loading, error, nextCurso
 });
 
 function makeStyles(colors) {
-  return StyleSheet.create({
+  return ScaledSheet.create({
     filterRow: {
       flexDirection: 'row',
-      gap: 10,
-      marginBottom: 10,
+      gap: '10@ms',
+      marginBottom: '10@ms',
     },
     filterField: {
       flex: 1,
     },
     filterLabel: {
-      fontSize: 12,
+      fontSize: '12@ms0.3',
       fontWeight: '600',
       color: colors.textMuted,
-      marginBottom: 4,
+      marginBottom: '4@ms',
     },
     dateBtn: {
       flexDirection: 'row',
       alignItems: 'center',
       justifyContent: 'space-between',
       backgroundColor: colors.surface,
-      borderRadius: 8,
-      padding: 10,
+      borderRadius: '8@ms',
+      padding: '10@ms',
       borderWidth: 1,
       borderColor: colors.border,
     },
     dateBtnText: {
-      fontSize: 14,
+      fontSize: '14@ms0.3',
       fontWeight: '600',
       color: colors.text,
     },
     dateBtnIcon: {
-      fontSize: 16,
+      fontSize: '16@ms0.3',
     },
     exportBtn: {
-      paddingVertical: 10,
-      paddingHorizontal: 16,
-      borderRadius: 10,
+      paddingVertical: '10@ms',
+      paddingHorizontal: '16@ms',
+      borderRadius: '10@ms',
       borderWidth: 1,
       borderColor: colors.primary,
       alignItems: 'center',
-      marginBottom: 12,
+      marginBottom: '12@ms',
     },
     exportBtnDisabled: {
       opacity: 0.4,
     },
     exportBtnText: {
-      fontSize: 13,
+      fontSize: '13@ms0.3',
       color: colors.primary,
       fontWeight: '600',
     },
     center: {
-      paddingVertical: 40,
+      paddingVertical: '40@ms',
       alignItems: 'center',
     },
     list: {
-      gap: 8,
+      gap: '8@ms',
     },
     logCard: {
-      padding: 14,
+      padding: '14@ms',
     },
     logTop: {
       flexDirection: 'row',
       justifyContent: 'space-between',
       alignItems: 'center',
-      marginBottom: 4,
+      marginBottom: '4@ms',
     },
     logDate: {
-      fontSize: 15,
+      fontSize: '15@ms0.3',
       fontWeight: '600',
       color: colors.text,
     },
     logLabel: {
-      fontSize: 13,
+      fontSize: '13@ms0.3',
       color: colors.primary,
       fontWeight: '600',
     },
     logMeta: {
-      fontSize: 13,
+      fontSize: '13@ms0.3',
       color: colors.textMuted,
     },
     loadMoreBtn: {
-      marginTop: 12,
-      paddingVertical: 12,
+      marginTop: '12@ms',
+      paddingVertical: '12@ms',
       alignItems: 'center',
-      borderRadius: 10,
+      borderRadius: '10@ms',
       backgroundColor: colors.surface,
       borderWidth: 1,
       borderColor: colors.border,
     },
     loadMoreText: {
-      fontSize: 14,
+      fontSize: '14@ms0.3',
       color: colors.primary,
       fontWeight: '600',
     },

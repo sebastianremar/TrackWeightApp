@@ -8,11 +8,12 @@ import {
   Modal,
   Platform,
   ActivityIndicator,
-  StyleSheet,
 } from 'react-native';
 import DateTimePicker from '@react-native-community/datetimepicker';
+import { ScaledSheet } from '../../utils/responsive';
 import { useTheme } from '../../contexts/ThemeContext';
 import InlineError from '../../components/InlineError';
+import CalendarPickerModal from '../../components/CalendarPickerModal';
 
 const COLORS = [
   '#991B1B', '#DC2626', '#F87171', '#FECACA',
@@ -102,11 +103,6 @@ export default function EventModal({ visible, event, onSave, onDelete, onClose, 
     setShowStartPicker(false);
     setShowEndPicker(false);
   }, [event, visible, defaultDate, defaultTime]);
-
-  const onDateChange = (_, selected) => {
-    if (Platform.OS === 'android') setShowDatePicker(false);
-    if (selected) setDate(fmtDate(selected));
-  };
 
   const onStartTimeChange = (_, selected) => {
     if (Platform.OS === 'android') setShowStartPicker(false);
@@ -209,22 +205,20 @@ export default function EventModal({ visible, event, onSave, onDelete, onClose, 
           <Text style={s.label}>Date</Text>
           <TouchableOpacity
             style={s.pickerBtn}
-            onPress={() => setShowDatePicker(!showDatePicker)}
+            onPress={() => setShowDatePicker(true)}
           >
             <Text style={s.pickerBtnText}>
               {date ? formatDateDisplay(date) : 'Select date'}
             </Text>
-            <Text style={s.pickerChevron}>{showDatePicker ? '▲' : '▼'}</Text>
+            <Text style={s.pickerChevron}>📅</Text>
           </TouchableOpacity>
-          {showDatePicker && (
-            <DateTimePicker
-              value={date ? parseDateStr(date) : new Date()}
-              mode="date"
-              display={Platform.OS === 'ios' ? 'spinner' : 'default'}
-              onChange={onDateChange}
-              themeVariant={colors.background === '#0F172A' ? 'dark' : 'light'}
-            />
-          )}
+          <CalendarPickerModal
+            visible={showDatePicker}
+            value={date}
+            label="Event Date"
+            onSelect={(d) => { setDate(d); setShowDatePicker(false); }}
+            onClose={() => setShowDatePicker(false)}
+          />
 
           {/* Start Time Picker */}
           <Text style={s.label}>Start Time</Text>
@@ -320,7 +314,7 @@ export default function EventModal({ visible, event, onSave, onDelete, onClose, 
 }
 
 function makeStyles(colors) {
-  return StyleSheet.create({
+  return ScaledSheet.create({
     container: {
       flex: 1,
       backgroundColor: colors.background,
@@ -329,31 +323,31 @@ function makeStyles(colors) {
       flexDirection: 'row',
       justifyContent: 'space-between',
       alignItems: 'center',
-      padding: 16,
-      paddingTop: 60,
+      padding: '16@ms',
+      paddingTop: '60@vs',
       backgroundColor: colors.surface,
       borderBottomWidth: 1,
       borderBottomColor: colors.border,
     },
-    headerBtn: { minWidth: 60 },
+    headerBtn: { minWidth: '60@ms' },
     headerBtnText: {
-      fontSize: 16,
+      fontSize: '16@ms0.3',
       color: colors.primary,
       fontWeight: '500',
     },
     headerTitle: {
-      fontSize: 17,
+      fontSize: '17@ms0.3',
       fontWeight: '700',
       color: colors.text,
     },
     saveText: { fontWeight: '700', textAlign: 'right' },
-    body: { flex: 1, padding: 16 },
+    body: { flex: 1, padding: '16@ms' },
     label: {
-      fontSize: 14,
+      fontSize: '14@ms0.3',
       fontWeight: '600',
       color: colors.textSecondary,
-      marginBottom: 6,
-      marginTop: 16,
+      marginBottom: '6@ms',
+      marginTop: '16@ms',
     },
     optional: {
       fontWeight: '400',
@@ -361,15 +355,15 @@ function makeStyles(colors) {
     },
     input: {
       backgroundColor: colors.surface,
-      borderRadius: 10,
-      padding: 12,
-      fontSize: 15,
+      borderRadius: '10@ms',
+      padding: '12@ms',
+      fontSize: '15@ms0.3',
       color: colors.text,
       borderWidth: 1,
       borderColor: colors.border,
     },
     textarea: {
-      minHeight: 72,
+      minHeight: '72@ms',
       textAlignVertical: 'top',
     },
     pickerBtn: {
@@ -377,17 +371,17 @@ function makeStyles(colors) {
       justifyContent: 'space-between',
       alignItems: 'center',
       backgroundColor: colors.surface,
-      borderRadius: 10,
-      padding: 12,
+      borderRadius: '10@ms',
+      padding: '12@ms',
       borderWidth: 1,
       borderColor: colors.border,
     },
     pickerBtnText: {
-      fontSize: 15,
+      fontSize: '15@ms0.3',
       color: colors.text,
     },
     pickerChevron: {
-      fontSize: 10,
+      fontSize: '10@ms0.3',
       color: colors.textMuted,
     },
     endTimeHeader: {
@@ -396,26 +390,26 @@ function makeStyles(colors) {
       alignItems: 'center',
     },
     endToggle: {
-      paddingHorizontal: 10,
-      paddingVertical: 4,
-      borderRadius: 6,
+      paddingHorizontal: '10@ms',
+      paddingVertical: '4@ms',
+      borderRadius: '6@ms',
       backgroundColor: colors.primary + '18',
-      marginTop: 12,
+      marginTop: '12@ms',
     },
     endToggleText: {
-      fontSize: 13,
+      fontSize: '13@ms0.3',
       fontWeight: '600',
       color: colors.primary,
     },
     colorGrid: {
       flexDirection: 'row',
       flexWrap: 'wrap',
-      gap: 8,
+      gap: '8@ms',
     },
     colorBtn: {
-      width: 36,
-      height: 36,
-      borderRadius: 18,
+      width: '36@ms',
+      height: '36@ms',
+      borderRadius: '18@ms',
       alignItems: 'center',
       justifyContent: 'center',
     },
@@ -430,23 +424,23 @@ function makeStyles(colors) {
     },
     colorCheck: {
       color: '#fff',
-      fontSize: 16,
+      fontSize: '16@ms0.3',
       fontWeight: '700',
     },
     deleteBtn: {
-      marginTop: 24,
-      paddingVertical: 14,
+      marginTop: '24@ms',
+      paddingVertical: '14@ms',
       alignItems: 'center',
-      borderRadius: 10,
+      borderRadius: '10@ms',
       backgroundColor: colors.errorBg,
       borderWidth: 1,
       borderColor: colors.error,
     },
     deleteBtnText: {
-      fontSize: 15,
+      fontSize: '15@ms0.3',
       color: colors.error,
       fontWeight: '600',
     },
-    bottomSpacer: { height: 40 },
+    bottomSpacer: { height: '40@ms' },
   });
 }

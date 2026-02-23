@@ -1,6 +1,7 @@
-import { View, Text, StyleSheet } from 'react-native';
+import { View, Text } from 'react-native';
 import { useNetwork } from '../contexts/NetworkContext';
 import { useTheme } from '../contexts/ThemeContext';
+import { ScaledSheet } from '../utils/responsive';
 
 export default function OfflineBanner() {
   const { isOnline, pendingCount, isSyncing } = useNetwork();
@@ -30,15 +31,15 @@ export default function OfflineBanner() {
   );
 }
 
-const styles = StyleSheet.create({
+const styles = ScaledSheet.create({
   banner: {
-    paddingVertical: 6,
-    paddingHorizontal: 16,
+    paddingVertical: '6@ms',
+    paddingHorizontal: '16@ms',
     alignItems: 'center',
   },
   text: {
     color: '#fff',
-    fontSize: 13,
+    fontSize: '13@ms0.3',
     fontWeight: '600',
   },
 });

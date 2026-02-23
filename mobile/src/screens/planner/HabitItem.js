@@ -6,8 +6,8 @@ import {
   TouchableOpacity,
   Modal,
   Pressable,
-  StyleSheet,
 } from 'react-native';
+import { ScaledSheet } from '../../utils/responsive';
 import { useTheme } from '../../contexts/ThemeContext';
 
 export default function HabitItem({
@@ -124,37 +124,37 @@ export default function HabitItem({
 }
 
 function makeStyles(colors) {
-  return StyleSheet.create({
+  return ScaledSheet.create({
     card: {
-      borderRadius: 12,
-      padding: 12,
-      marginBottom: 8,
+      borderRadius: '12@ms',
+      padding: '12@ms',
+      marginBottom: '8@ms',
     },
     row: {
       flexDirection: 'row',
       alignItems: 'center',
     },
     checkWrap: {
-      marginRight: 12,
+      marginRight: '12@ms',
     },
     checkbox: {
-      width: 24,
-      height: 24,
-      borderRadius: 6,
+      width: '24@ms',
+      height: '24@ms',
+      borderRadius: '6@ms',
       borderWidth: 2,
       alignItems: 'center',
       justifyContent: 'center',
     },
     checkmark: {
       color: '#fff',
-      fontSize: 14,
+      fontSize: '14@ms0.3',
       fontWeight: '700',
     },
     info: {
       flex: 1,
     },
     name: {
-      fontSize: 15,
+      fontSize: '15@ms0.3',
       fontWeight: '600',
       color: colors.text,
     },
@@ -163,66 +163,66 @@ function makeStyles(colors) {
       opacity: 0.6,
     },
     subtitle: {
-      fontSize: 12,
+      fontSize: '12@ms0.3',
       color: colors.textMuted,
-      marginTop: 2,
+      marginTop: '2@ms',
     },
     subtitleDanger: {
       color: colors.error,
       fontWeight: '600',
     },
     menuBtn: {
-      padding: 8,
+      padding: '8@ms',
     },
     menuDots: {
-      fontSize: 16,
+      fontSize: '16@ms0.3',
       color: colors.textMuted,
       fontWeight: '700',
-      letterSpacing: 1,
+      letterSpacing: '1@ms0.3',
     },
     progressBar: {
-      height: 4,
+      height: '4@ms',
       backgroundColor: colors.border,
-      borderRadius: 2,
-      marginTop: 8,
+      borderRadius: '2@ms',
+      marginTop: '8@ms',
       overflow: 'hidden',
     },
     progressFill: {
       height: '100%',
-      borderRadius: 2,
+      borderRadius: '2@ms',
     },
     reflection: {
-      marginTop: 8,
+      marginTop: '8@ms',
     },
     reflectionInput: {
       backgroundColor: colors.surface,
-      borderRadius: 8,
-      padding: 10,
-      fontSize: 13,
+      borderRadius: '8@ms',
+      padding: '10@ms',
+      fontSize: '13@ms0.3',
       color: colors.text,
       borderWidth: 1,
       borderColor: colors.border,
-      minHeight: 50,
+      minHeight: '50@ms',
       textAlignVertical: 'top',
     },
     reflectionCount: {
-      fontSize: 11,
+      fontSize: '11@ms0.3',
       color: colors.textMuted,
       textAlign: 'right',
-      marginTop: 2,
+      marginTop: '2@ms',
     },
     overlay: {
       flex: 1,
       backgroundColor: 'rgba(0,0,0,0.5)',
       justifyContent: 'center',
       alignItems: 'center',
-      padding: 32,
+      padding: '32@ms',
     },
     dropdown: {
       backgroundColor: colors.surface,
-      borderRadius: 12,
-      padding: 4,
-      minWidth: 180,
+      borderRadius: '12@ms',
+      padding: '4@ms',
+      minWidth: '180@ms',
       shadowColor: '#000',
       shadowOffset: { width: 0, height: 2 },
       shadowOpacity: 0.15,
@@ -230,11 +230,11 @@ function makeStyles(colors) {
       elevation: 5,
     },
     dropdownItem: {
-      paddingVertical: 14,
-      paddingHorizontal: 16,
+      paddingVertical: '14@ms',
+      paddingHorizontal: '16@ms',
     },
     dropdownText: {
-      fontSize: 16,
+      fontSize: '16@ms0.3',
       color: colors.text,
       fontWeight: '500',
     },

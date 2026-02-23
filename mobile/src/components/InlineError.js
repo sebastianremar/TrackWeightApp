@@ -1,5 +1,6 @@
-import { View, Text, StyleSheet } from 'react-native';
+import { View, Text } from 'react-native';
 import { useTheme } from '../contexts/ThemeContext';
+import { ScaledSheet } from '../utils/responsive';
 
 export default function InlineError({ message }) {
   const { colors } = useTheme();
@@ -13,17 +14,17 @@ export default function InlineError({ message }) {
 }
 
 function makeStyles(colors) {
-  return StyleSheet.create({
+  return ScaledSheet.create({
     container: {
       backgroundColor: colors.errorBg,
-      borderRadius: 8,
-      padding: 12,
+      borderRadius: '8@ms',
+      padding: '12@ms',
       borderWidth: 1,
       borderColor: colors.error,
     },
     text: {
       color: colors.error,
-      fontSize: 14,
+      fontSize: '14@ms0.3',
       fontWeight: '500',
     },
   });

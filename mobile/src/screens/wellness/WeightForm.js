@@ -2,16 +2,15 @@ import React, { useState } from 'react';
 import {
   View,
   Text,
-  TextInput,
   TouchableOpacity,
   ActivityIndicator,
-  Platform,
-  StyleSheet,
 } from 'react-native';
-import DateTimePicker from '@react-native-community/datetimepicker';
 import { useTheme } from '../../contexts/ThemeContext';
 import { logWeight } from '../../api/weight';
 import InlineError from '../../components/InlineError';
+import NumberPicker from '../../components/NumberPicker';
+import CalendarPickerModal from '../../components/CalendarPickerModal';
+import { ScaledSheet } from '../../utils/responsive';
 
 function todayStr() {
   return new Date().toISOString().split('T')[0];
@@ -25,24 +24,25 @@ function formatDisplay(dateStr) {
 export default React.memo(function WeightForm({ entries, onSaved }) {
   const { colors, weightUnit } = useTheme();
   const s = makeStyles(colors);
-  const [weight, setWeight] = useState('');
+  const [weight, setWeight] = useState(null);
   const [date, setDate] = useState(todayStr());
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState(null);
+  const [showWeightPicker, setShowWeightPicker] = useState(false);
   const [showDatePicker, setShowDatePicker] = useState(false);
 
   const handleDateChange = (newDate) => {
     setDate(newDate);
     const existing = entries?.find((e) => e.date === newDate);
-    setWeight(existing ? String(existing.weight) : '');
+    setWeight(existing ? existing.weight : null);
   };
 
   const handleSubmit = async () => {
     setError(null);
-    const w = parseFloat(weight);
+    const w = weight;
     const min = weightUnit === 'lbs' ? 44 : 20;
     const max = weightUnit === 'lbs' ? 1100 : 500;
-    if (isNaN(w) || w < min || w > max) {
+    if (w === null || isNaN(w) || w < min || w > max) {
       setError(`Weight must be between ${min} and ${max} ${weightUnit}`);
       return;
     }
@@ -54,7 +54,7 @@ export default React.memo(function WeightForm({ entries, onSaved }) {
     setSaving(true);
     try {
       await logWeight(w, date);
-      setWeight('');
+      setWeight(null);
       setDate(todayStr());
       onSaved?.();
     } catch (err) {
@@ -73,15 +73,11 @@ export default React.memo(function WeightForm({ entries, onSaved }) {
       <View style={s.row}>
         <View style={s.field}>
           <Text style={s.label}>Weight ({weightUnit})</Text>
-          <TextInput
-            style={s.input}
-            value={weight}
-            onChangeText={setWeight}
-            keyboardType="decimal-pad"
-            placeholder="e.g. 75.5"
-            placeholderTextColor={colors.textMuted}
-            returnKeyType="done"
-          />
+          <TouchableOpacity style={s.input} onPress={() => setShowWeightPicker(true)}>
+            <Text style={[s.inputText, !weight && s.placeholderText]}>
+              {weight !== null ? `${weight} ${weightUnit}` : 'e.g. 75.5'}
+            </Text>
+          </TouchableOpacity>
         </View>
         <View style={s.field}>
           <Text style={s.label}>Date</Text>
@@ -92,21 +88,26 @@ export default React.memo(function WeightForm({ entries, onSaved }) {
         </View>
       </View>
 
-      {showDatePicker && (
-        <DateTimePicker
-          value={new Date(date + 'T12:00:00')}
-          mode="date"
-          display={Platform.OS === 'ios' ? 'inline' : 'default'}
-          maximumDate={new Date()}
-          onChange={(_, selected) => {
-            setShowDatePicker(false);
-            if (selected) {
-              handleDateChange(selected.toISOString().split('T')[0]);
-            }
-          }}
-          themeVariant="light"
-        />
-      )}
+      <NumberPicker
+        visible={showWeightPicker}
+        value={weight || (weightUnit === 'lbs' ? 150 : 70)}
+        min={weightUnit === 'lbs' ? 44 : 20}
+        max={weightUnit === 'lbs' ? 1100 : 500}
+        step={0.1}
+        unit={weightUnit}
+        label="Weight"
+        onConfirm={(v) => { setWeight(v); setShowWeightPicker(false); }}
+        onCancel={() => setShowWeightPicker(false)}
+      />
+
+      <CalendarPickerModal
+        visible={showDatePicker}
+        value={date}
+        maxDate={todayStr()}
+        label="Log Date"
+        onSelect={(d) => { handleDateChange(d); setShowDatePicker(false); }}
+        onClose={() => setShowDatePicker(false)}
+      />
 
       <View style={s.actions}>
         <TouchableOpacity
@@ -126,74 +127,81 @@ export default React.memo(function WeightForm({ entries, onSaved }) {
 });
 
 function makeStyles(colors) {
-  return StyleSheet.create({
+  return ScaledSheet.create({
     container: {
       backgroundColor: colors.surface,
-      borderRadius: 12,
-      padding: 16,
+      borderRadius: '12@ms',
+      padding: '16@ms',
       borderWidth: 1,
       borderColor: colors.border,
-      gap: 12,
+      gap: '12@ms',
     },
     title: {
-      fontSize: 17,
+      fontSize: '17@ms0.3',
       fontWeight: '700',
       color: colors.text,
     },
     row: {
       flexDirection: 'row',
-      gap: 12,
+      gap: '12@ms',
     },
     field: { flex: 1 },
     label: {
-      fontSize: 13,
+      fontSize: '13@ms0.3',
       fontWeight: '600',
       color: colors.textSecondary,
-      marginBottom: 6,
+      marginBottom: '6@ms',
     },
     input: {
       backgroundColor: colors.background,
-      borderRadius: 8,
-      padding: 12,
-      fontSize: 16,
-      color: colors.text,
+      borderRadius: '8@ms',
+      padding: '12@ms',
       borderWidth: 1,
       borderColor: colors.border,
+    },
+    inputText: {
+      fontSize: '16@ms0.3',
+      fontWeight: '600',
+      color: colors.text,
+    },
+    placeholderText: {
+      color: colors.textMuted,
+      fontWeight: '400',
     },
     dateBtn: {
       flexDirection: 'row',
       alignItems: 'center',
       justifyContent: 'space-between',
       backgroundColor: colors.background,
-      borderRadius: 8,
-      padding: 12,
+      borderRadius: '8@ms',
+      padding: '12@ms',
       borderWidth: 1,
       borderColor: colors.border,
     },
     dateBtnText: {
-      fontSize: 14,
+      fontSize: '14@ms0.3',
       fontWeight: '600',
       color: colors.text,
     },
     dateBtnIcon: {
-      fontSize: 16,
+      fontSize: '16@ms0.3',
     },
     actions: {
       flexDirection: 'row',
       justifyContent: 'flex-end',
-      gap: 10,
+      gap: '10@ms',
     },
     submitBtn: {
-      paddingVertical: 12,
-      paddingHorizontal: 24,
-      borderRadius: 8,
+      paddingVertical: '12@ms',
+      paddingHorizontal: '24@ms',
+      borderRadius: '8@ms',
       backgroundColor: colors.primary,
-      minWidth: 80,
+      minWidth: '80@ms',
       alignItems: 'center',
     },
     submitBtnDisabled: { opacity: 0.6 },
     submitText: {
-      fontSize: 15,
+      fontSize: '15@ms0.3',
       fontWeight: '600',
       color: '#fff',
     },

@@ -17,6 +17,7 @@ import { useTheme } from '../../contexts/ThemeContext';
 import ConfirmDialog from '../../components/ConfirmDialog';
 import InlineError from '../../components/InlineError';
 import ExercisePicker from '../../components/ExercisePicker';
+import { ScaledSheet } from '../../utils/responsive';
 
 function ExerciseRow({ item, index, drag, isActive, onRemove, colors }) {
   const s = makeStyles(colors);
@@ -281,7 +282,7 @@ export default function TemplateModal({
 }
 
 function makeStyles(colors) {
-  return StyleSheet.create({
+  return ScaledSheet.create({
     container: {
       flex: 1,
       backgroundColor: colors.background,
@@ -290,57 +291,57 @@ function makeStyles(colors) {
       flexDirection: 'row',
       justifyContent: 'space-between',
       alignItems: 'center',
-      padding: 16,
-      paddingTop: 60,
+      padding: '16@ms',
+      paddingTop: '60@vs',
       backgroundColor: colors.surface,
       borderBottomWidth: 1,
       borderBottomColor: colors.border,
     },
-    headerBtn: { minWidth: 60 },
+    headerBtn: { minWidth: '60@ms' },
     headerBtnText: {
-      fontSize: 16,
+      fontSize: '16@ms0.3',
       color: colors.primary,
       fontWeight: '500',
     },
     headerTitle: {
-      fontSize: 17,
+      fontSize: '17@ms0.3',
       fontWeight: '700',
       color: colors.text,
     },
     saveText: { fontWeight: '700', textAlign: 'right' },
-    listContent: { padding: 16 },
-    listHeader: { marginBottom: 4 },
-    listFooter: { marginTop: 4 },
+    listContent: { padding: '16@ms' },
+    listHeader: { marginBottom: '4@ms' },
+    listFooter: { marginTop: '4@ms' },
 
     label: {
-      fontSize: 14,
+      fontSize: '14@ms0.3',
       fontWeight: '600',
       color: colors.textSecondary,
-      marginBottom: 6,
-      marginTop: 8,
+      marginBottom: '6@ms',
+      marginTop: '8@ms',
     },
     nameInput: {
       backgroundColor: colors.surface,
-      borderRadius: 10,
-      padding: 12,
-      fontSize: 15,
+      borderRadius: '10@ms',
+      padding: '12@ms',
+      fontSize: '15@ms0.3',
       color: colors.text,
       borderWidth: 1,
       borderColor: colors.border,
     },
     sectionLabel: {
-      fontSize: 16,
+      fontSize: '16@ms0.3',
       fontWeight: '700',
       color: colors.text,
-      marginTop: 20,
-      marginBottom: 4,
+      marginTop: '20@ms',
+      marginBottom: '4@ms',
     },
     /* Exercise card */
     exCard: {
       backgroundColor: colors.surface,
-      borderRadius: 10,
-      padding: 12,
-      marginBottom: 10,
+      borderRadius: '10@ms',
+      padding: '12@ms',
+      marginBottom: '10@ms',
       borderWidth: 1,
       borderColor: colors.border,
     },
@@ -357,51 +358,51 @@ function makeStyles(colors) {
       alignItems: 'center',
     },
     dragHandle: {
-      fontSize: 20,
+      fontSize: '20@ms0.3',
       color: colors.textMuted,
-      marginRight: 10,
-      lineHeight: 22,
+      marginRight: '10@ms',
+      lineHeight: '22@ms0.3',
     },
     exInfo: { flex: 1 },
-    exName: { fontSize: 15, fontWeight: '600', color: colors.text },
-    exMuscle: { fontSize: 13, color: colors.textMuted, marginTop: 2 },
-    exRemoveBtn: { padding: 6 },
-    exRemoveText: { fontSize: 16, color: colors.error, fontWeight: '600' },
+    exName: { fontSize: '15@ms0.3', fontWeight: '600', color: colors.text },
+    exMuscle: { fontSize: '13@ms0.3', color: colors.textMuted, marginTop: '2@ms' },
+    exRemoveBtn: { padding: '6@ms' },
+    exRemoveText: { fontSize: '16@ms0.3', color: colors.error, fontWeight: '600' },
 
     /* Add exercise */
     addBtn: {
-      paddingVertical: 14,
+      paddingVertical: '14@ms',
       alignItems: 'center',
-      borderRadius: 10,
+      borderRadius: '10@ms',
       backgroundColor: colors.surface,
       borderWidth: 1,
       borderColor: colors.primary,
       borderStyle: 'dashed',
-      marginTop: 4,
+      marginTop: '4@ms',
     },
-    addBtnText: { fontSize: 15, color: colors.primary, fontWeight: '600' },
+    addBtnText: { fontSize: '15@ms0.3', color: colors.primary, fontWeight: '600' },
 
     /* Delete template */
     deleteBtn: {
-      marginTop: 24,
-      paddingVertical: 14,
+      marginTop: '24@ms',
+      paddingVertical: '14@ms',
       alignItems: 'center',
-      borderRadius: 10,
+      borderRadius: '10@ms',
       backgroundColor: colors.errorBg,
       borderWidth: 1,
       borderColor: colors.error,
     },
-    deleteBtnText: { fontSize: 15, color: colors.error, fontWeight: '600' },
+    deleteBtnText: { fontSize: '15@ms0.3', color: colors.error, fontWeight: '600' },
 
     /* Swipeable delete action */
     deleteAction: {
       backgroundColor: colors.error,
       justifyContent: 'center',
       alignItems: 'center',
-      width: 80,
-      borderRadius: 10,
-      marginBottom: 10,
+      width: '80@ms',
+      borderRadius: '10@ms',
+      marginBottom: '10@ms',
     },
-    deleteActionText: { color: '#fff', fontWeight: '700', fontSize: 13 },
+    deleteActionText: { color: '#fff', fontWeight: '700', fontSize: '13@ms0.3' },
   });
 }

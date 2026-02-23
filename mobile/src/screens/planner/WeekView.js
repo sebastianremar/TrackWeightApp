@@ -1,5 +1,6 @@
 import React, { useState, useMemo } from 'react';
-import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
+import { View, Text, TouchableOpacity } from 'react-native';
+import { ScaledSheet } from '../../utils/responsive';
 import { useTheme } from '../../contexts/ThemeContext';
 import DayDetailPanel from './DayDetailPanel';
 
@@ -147,49 +148,49 @@ export default React.memo(function WeekView({
 });
 
 function makeStyles(colors) {
-  return StyleSheet.create({
+  return ScaledSheet.create({
     nav: {
       flexDirection: 'row',
       alignItems: 'center',
       justifyContent: 'center',
-      gap: 8,
-      marginBottom: 12,
+      gap: '8@ms',
+      marginBottom: '12@ms',
     },
     arrowBtn: {
-      padding: 8,
+      padding: '8@ms',
     },
     arrow: {
-      fontSize: 24,
+      fontSize: '24@ms0.3',
       color: colors.primary,
       fontWeight: '600',
     },
     navLabel: {
-      fontSize: 15,
+      fontSize: '15@ms0.3',
       fontWeight: '600',
       color: colors.text,
-      minWidth: 140,
+      minWidth: '140@ms',
       textAlign: 'center',
     },
     todayBtn: {
-      paddingHorizontal: 12,
-      paddingVertical: 6,
-      borderRadius: 16,
+      paddingHorizontal: '12@ms',
+      paddingVertical: '6@ms',
+      borderRadius: '16@ms',
       backgroundColor: colors.primary,
     },
     todayText: {
-      fontSize: 12,
+      fontSize: '12@ms0.3',
       fontWeight: '600',
       color: '#fff',
     },
     strip: {
       flexDirection: 'row',
-      gap: 4,
+      gap: '4@ms',
     },
     day: {
       flex: 1,
       alignItems: 'center',
-      paddingVertical: 8,
-      borderRadius: 10,
+      paddingVertical: '8@ms',
+      borderRadius: '10@ms',
       backgroundColor: colors.surface,
       borderWidth: 1,
       borderColor: colors.border,
@@ -203,16 +204,16 @@ function makeStyles(colors) {
       borderWidth: 2,
     },
     dayName: {
-      fontSize: 11,
+      fontSize: '11@ms0.3',
       fontWeight: '500',
       color: colors.textMuted,
-      marginBottom: 2,
+      marginBottom: '2@ms',
     },
     dayNameSelected: {
       color: '#fff',
     },
     dayNum: {
-      fontSize: 16,
+      fontSize: '16@ms0.3',
       fontWeight: '700',
       color: colors.text,
     },
@@ -223,17 +224,17 @@ function makeStyles(colors) {
       flexDirection: 'row',
       flexWrap: 'wrap',
       justifyContent: 'center',
-      gap: 2,
-      marginTop: 4,
-      maxWidth: 36,
+      gap: '2@ms',
+      marginTop: '4@ms',
+      maxWidth: '36@ms',
     },
     dot: {
-      width: 5,
-      height: 5,
-      borderRadius: 2.5,
+      width: '5@ms',
+      height: '5@ms',
+      borderRadius: '2.5@ms',
     },
     dotExtra: {
-      fontSize: 8,
+      fontSize: '8@ms0.3',
       color: colors.textMuted,
     },
   });

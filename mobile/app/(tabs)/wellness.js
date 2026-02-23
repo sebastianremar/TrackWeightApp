@@ -6,12 +6,12 @@ import {
   ScrollView,
   KeyboardAvoidingView,
   Platform,
-  StyleSheet,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useTheme } from '../../src/contexts/ThemeContext';
 import WeightDashboard from '../../src/screens/wellness/WeightDashboard';
 import WorkoutDashboard from '../../src/screens/wellness/WorkoutDashboard';
+import { ScaledSheet } from '../../src/utils/responsive';
 
 const TABS = ['Weight', 'Workouts'];
 
@@ -61,7 +61,7 @@ export default function WellnessScreen() {
 }
 
 function makeStyles(colors) {
-  return StyleSheet.create({
+  return ScaledSheet.create({
     safe: { flex: 1, backgroundColor: colors.background },
     flex: { flex: 1 },
     tabBar: {
@@ -72,17 +72,17 @@ function makeStyles(colors) {
     },
     tab: {
       flex: 1,
-      paddingVertical: 12,
+      paddingVertical: '12@ms',
       alignItems: 'center',
     },
     tabActive: {
       borderBottomWidth: 2,
       borderBottomColor: colors.primary,
     },
-    tabText: { fontSize: 15, color: colors.textMuted, fontWeight: '500' },
+    tabText: { fontSize: '15@ms0.3', color: colors.textMuted, fontWeight: '500' },
     tabTextActive: { color: colors.primary, fontWeight: '600' },
     content: { flex: 1 },
-    contentInner: { padding: 16, paddingBottom: 32 },
+    contentInner: { padding: '16@ms', paddingBottom: '32@ms' },
     hidden: { display: 'none' },
   });
 }

@@ -1,4 +1,5 @@
-import { View, Text, StyleSheet } from 'react-native';
+import { View, Text } from 'react-native';
+import { ScaledSheet } from '../../utils/responsive';
 import { useTheme } from '../../contexts/ThemeContext';
 
 function calcBestStreak(stats, targetFrequency) {
@@ -54,46 +55,46 @@ export default function StreakRow({ habit, stats }) {
 }
 
 function makeStyles(colors) {
-  return StyleSheet.create({
+  return ScaledSheet.create({
     row: {
-      marginBottom: 14,
+      marginBottom: '14@ms',
     },
     header: {
       flexDirection: 'row',
       alignItems: 'center',
-      marginBottom: 6,
+      marginBottom: '6@ms',
     },
     dot: {
-      width: 10,
-      height: 10,
-      borderRadius: 5,
-      marginRight: 8,
+      width: '10@ms',
+      height: '10@ms',
+      borderRadius: '5@ms',
+      marginRight: '8@ms',
     },
     name: {
       flex: 1,
-      fontSize: 14,
+      fontSize: '14@ms0.3',
       fontWeight: '600',
       color: colors.text,
     },
     badge: {
       backgroundColor: colors.primary + '20',
-      paddingHorizontal: 8,
-      paddingVertical: 3,
-      borderRadius: 10,
+      paddingHorizontal: '8@ms',
+      paddingVertical: '3@ms',
+      borderRadius: '10@ms',
     },
     badgeText: {
-      fontSize: 11,
+      fontSize: '11@ms0.3',
       fontWeight: '600',
       color: colors.primary,
     },
     heatmap: {
       flexDirection: 'row',
-      gap: 3,
+      gap: '3@ms',
     },
     cell: {
       flex: 1,
-      height: 14,
-      borderRadius: 3,
+      height: '14@ms',
+      borderRadius: '3@ms',
     },
   });
 }

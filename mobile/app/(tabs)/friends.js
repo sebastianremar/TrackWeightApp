@@ -1,5 +1,5 @@
 import { useState, useMemo, useRef } from 'react';
-import { View, Text, ScrollView, TouchableOpacity, ActivityIndicator, StyleSheet } from 'react-native';
+import { View, Text, ScrollView, TouchableOpacity, ActivityIndicator } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useTheme } from '../../src/contexts/ThemeContext';
 import { useFriends } from '../../src/hooks/useFriends';
@@ -7,6 +7,7 @@ import InlineError from '../../src/components/InlineError';
 import FriendRequestCard from '../../src/screens/friends/FriendRequestCard';
 import FriendCard from '../../src/screens/friends/FriendCard';
 import AddFriendModal from '../../src/screens/friends/AddFriendModal';
+import { ScaledSheet } from '../../src/utils/responsive';
 
 export default function FriendsScreen() {
   const { colors } = useTheme();
@@ -86,7 +87,7 @@ export default function FriendsScreen() {
 }
 
 function makeStyles(colors) {
-  return StyleSheet.create({
+  return ScaledSheet.create({
     safe: { flex: 1, backgroundColor: colors.background },
     center: {
       flex: 1,
@@ -97,54 +98,54 @@ function makeStyles(colors) {
       flexDirection: 'row',
       justifyContent: 'space-between',
       alignItems: 'center',
-      paddingHorizontal: 16,
-      paddingVertical: 12,
+      paddingHorizontal: '16@ms',
+      paddingVertical: '12@ms',
       backgroundColor: colors.surface,
       borderBottomWidth: 1,
       borderBottomColor: colors.border,
     },
     headerTitle: {
-      fontSize: 20,
+      fontSize: '20@ms0.3',
       fontWeight: '700',
       color: colors.text,
     },
     addBtn: {
-      paddingVertical: 8,
-      paddingHorizontal: 14,
-      borderRadius: 8,
+      paddingVertical: '8@ms',
+      paddingHorizontal: '14@ms',
+      borderRadius: '8@ms',
       backgroundColor: colors.primary,
     },
     addBtnText: {
-      fontSize: 14,
+      fontSize: '14@ms0.3',
       fontWeight: '600',
       color: '#fff',
     },
     content: { flex: 1 },
-    contentInner: { padding: 16, paddingBottom: 32 },
+    contentInner: { padding: '16@ms', paddingBottom: '32@ms' },
     requestsCard: {
       backgroundColor: colors.surface,
-      borderRadius: 12,
-      padding: 14,
+      borderRadius: '12@ms',
+      padding: '14@ms',
       borderWidth: 1,
       borderColor: colors.border,
-      marginBottom: 12,
+      marginBottom: '12@ms',
     },
     sectionTitle: {
-      fontSize: 15,
+      fontSize: '15@ms0.3',
       fontWeight: '700',
       color: colors.text,
-      marginBottom: 4,
+      marginBottom: '4@ms',
     },
     emptyCard: {
       backgroundColor: colors.surface,
-      borderRadius: 12,
-      padding: 24,
+      borderRadius: '12@ms',
+      padding: '24@ms',
       alignItems: 'center',
       borderWidth: 1,
       borderColor: colors.border,
     },
     emptyText: {
-      fontSize: 14,
+      fontSize: '14@ms0.3',
       color: colors.textMuted,
       textAlign: 'center',
     },

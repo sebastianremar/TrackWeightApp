@@ -1,7 +1,8 @@
 import { Redirect } from 'expo-router';
-import { View, Image, StyleSheet } from 'react-native';
+import { View, Image } from 'react-native';
 import { useAuth } from '../src/contexts/AuthContext';
 import { useTheme } from '../src/contexts/ThemeContext';
+import { ScaledSheet } from '../src/utils/responsive';
 
 export default function Index() {
   const { user, loading } = useAuth();
@@ -26,7 +27,7 @@ export default function Index() {
   return <Redirect href="/(tabs)/wellness" />;
 }
 
-const styles = StyleSheet.create({
+const styles = ScaledSheet.create({
   splashContainer: {
     flex: 1,
     justifyContent: 'center',
@@ -34,7 +35,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#FFFFFF',
   },
   splashLogo: {
-    width: 200,
-    height: 200,
+    width: '200@ms',
+    height: '200@ms',
   },
 });
